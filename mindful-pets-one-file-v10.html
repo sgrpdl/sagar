@@ -6,2316 +6,261 @@
 <meta name="theme-color" content="#6d5dfc">
 <title>Mindful Pets Adventure</title>
 <style>
-/* ── Reset & tokens ───────────────────────────────────────── */
-:root{
-  --ink:#23324a;--muted:#5a6d84;--card:rgba(255,255,255,.88);
-  --purple:#6d5dfc;--blue:#2f9cf4;--green:#22b884;--gold:#ffb728;
-  --red:#ec6470;--shadow:0 14px 36px rgba(63,72,115,.16);
-  --toast-dur:3500ms;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#20243a}
-button,input,select{font:inherit}
-button{cursor:pointer;touch-action:manipulation}
-
-/* ── App shell ────────────────────────────────────────────── */
-.app{width:min(100%,520px);min-height:100dvh;margin:auto;
-  background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);
-  position:relative;overflow:hidden}
-
-/* ── Top bar ──────────────────────────────────────────────── */
-.top{position:sticky;top:0;z-index:30;display:flex;
-  justify-content:space-between;align-items:center;
-  padding:12px 14px;background:rgba(255,255,255,.72);
-  backdrop-filter:blur(15px);border-bottom:1px solid #fff}
-.brand{font-weight:900}
-.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-.pill{background:#fff;border-radius:999px;padding:6px 9px;
-  font-weight:900;font-size:13px;box-shadow:0 4px 12px #65719a19}
-
-/* ── Main content ─────────────────────────────────────────── */
-.main{padding:15px 15px 92px}
-.view{display:none;animation:fadeIn .25s ease}
-.view.active{display:block}
-@keyframes fadeIn{from{opacity:.3;transform:translateY(4px)}}
-h1,h2,h3,p{margin-top:0}
-
-/* ── Hero / pet card ──────────────────────────────────────── */
-.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);
-  border:2px solid #fff;border-radius:28px;padding:18px;
-  box-shadow:var(--shadow);text-align:center}
-.pet{font-size:106px;cursor:pointer;
-  filter:drop-shadow(0 14px 12px #5260802c);
-  animation:float 3.2s ease-in-out infinite;margin:8px 0;
-  display:inline-block;line-height:1}
-@keyframes float{50%{transform:translateY(-9px)}}
-.pet.exhausted{animation:exhaustedPet 3.2s ease-in-out infinite;
-  filter:grayscale(.18) drop-shadow(0 10px 9px #53607b2b)}
-@keyframes exhaustedPet{50%{transform:translateY(7px) rotate(2deg) scale(.96)}}
-
-/* ── Play animations ─────────────────────────────────────── */
-.pet.play-jump{animation:playJump .55s ease 3}
-.pet.play-spin{animation:playSpin .8s ease}
-.pet.play-bounce{animation:playBounce .45s ease 4}
-@keyframes playJump{50%{transform:translateY(-38px) scale(1.08)}}
-@keyframes playSpin{to{transform:rotate(360deg) scale(1.1)}}
-@keyframes playBounce{50%{transform:scale(.86) translateY(12px)}}
-
-/* ── Play area ────────────────────────────────────────────── */
-.play-area{position:relative;min-height:320px;touch-action:none;
-  background:linear-gradient(145deg,#fff8d8,#e5f8ff);
-  border-radius:24px;overflow:hidden;padding:18px;text-align:center;
-  user-select:none;-webkit-user-select:none}
-.game-pet{position:absolute;left:50%;bottom:35px;
-  transform:translateX(-50%);font-size:92px;
-  transition:left .45s ease,bottom .35s ease;
-  z-index:3;filter:drop-shadow(0 10px 8px #53607b33);
-  touch-action:none;pointer-events:none}
-.game-pet.catch{animation:petCatch .7s ease}
-.game-pet.giggle{animation:petGiggle .5s ease 3}
-/* Ball uses transform for compositing (avoids left/bottom repaints) */
-.game-ball{position:absolute;left:28px;bottom:30px;font-size:48px;
-  z-index:5;touch-action:none;cursor:grab;
-  filter:drop-shadow(0 7px 6px #53607b33);
-  will-change:transform;transition:none}
-.game-ball.flying{transition:transform .65s cubic-bezier(.2,.7,.2,1)}
-.hand-hint{position:absolute;font-size:38px;pointer-events:none;
-  animation:handHint 1.2s ease-in-out infinite;z-index:4}
-.joy-pop{position:absolute;font-size:32px;z-index:9;pointer-events:none;
-  animation:joyUp .9s ease forwards}
-@keyframes petCatch{45%{transform:translateX(-50%) translateY(-45px) scale(1.15)}}
-@keyframes petGiggle{
-  25%{transform:translateX(-50%) rotate(-10deg) scale(1.08)}
-  75%{transform:translateX(-50%) rotate(10deg) scale(1.08)}}
-@keyframes handHint{50%{transform:translateY(8px) scale(.92)}}
-@keyframes joyUp{to{opacity:0;transform:translateY(-80px) scale(1.4)}}
-
-/* ── Meters / bars ────────────────────────────────────────── */
-.participation{width:100%;background:#ffffffd9;border-radius:18px;
-  padding:12px;margin:12px 0;text-align:left}
-.participation-bar{height:10px;background:#e9edf5;border-radius:99px;overflow:hidden}
-.participation-fill{height:100%;
-  background:linear-gradient(90deg,#45d49c,#6d5dfc);
-  width:100%;transition:width .3s}
-.presence-card{display:none;width:100%;background:#fff6ce;
-  border:2px solid #ffe08a;border-radius:18px;padding:15px;margin:12px 0}
-.presence-card.show{display:block}
-.parent-log{font-size:12px;text-align:left;max-height:220px;overflow:auto}
-.pet-message{margin:8px auto 14px;max-width:330px;background:#fff;
-  border-radius:18px;padding:10px 13px;font-weight:850;
-  color:#536179;box-shadow:0 6px 15px #56627d18;position:relative}
-.pet-message:after{content:"";position:absolute;top:-8px;left:50%;
-  border-width:0 9px 9px;border-style:solid;
-  border-color:transparent transparent #fff;pointer-events:none}
-.pet-message.needs-care{background:#fff3cd;color:#735700}
-.pet-message.needs-care:after{border-color:transparent transparent #fff3cd}
-.meters{display:grid;gap:8px;text-align:left}
-.meterline{display:grid;grid-template-columns:76px 1fr 36px;
-  align-items:center;gap:7px;font-size:12px;font-weight:800}
-.bar{height:11px;background:#e8edf3;border-radius:99px;overflow:hidden}
-.fill{height:100%;border-radius:99px;transition:width .4s}
-.health-fill{background:linear-gradient(90deg,#52dc96,#22b884)}
-.happy-fill{background:linear-gradient(90deg,#ffd15a,#ff9e3d)}
-.friend-fill{background:linear-gradient(90deg,#9d84ff,#6d5dfc)}
-
-/* ── Buttons ──────────────────────────────────────────────── */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}
-.btn{border:0;border-radius:17px;padding:14px 12px;font-weight:900;
-  box-shadow:0 7px 15px #5a668327;transition:.15s;color:#fff;
-  touch-action:manipulation}
-.btn:active{transform:scale(.97)}
-.blue{background:linear-gradient(135deg,#49b9ff,#247ee8)}
-.green{background:linear-gradient(135deg,#42d8a0,#139d70)}
-.gold{background:linear-gradient(135deg,#ffc950,#ee8c18)}
-.purple{background:linear-gradient(135deg,#9483ff,#5a49e8)}
-.soft{background:#edf1f6;color:#4d5a6f;box-shadow:none}
-.danger{background:#fff0f1;color:#bc4250;box-shadow:none}
-
-/* ── Cards / sections ────────────────────────────────────── */
-.section-title{display:flex;justify-content:space-between;
-  align-items:center;margin:20px 3px 10px}
-.section-title h2{font-size:20px;margin:0}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
-.card{background:var(--card);border:1px solid #fff;border-radius:21px;
-  padding:14px;box-shadow:0 8px 20px #65719a16;text-align:center}
-.icon{font-size:44px}
-.small{font-size:12px;color:var(--muted);font-weight:700}
-.price{font-weight:900;margin:7px 0}
-.rarity{display:inline-block;border-radius:99px;padding:3px 8px;
-  font-size:10px;font-weight:900;margin:4px}
-.common-r{background:#e7f8ef;color:#16865e}
-.special-r{background:#eee9ff;color:#604bd0}
-.premium-r{background:#fff0bd;color:#956500}
-.royal-r{background:linear-gradient(135deg,#fff0a6,#eadcff);color:#6b4b00}
-.favorite-r{background:#ffe6ef;color:#b63e6a}
-.equipped{outline:3px solid #795fff;background:linear-gradient(145deg,#fff,#eeeaff)}
-.room-preview{border-radius:18px;padding:13px;margin-bottom:10px;
-  background:linear-gradient(145deg,#dff7e8,#e7f3ff);
-  min-height:92px;display:grid;place-items:center;font-size:42px}
-.market-note{background:#eef7ff;color:#3f6485;border-radius:16px;
-  padding:10px 12px;font-size:12px;font-weight:800;margin-bottom:12px}
-.tabs{display:flex;gap:6px;overflow:auto;padding:3px 2px 10px}
-.chip{white-space:nowrap;border:0;border-radius:99px;
-  background:#ffffffb8;color:#617087;padding:9px 12px;font-weight:850}
-.chip.active{background:var(--purple);color:#fff}
-
-/* ── Bottom nav ───────────────────────────────────────────── */
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  z-index:40;width:min(100%,520px);
-  display:grid;grid-template-columns:repeat(4,1fr);
-  background:#fffffff2;backdrop-filter:blur(14px);
-  padding:7px 6px max(7px,env(safe-area-inset-bottom));
-  box-shadow:0 -6px 24px #4651721c}
-.nav{border:0;background:none;color:#8b97a9;font-weight:850;
-  font-size:11px;padding:7px 2px;border-radius:14px}
-.nav span{display:block;font-size:22px}
-.nav.active{color:var(--purple);background:#f0edff}
-
-/* ── Modals ───────────────────────────────────────────────── */
-.modal{display:none;position:fixed;inset:0;z-index:100;
-  background:#27304799;align-items:center;justify-content:center;
-  padding:18px}
-.modal.show{display:flex}
-.sheet{width:min(100%,480px);max-height:88dvh;overflow:auto;
-  background:#fff;border-radius:26px;padding:20px;
-  box-shadow:0 25px 70px #10152666}
-.list{display:grid;gap:9px}
-.row{display:flex;justify-content:space-between;align-items:center;
-  gap:10px;background:#f5f7fb;border-radius:16px;padding:11px}
-
-/* ── Practice view ───────────────────────────────────────── */
-.practice{min-height:calc(100dvh - 170px);position:relative;
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;text-align:center}
-.orb{width:155px;height:155px;border-radius:50%;
-  display:grid;place-items:center;
-  background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);
-  color:white;font-size:21px;font-weight:900;
-  box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;
-  transition:transform 1s ease}
-.orb.inhale{animation:inhaleAnim 4s ease-in-out forwards}
-.orb.exhale{animation:exhaleAnim 5s ease-in-out forwards}
-.orb.meditation{
-  background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);
-  animation:meditateGlow 5s ease-in-out infinite}
-@keyframes meditateGlow{
-  50%{transform:scale(1.08);
-    box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}
-@keyframes inhaleAnim{to{transform:scale(1.45)}}
-@keyframes exhaleAnim{from{transform:scale(1.45)}to{transform:scale(.92)}}
-
-/* ── Buddy zone ──────────────────────────────────────────── */
-.buddy-zone{display:flex;align-items:flex-end;justify-content:center;
-  gap:14px;min-height:105px;margin:4px 0 10px}
-.buddy-pet{font-size:76px;
-  filter:drop-shadow(0 10px 8px #53607b33);
-  animation:buddyBreathe 5s ease-in-out infinite}
-.buddy-pet.resting{animation:buddyRest 4s ease-in-out infinite}
-.buddy-pet.celebrate{animation:buddyCelebrate .55s ease 4}
-.buddy-bubble{max-width:180px;background:#fff;
-  border-radius:18px 18px 18px 4px;padding:9px 11px;
-  font-size:12px;font-weight:850;color:#526178;
-  box-shadow:0 6px 15px #53607b18}
-@keyframes buddyBreathe{50%{transform:scale(1.08) translateY(-5px)}}
-@keyframes buddyRest{50%{transform:rotate(2deg) translateY(3px) scale(.98)}}
-@keyframes buddyCelebrate{
-  50%{transform:translateY(-28px) rotate(8deg) scale(1.12)}}
-
-/* ── Timer ───────────────────────────────────────────────── */
-.timer{font:900 50px ui-monospace,'Courier New',monospace;
-  margin:22px 0 8px;font-variant-numeric:tabular-nums;
-  min-width:5ch;text-align:center}
-
-/* ── Misc ────────────────────────────────────────────────── */
-.notice{background:#fff7d9;color:#755b00;border-radius:15px;
-  padding:10px 12px;font-size:12px;font-weight:800;margin:10px 0;
-  line-height:1.5}
-.check{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.achievement{display:flex;text-align:left;gap:10px;align-items:center}
-.locked{filter:grayscale(1);opacity:.55}
-.goal-card{background:linear-gradient(135deg,#fff,#fff4ce);
-  border:2px solid #fff;border-radius:20px;padding:14px;
-  margin:14px 0;box-shadow:0 8px 20px #65719a16}
-.goal-row{display:flex;align-items:center;gap:11px;text-align:left}
-.goal-icon{font-size:48px}
-.goalbar{height:12px;background:#e8e5dc;border-radius:99px;
-  overflow:hidden;margin-top:9px}
-.goalfill{height:100%;
-  background:linear-gradient(90deg,#ffb728,#6d5dfc);transition:width .4s}
-.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);
-  border:2px solid #fff;border-radius:18px;padding:12px;
-  margin:10px 0;font-weight:900;color:#59429b}
-
-/* ── Toast ────────────────────────────────────────────────── */
-.toastbox{position:fixed;z-index:200;top:75px;left:50%;
-  transform:translateX(-50%);width:min(90%,430px);
-  display:grid;gap:7px;pointer-events:none}
-.toast{background:#26344bea;color:#fff;border-radius:15px;
-  padding:11px 14px;font-weight:800;box-shadow:var(--shadow);
-  animation:toastIn .25s ease}
-@keyframes toastIn{from{opacity:0;transform:translateY(-6px)}}
-
-/* ── Settings ────────────────────────────────────────────── */
-.setup{display:grid;gap:10px}
-.setting-item{display:flex;gap:10px;align-items:flex-start;
-  background:#f5f7fb;border-radius:15px;padding:11px}
-.setting-item input[type=checkbox]{width:auto!important;
-  margin-top:3px;transform:scale(1.15)}
-.setting-copy{display:block}
-.setting-copy b{display:block;color:#344258}
-.setting-copy small{display:block;color:#748197;font-weight:700;
-  line-height:1.35;margin-top:2px}
-.setup input:not([type=checkbox]):not([type=file]),
-.setup select{width:100%;padding:12px;border:1px solid #dce2ec;
-  border-radius:13px;background:#fff}
-.focus-banner{display:none;background:#fff0cf;color:#735300;
-  border-radius:16px;padding:12px;font-weight:850;margin-bottom:10px}
-.focus-banner.show{display:block}
-
-/* ── Reduced motion (manual toggle + OS preference) ─────── */
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition-duration:.01ms!important}}
-.reduce *{animation:none!important;transition-duration:.01ms!important}
-
-/* ── Accessibility helpers ───────────────────────────────── */
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
-  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-[aria-live]{pointer-events:none}
+:root{--ink:#23324a;--muted:#6f7f96;--card:rgba(255,255,255,.88);--purple:#6d5dfc;--blue:#2f9cf4;--green:#22b884;--gold:#ffb728;--red:#ec6470;--shadow:0 14px 36px rgba(63,72,115,.16)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#20243a}button,input,select{font:inherit}button{cursor:pointer}.app{width:min(100%,520px);min-height:100dvh;margin:auto;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);position:relative;overflow:hidden}.top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.72);backdrop-filter:blur(15px);border-bottom:1px solid #fff}.brand{font-weight:900}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{background:#fff;border-radius:999px;padding:6px 9px;font-weight:900;font-size:13px;box-shadow:0 4px 12px #65719a19}.main{padding:15px 15px 92px}.view{display:none;animation:in .25s ease}.view.active{display:block}@keyframes in{from{opacity:.3;transform:translateY(4px)}}h1,h2,h3,p{margin-top:0}.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);border:2px solid #fff;border-radius:28px;padding:18px;box-shadow:var(--shadow);text-align:center}.pet{font-size:106px;cursor:pointer;filter:drop-shadow(0 14px 12px #5260802c);animation:float 3.2s ease-in-out infinite;margin:8px 0}@keyframes float{50%{transform:translateY(-9px)}}.pet.exhausted{animation:exhaustedPet 3.2s ease-in-out infinite;filter:grayscale(.18) drop-shadow(0 10px 9px #53607b2b)}@keyframes exhaustedPet{50%{transform:translateY(7px) rotate(2deg) scale(.96)}}.pet.play-jump{animation:playJump .55s ease 3}.pet.play-spin{animation:playSpin .8s ease}.pet.play-bounce{animation:playBounce .45s ease 4}@keyframes playJump{50%{transform:translateY(-38px) scale(1.08)}}@keyframes playSpin{to{transform:rotate(360deg) scale(1.1)}}@keyframes playBounce{50%{transform:scale(.86) translateY(12px)}}.play-area{position:relative;min-height:330px;touch-action:none;background:linear-gradient(145deg,#fff8d8,#e5f8ff);border-radius:24px;overflow:hidden;padding:18px;text-align:center}.play-target{position:absolute;border:0;background:none;font-size:58px;filter:drop-shadow(0 8px 8px #53607b33);animation:targetPulse .8s ease-in-out infinite alternate}@keyframes targetPulse{to{transform:scale(1.18) rotate(8deg)}}
+.game-pet{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);font-size:92px;transition:left .45s ease,bottom .35s ease,transform .35s ease;z-index:3;filter:drop-shadow(0 10px 8px #53607b33);touch-action:none}.game-pet.catch{animation:petCatch .7s ease}.game-pet.giggle{animation:petGiggle .5s ease 3}.game-ball{position:absolute;left:28px;bottom:30px;font-size:48px;z-index:5;touch-action:none;cursor:grab;transition:none;filter:drop-shadow(0 7px 6px #53607b33)}.game-ball.flying{transition:left .65s cubic-bezier(.2,.7,.2,1),bottom .65s cubic-bezier(.2,.7,.2,1),transform .65s linear}.hand-hint{position:absolute;font-size:38px;pointer-events:none;animation:handHint 1.2s ease-in-out infinite}.joy-pop{position:absolute;font-size:32px;z-index:9;pointer-events:none;animation:joyUp .9s ease forwards}@keyframes petCatch{45%{transform:translateX(-50%) translateY(-45px) scale(1.15);filter:drop-shadow(0 12px 8px #53607b44)}}@keyframes petGiggle{25%{transform:translateX(-50%) rotate(-10deg) scale(1.08)}75%{transform:translateX(-50%) rotate(10deg) scale(1.08)}}@keyframes handHint{50%{transform:translateY(8px) scale(.92)}}@keyframes joyUp{to{opacity:0;transform:translateY(-80px) scale(1.4)}}
+.participation{width:100%;background:#ffffffd9;border-radius:18px;padding:12px;margin:12px 0;text-align:left}.participation-bar{height:10px;background:#e9edf5;border-radius:99px;overflow:hidden}.participation-fill{height:100%;background:linear-gradient(90deg,#45d49c,#6d5dfc);width:100%;transition:width .3s}.presence-card{display:none;width:100%;background:#fff6ce;border:2px solid #ffe08a;border-radius:18px;padding:15px;margin:12px 0}.presence-card.show{display:block}.parent-log{font-size:12px;text-align:left;max-height:220px;overflow:auto}.pet-message{margin:8px auto 14px;max-width:330px;background:#fff;border-radius:18px;padding:10px 13px;font-weight:850;color:#536179;box-shadow:0 6px 15px #56627d18;position:relative}.pet-message:after{content:"";position:absolute;top:-8px;left:50%;border-width:0 9px 9px;border-style:solid;border-color:transparent transparent #fff}.pet-message.needs-care{background:#fff3cd;color:#735700}.pet-message.needs-care:after{border-color:transparent transparent #fff3cd}.meters{display:grid;gap:8px;text-align:left}.meterline{display:grid;grid-template-columns:76px 1fr 36px;align-items:center;gap:7px;font-size:12px;font-weight:800}.bar{height:11px;background:#e8edf3;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;transition:width .4s}.health{background:linear-gradient(90deg,#52dc96,#22b884)}.happy{background:linear-gradient(90deg,#ffd15a,#ff9e3d)}.friend{background:linear-gradient(90deg,#9d84ff,#6d5dfc)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}.btn{border:0;border-radius:17px;padding:14px 12px;font-weight:900;box-shadow:0 7px 15px #5a668327;transition:.15s;color:#fff}.btn:active{transform:scale(.97)}.blue{background:linear-gradient(135deg,#49b9ff,#247ee8)}.green{background:linear-gradient(135deg,#42d8a0,#139d70)}.gold{background:linear-gradient(135deg,#ffc950,#ee8c18)}.purple{background:linear-gradient(135deg,#9483ff,#5a49e8)}.soft{background:#edf1f6;color:#4d5a6f;box-shadow:none}.danger{background:#fff0f1;color:#bc4250;box-shadow:none}.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 3px 10px}.section-title h2{font-size:20px;margin:0}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.card{background:var(--card);border:1px solid #fff;border-radius:21px;padding:14px;box-shadow:0 8px 20px #65719a16;text-align:center}.icon{font-size:44px}.small{font-size:12px;color:var(--muted);font-weight:700}.price{font-weight:900;margin:7px 0}.rarity{display:inline-block;border-radius:99px;padding:3px 8px;font-size:10px;font-weight:900;margin:4px}.common{background:#e7f8ef;color:#16865e}.special{background:#eee9ff;color:#604bd0}.premium{background:#fff0bd;color:#956500}.royal{background:linear-gradient(135deg,#fff0a6,#eadcff);color:#6b4b00}.favorite{background:#ffe6ef;color:#b63e6a}.equipped{outline:3px solid #795fff;background:linear-gradient(145deg,#fff,#eeeaff)}.room-preview{border-radius:18px;padding:13px;margin-bottom:10px;background:linear-gradient(145deg,#dff7e8,#e7f3ff);min-height:92px;display:grid;place-items:center;font-size:42px}.market-note{background:#eef7ff;color:#3f6485;border-radius:16px;padding:10px 12px;font-size:12px;font-weight:800;margin-bottom:12px}.tabs{display:flex;gap:6px;overflow:auto;padding:3px 2px 10px}.chip{white-space:nowrap;border:0;border-radius:99px;background:#ffffffb8;color:#617087;padding:9px 12px;font-weight:850}.chip.active{background:var(--purple);color:#fff}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(100%,520px);display:grid;grid-template-columns:repeat(4,1fr);background:#fffffff2;backdrop-filter:blur(14px);padding:7px 6px max(7px,env(safe-area-inset-bottom));box-shadow:0 -6px 24px #4651721c}.nav{border:0;background:none;color:#8b97a9;font-weight:850;font-size:11px;padding:7px 2px;border-radius:14px}.nav span{display:block;font-size:22px}.nav.active{color:var(--purple);background:#f0edff}.modal{display:none;position:fixed;inset:0;z-index:100;background:#27304799;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.sheet{width:min(100%,480px);max-height:88dvh;overflow:auto;background:#fff;border-radius:26px;padding:20px;box-shadow:0 25px 70px #10152666}.list{display:grid;gap:9px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f5f7fb;border-radius:16px;padding:11px}.practice{min-height:calc(100dvh - 170px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:21px;font-weight:900;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform 1s ease}.orb.inhale{animation:inhale 4s ease-in-out forwards}.orb.exhale{animation:exhale 5s ease-in-out forwards}.orb.meditation{background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);animation:meditateGlow 5s ease-in-out infinite}.goal-card{background:linear-gradient(135deg,#fff,#fff4ce);border:2px solid #fff;border-radius:20px;padding:14px;margin:14px 0;box-shadow:0 8px 20px #65719a16}.goal-row{display:flex;align-items:center;gap:11px;text-align:left}.goal-icon{font-size:48px}.goalbar{height:12px;background:#e8e5dc;border-radius:99px;overflow:hidden;margin-top:9px}.goalfill{height:100%;background:linear-gradient(90deg,#ffb728,#6d5dfc);transition:width .4s}.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);border:2px solid #fff;border-radius:18px;padding:12px;margin:10px 0;font-weight:900;color:#59429b}@keyframes meditateGlow{50%{transform:scale(1.08);box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}@keyframes inhale{to{transform:scale(1.45)}}@keyframes exhale{from{transform:scale(1.45)}to{transform:scale(.92)}}.buddy-zone{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:105px;margin:4px 0 10px}.buddy-pet{font-size:76px;filter:drop-shadow(0 10px 8px #53607b33);animation:buddyBreathe 5s ease-in-out infinite}.buddy-pet.resting{animation:buddyRest 4s ease-in-out infinite}.buddy-pet.celebrate{animation:buddyCelebrate .55s ease 4}.buddy-bubble{max-width:180px;background:#fff;border-radius:18px 18px 18px 4px;padding:9px 11px;font-size:12px;font-weight:850;color:#526178;box-shadow:0 6px 15px #53607b18}.buddy-z{position:absolute;font-size:18px;animation:zFloat 2.4s ease-in-out infinite}@keyframes buddyBreathe{50%{transform:scale(1.08) translateY(-5px)}}@keyframes buddyRest{50%{transform:rotate(2deg) translateY(3px) scale(.98)}}@keyframes buddyCelebrate{50%{transform:translateY(-28px) rotate(8deg) scale(1.12)}}@keyframes zFloat{to{opacity:0;transform:translate(22px,-35px)}}.timer{font:900 50px ui-monospace,monospace;margin:38px 0 8px}.notice{background:#fff7d9;color:#755b00;border-radius:15px;padding:10px 12px;font-size:12px;font-weight:800;margin:10px 0}.check{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.achievement{display:flex;text-align:left;gap:10px;align-items:center}.locked{filter:grayscale(1);opacity:.55}.toastbox{position:fixed;z-index:200;top:75px;left:50%;transform:translateX(-50%);width:min(90%,430px);display:grid;gap:7px}.toast{background:#26344bea;color:#fff;border-radius:15px;padding:11px 14px;font-weight:800;box-shadow:var(--shadow)}.setup{display:grid;gap:10px}.setting-item{display:flex;gap:10px;align-items:flex-start;background:#f5f7fb;border-radius:15px;padding:11px}.setting-item input{width:auto!important;margin-top:3px;transform:scale(1.15)}.setting-copy{display:block}.setting-copy b{display:block;color:#344258}.setting-copy small{display:block;color:#748197;font-weight:700;line-height:1.35;margin-top:2px}.setup input,.setup select{width:100%;padding:12px;border:1px solid #dce2ec;border-radius:13px;background:#fff}.focus-banner{display:none;background:#fff0cf;color:#735300;border-radius:16px;padding:12px;font-weight:850;margin-bottom:10px}.focus-banner.show{display:block}body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}body.reduce .orb{transform:none!important}body.reduce .buddy-pet,body.reduce .pet,body.reduce .game-pet{animation:none!important}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.weekly-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.weekly-stat{background:#f5f7fb;border-radius:14px;padding:10px;text-align:center}.pin-row{display:flex;gap:8px;justify-content:center}.pin-row input{max-width:180px;text-align:center;letter-spacing:8px;font-size:22px}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
-<div class="app">
-
-<!-- ══ TOP BAR ══════════════════════════════════════════════ -->
-<header class="top" role="banner">
-  <div class="brand" aria-label="Mindful Pets Adventure">✨ Mindful Pets</div>
-  <div class="stats" aria-label="Player stats">
-    <div class="pill" aria-label="Streak days">🔥 <b id="streak">0</b></div>
-    <div class="pill" aria-label="Stars earned">⭐ <b id="stars">0</b></div>
-    <div class="pill" aria-label="Coins available">🪙 <b id="coins">0</b></div>
-  </div>
-</header>
-
-<!-- ══ LIVE REGION for screen readers ═══════════════════════ -->
-<div id="liveRegion" aria-live="polite" aria-atomic="true" class="sr-only"></div>
-
-<main class="main" id="mainContent">
-
-  <!-- HOME ─────────────────────────────────────────────────── -->
-  <section id="home" class="view active" aria-label="Home">
-    <div id="focusBanner" class="focus-banner" role="status">
-      Welcome back. The practice was paused while this app was not visible.
-    </div>
-    <div class="hero" id="heroCard">
-      <div id="petAvatar" class="pet" role="img" aria-label="Your pet">🐱</div>
-      <h1 id="petName">Whiskers</h1>
-      <p class="small" id="petLevel">Friendship level 1</p>
-      <div id="petMessage" class="pet-message" role="status">
-        I'm happy you're here! Shall we practice or play?
-      </div>
-      <div class="meters" aria-label="Pet wellbeing meters">
-        <div class="meterline">
-          <span id="healthLabel">Energy</span>
-          <div class="bar" role="progressbar" aria-labelledby="healthLabel"
-               aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" id="healthBar">
-            <div id="healthFill" class="fill health-fill" style="width:60%"></div>
-          </div>
-          <b id="healthN">60</b>
-        </div>
-        <div class="meterline">
-          <span id="happyLabel">Happiness</span>
-          <div class="bar" role="progressbar" aria-labelledby="happyLabel"
-               aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" id="happyBar">
-            <div id="happyFill" class="fill happy-fill" style="width:60%"></div>
-          </div>
-          <b id="happyN">60</b>
-        </div>
-        <div class="meterline">
-          <span id="friendLabel">Friendship</span>
-          <div class="bar" role="progressbar" aria-labelledby="friendLabel"
-               aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="friendBar">
-            <div id="friendFill" class="fill friend-fill" style="width:0%"></div>
-          </div>
-          <b id="friendN">0</b>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <button class="btn blue" onclick="openPractice('breathing')"
-              aria-label="Start breathing practice">💨 Breathe</button>
-      <button class="btn green" onclick="openPractice('meditation')"
-              aria-label="Start meditation practice">🧘 Meditate</button>
-      <button class="btn gold" onclick="openFeed()"
-              aria-label="Feed your pet">🍎 Feed</button>
-      <button class="btn purple" onclick="playPet()"
-              aria-label="Play with your pet">💖 Play</button>
-    </div>
-
-    <div id="charlieGoal" class="goal-card" aria-live="polite"></div>
-
-    <div class="section-title">
-      <h2>Today's gentle mission</h2>
-    </div>
-    <div class="card" id="mission" aria-live="polite"></div>
-
-    <div class="special-reward" role="note">
-      🎁 Practice for 10 minutes to earn a Calm Treasure.
-      Complete 15 minutes for a Super Calm Treasure!
-    </div>
-  </section>
-
-  <!-- MARKET ───────────────────────────────────────────────── -->
-  <section id="market" class="view" aria-label="Marketplace">
-    <div class="section-title"><h2>Marketplace</h2></div>
-    <div id="marketTabs" class="tabs" role="tablist"></div>
-    <div id="marketGrid" class="cards"></div>
-  </section>
-
-  <!-- COLLECTION ───────────────────────────────────────────── -->
-  <section id="collection" class="view" aria-label="My collection">
-    <div class="section-title"><h2>My collection</h2></div>
-    <div id="petCollection" class="cards"></div>
-    <div class="section-title"><h2>Badges</h2></div>
-    <div id="badgeGrid" class="cards"></div>
-  </section>
-
-  <!-- SETTINGS ─────────────────────────────────────────────── -->
-  <section id="settings" class="view" aria-label="Parent and settings">
-    <div class="section-title"><h2>Parent &amp; settings</h2></div>
-    <div class="card" style="text-align:left">
-      <div class="setup">
-        <label for="childName">Child nickname
-          <input id="childName" maxlength="18" autocomplete="off">
-        </label>
-        <label for="ageGroup">Age group
-          <select id="ageGroup">
-            <option value="5-7">5–7</option>
-            <option value="8-10" selected>8–10</option>
-            <option value="11-12">11–12</option>
-          </select>
-        </label>
-        <label class="setting-item">
-          <input id="buddyToggle" type="checkbox" checked>
-          <span class="setting-copy">
-            <b>Practice with my pet</b>
-            <small>Show the selected pet quietly breathing or meditating alongside the child.</small>
-          </span>
-        </label>
-        <label class="setting-item">
-          <input id="soundToggle" type="checkbox" checked>
-          <span class="setting-copy">
-            <b>Game and reward sounds</b>
-            <small>Play cheerful sounds for rewards, games, feeding, purchases, and completed activities.</small>
-          </span>
-        </label>
-        <label class="setting-item">
-          <input id="petSignalToggle" type="checkbox" checked>
-          <span class="setting-copy">
-            <b>Pet completion sound</b>
-            <small>Let the pet make its special sound when practice finishes.</small>
-          </span>
-        </label>
-        <label class="setting-item">
-          <input id="motionToggle" type="checkbox">
-          <span class="setting-copy">
-            <b>Use fewer animations</b>
-            <small>Reduce pet movement, celebrations, and decorative motion for a calmer screen.</small>
-          </span>
-        </label>
-        <button class="btn purple" onclick="saveSettings()">Save settings</button>
-        <button class="btn soft" onclick="exportData()">Export offline backup</button>
-        <button class="btn soft" onclick="document.getElementById('importFile').click()">
-          Import backup
-        </button>
-        <input id="importFile" type="file" accept="application/json" hidden
-               onchange="importData(event)">
-        <button class="btn danger" onclick="parentReset()">Reset all progress</button>
-      </div>
-    </div>
-    <div class="section-title"><h2>Recent practice record</h2></div>
-    <div class="card parent-log" id="parentLog" aria-label="Practice history"></div>
-    <div class="notice" role="note">
-      <b>Privacy:</b> All progress stays in this browser unless a parent exports a backup.
-      This app does not use the camera or microphone. Practice presence is estimated using
-      app visibility and occasional mindful checks — it cannot confirm whether someone is
-      truly meditating. Pets can become gently tired, but never critically sick and never
-      blame the child.
-    </div>
-  </section>
-
-  <!-- PRACTICE ─────────────────────────────────────────────── -->
-  <section id="practice" class="view" aria-label="Practice session">
-    <div class="practice">
-      <h2 id="practiceTitle">Practice</h2>
-      <p id="practiceGuide" class="small"></p>
-
-      <div class="buddy-zone" id="buddyZone" aria-hidden="true">
-        <div id="buddyPet" class="buddy-pet">🐱</div>
-        <div id="buddyBubble" class="buddy-bubble">
-          I will practice quietly with you.
-        </div>
-      </div>
-
-      <div id="orb" class="orb" aria-label="Breathing guide circle" aria-live="polite">
-        Ready
-      </div>
-
-      <div id="timer" class="timer" aria-live="off" aria-label="Time remaining">01:00</div>
-
-      <div class="participation">
-        <b>Practice presence</b>
-        <div class="participation-bar">
-          <div id="participationFill" class="participation-fill"
-               role="progressbar" aria-valuenow="100"
-               aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <div id="participationText" class="small">App visible • Practice running</div>
-      </div>
-
-      <div id="presenceCard" class="presence-card" role="dialog"
-           aria-modal="false" aria-labelledby="presencePrompt">
-        <b id="presencePrompt">Quick mindful check</b>
-        <p id="presenceInstruction">Tap the matching symbol to continue.</p>
-        <div id="presenceChoices" class="check"></div>
-      </div>
-
-      <p id="integrityText" class="notice" role="note">
-        This app checks attention and app visibility, but it cannot prove someone is
-        meditating. If the app is hidden or a check is missed, the practice pauses
-        automatically.
-      </p>
-
-      <div style="width:100%" class="grid2">
-        <button class="btn soft" onclick="pauseResume()" id="pauseBtn"
-                aria-label="Pause or resume practice">⏸ Pause</button>
-        <button class="btn danger" onclick="quitPractice()"
-                aria-label="End practice early">End</button>
-      </div>
-    </div>
-  </section>
-
+<body><div class="app">
+<header class="top"><div class="brand">✨ Mindful Pets</div><div class="stats"><div class="pill">🔥 <b id="streak">0</b></div><div class="pill">⭐ <b id="stars">0</b></div><div class="pill">🪙 <b id="coins">0</b></div></div></header>
+<main class="main">
+<section id="home" class="view active"><div id="focusBanner" class="focus-banner">Welcome back. The practice was paused while this app was not visible.</div><div class="hero"><div id="petAvatar" class="pet">🐱</div><h1 id="petName">Whiskers</h1><p class="small" id="petLevel">Friendship level 1</p><div id="petMessage" class="pet-message">I’m happy you’re here! Shall we practice or play?</div><div class="meters"><div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div><div class="meterline"><span>Happiness</span><div class="bar"><div id="happyFill" class="fill happy"></div></div><b id="happyN"></b></div><div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div></div></div><div class="grid2"><button class="btn blue" onclick="openPractice('breathing')">💨 Breathe</button><button class="btn green" onclick="openPractice('meditation')">🧘 Meditate</button><button class="btn gold" onclick="openFeed()">🍎 Feed</button><button class="btn purple" onclick="playPet()">💖 Play</button></div><div id="charlieGoal" class="goal-card"></div><div class="section-title"><h2>Today’s gentle mission</h2></div><div class="card" id="mission"></div><div class="special-reward">🎁 Practice for 10 minutes to earn a Calm Treasure. Complete 15 minutes for a Super Calm Treasure!</div></section>
+<section id="market" class="view"><div class="section-title"><h2>Marketplace</h2></div><div id="marketTabs" class="tabs"></div><div id="marketGrid" class="cards"></div></section>
+<section id="collection" class="view"><div class="section-title"><h2>My collection</h2></div><div id="petCollection" class="cards"></div><div class="section-title"><h2>Badges</h2></div><div id="badgeGrid" class="cards"></div></section>
+<section id="settings" class="view"><div class="section-title"><h2>Parent & settings</h2></div><div class="card" style="text-align:left"><div class="setup"><label>Child nickname<input id="childName" maxlength="18"></label><label>Age group<select id="ageGroup"><option value="5-7">5–7</option><option value="8-10">8–10</option><option value="11-12">11–12</option></select></label><label class="setting-item"><input id="buddyToggle" type="checkbox"><span class="setting-copy"><b>Practice with my pet</b><small>Show the selected pet quietly breathing or meditating alongside the child.</small></span></label><label class="setting-item"><input id="soundToggle" type="checkbox"><span class="setting-copy"><b>Game and reward sounds</b><small>Play cheerful sounds for rewards, games, feeding, purchases, and completed activities.</small></span></label><label class="setting-item"><input id="petSignalToggle" type="checkbox"><span class="setting-copy"><b>Pet completion sound</b><small>Let the pet bark, meow, chirp, or make its special sound when practice finishes.</small></span></label><label class="setting-item"><input id="hapticToggle" type="checkbox"><span class="setting-copy"><b>Gentle vibration</b><small>Use short vibrations for catches, treasures, and completed practices on supported devices.</small></span></label><label class="setting-item"><input id="motionToggle" type="checkbox"><span class="setting-copy"><b>Use fewer animations</b><small>Reduce pet movement, celebrations, and decorative motion for a calmer screen.</small></span></label><button class="btn purple" onclick="saveSettings()">Save settings</button><button class="btn soft" onclick="exportData()">Export offline backup</button><button class="btn soft" onclick="document.getElementById('importFile').click()">Import backup</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"><button class="btn soft" onclick="openPinSetup()">Set or change parent PIN</button><button class="btn danger" onclick="requestProtectedAction('reset')">Reset all progress</button></div></div><div class="section-title"><h2>This week</h2></div><div class="card weekly-grid" id="weeklySummary"></div><div class="section-title"><h2>Recent practice record</h2></div><div class="card parent-log" id="parentLog"></div><div class="notice">Privacy: all progress stays in this browser unless a parent exports a backup. Privacy: This app does not use the camera or microphone. Practice presence is estimated using app visibility and occasional mindful checks. It cannot confirm whether someone is truly meditating. All progress remains on this device unless a parent exports a backup. Pets can become gently tired, but never critically sick and never blame the child.</div></section>
+<section id="practice" class="view"><div class="practice"><h2 id="practiceTitle">Practice</h2><p id="practiceGuide" class="small"></p><div class="buddy-zone"><div id="buddyPet" class="buddy-pet">🐱</div><div id="buddyBubble" class="buddy-bubble">I will practice quietly with you.</div></div><div id="orb" class="orb">Ready</div><div id="timer" class="timer" role="timer" aria-label="Practice time remaining" aria-atomic="true">05:00</div><div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div><div class="participation"><b>Practice presence</b><div class="participation-bar" role="progressbar" aria-label="Practice presence" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="participationFill" class="participation-fill"></div></div><div id="participationText" class="small">App visible • Practice running</div></div><div id="presenceCard" class="presence-card"><b id="presencePrompt">Quick mindful check</b><p id="presenceInstruction">Tap the matching symbol to continue.</p><div id="presenceChoices" class="check"></div></div><p id="integrityText" class="notice">This app can check attention and app visibility, but it cannot prove someone is meditating. If the app is hidden or a check is missed, the practice pauses.</p><div style="width:100%" class="grid2"><button class="btn soft" onclick="pauseResume()" id="pauseBtn">Pause</button><button class="btn danger" onclick="quitPractice()">End</button></div></div></section>
 </main>
-
-<!-- ══ BOTTOM NAV ═══════════════════════════════════════════ -->
-<nav class="bottom" aria-label="Main navigation">
-  <button class="nav active" data-view="home" aria-label="Home" aria-current="page">
-    <span aria-hidden="true">🏡</span>Home
-  </button>
-  <button class="nav" data-view="market" aria-label="Marketplace">
-    <span aria-hidden="true">🏪</span>Market
-  </button>
-  <button class="nav" data-view="collection" aria-label="My collection">
-    <span aria-hidden="true">🎒</span>Collection
-  </button>
-  <button class="nav" data-view="settings" aria-label="Parent settings">
-    <span aria-hidden="true">⚙️</span>Settings
-  </button>
-</nav>
-
-<!-- ══ MODALS ═══════════════════════════════════════════════ -->
-
-<!-- Choose practice -->
-<div id="chooseModal" class="modal" role="dialog" aria-modal="true"
-     aria-labelledby="chooseTitle">
-  <div class="sheet">
-    <h2 id="chooseTitle">Choose a practice</h2>
-    <p id="chooseIntro" class="small">
-      Your pet will practice with you. Choose the time that feels right today.
-    </p>
-    <div id="practiceOptions" class="list"></div>
-    <div class="notice" role="note">
-      🌱 Five minutes builds the habit.
-      🎁 Ten minutes unlocks a Calm Treasure.
-      ✨ Fifteen minutes unlocks a Super Calm Treasure.
-    </div>
-    <button class="btn soft" onclick="closeModal('chooseModal')">Close</button>
-  </div>
-</div>
-
-<!-- Feed -->
-<div id="feedModal" class="modal" role="dialog" aria-modal="true"
-     aria-label="Food pantry">
-  <div class="sheet">
-    <h2>Food pantry</h2>
-    <div id="pantry" class="list"></div>
-    <button class="btn soft" onclick="closeModal('feedModal')">Close</button>
-  </div>
-</div>
-
-<!-- Post-practice check-in -->
-<div id="checkModal" class="modal" role="dialog" aria-modal="true"
-     aria-label="How do you feel?">
-  <div class="sheet">
-    <h2>Nice work showing up! 🎉</h2>
-    <p>How do you feel now? Any answer is okay.</p>
-    <div class="check">
-      <button class="btn soft" onclick="finishCheck('calm')">😌 Calm</button>
-      <button class="btn soft" onclick="finishCheck('happy')">😊 Happy</button>
-      <button class="btn soft" onclick="finishCheck('sleepy')">😴 Sleepy</button>
-      <button class="btn soft" onclick="finishCheck('same')">🙂 About the same</button>
-    </div>
-  </div>
-</div>
-
-<!-- Reward choice -->
-<div id="rewardChoiceModal" class="modal" role="dialog" aria-modal="true"
-     aria-label="Reward earned">
-  <div class="sheet">
-    <h2>We earned this together! ✨</h2>
-    <p id="rewardChoiceText">Would you like to save for Charlie or visit the food market?</p>
-    <div class="choice-grid">
-      <button class="btn purple" onclick="chooseAfterReward('save')">
-        🐕 Save for Charlie
-      </button>
-      <button class="btn gold" onclick="chooseAfterReward('food')">
-        🍎 Shop for food
-      </button>
-    </div>
-    <button class="btn soft" onclick="chooseAfterReward('home')"
-            style="margin-top:10px;width:100%">Maybe later</button>
-  </div>
-</div>
-
-<!-- Play modal -->
-<div id="playModal" class="modal" role="dialog" aria-modal="true"
-     aria-label="Pet Playground">
-  <div class="sheet">
-    <h2>Pet Playground 🐾</h2>
-    <p id="playInstruction">Choose a game below.</p>
-    <div class="tabs">
-      <button class="chip active" id="patTab" onclick="setPlayMode('pat')"
-              aria-pressed="true">🖐️ Pat &amp; Tickle</button>
-      <button class="chip" id="ballTab" onclick="setPlayMode('ball')"
-              aria-pressed="false">🎾 Throw Ball</button>
-    </div>
-    <!-- Play area: pointer events handled in JS -->
-    <div class="play-area" id="playArea">
-      <div id="gamePet" class="game-pet" aria-hidden="true">🐱</div>
-      <div id="handHint" class="hand-hint" aria-hidden="true"
-           style="left:48%;top:115px">👇</div>
-      <div id="gameBall" class="game-ball" aria-hidden="true"
-           style="display:none">🎾</div>
-      <p id="playScore" aria-live="polite"
-         style="font-weight:900;position:absolute;left:12px;top:10px;margin:0">
-        Joy 0 / 6
-      </p>
-    </div>
-    <button class="btn soft" onclick="closePlay()" style="margin-top:10px;width:100%">
-      Finish playing
-    </button>
-  </div>
-</div>
-
-<!-- Toast container -->
-<div id="toastbox" class="toastbox" aria-live="assertive" aria-atomic="true"></div>
-
-</div><!-- .app -->
-
+<nav class="bottom"><button class="nav active" data-view="home"><span>🏡</span>Home</button><button class="nav" data-view="market"><span>🏪</span>Market</button><button class="nav" data-view="collection"><span>🎒</span>Collection</button><button class="nav" data-view="settings"><span>⚙️</span>Settings</button></nav>
+<div id="chooseModal" class="modal"><div class="sheet"><h2 id="chooseTitle">Choose a practice</h2><p id="chooseIntro" class="small">Your pet will practice with you. Choose the time that feels right today.</p><div id="practiceOptions" class="list"></div><div class="notice">🌱 Five minutes builds the habit. 🎁 Ten minutes unlocks a Calm Treasure. ✨ Fifteen minutes unlocks a Super Calm Treasure.</div><button class="btn soft" onclick="closeModal('chooseModal')">Close</button></div></div>
+<div id="feedModal" class="modal"><div class="sheet"><h2>Food pantry</h2><div id="pantry" class="list"></div><button class="btn soft" onclick="closeModal('feedModal')">Close</button></div></div>
+<div id="checkModal" class="modal"><div class="sheet"><h2>Nice work showing up! 🎉</h2><p>How do you feel now? Any answer is okay.</p><div class="check"><button class="btn soft" onclick="finishCheck('calm')">😌 Calm</button><button class="btn soft" onclick="finishCheck('happy')">😊 Happy</button><button class="btn soft" onclick="finishCheck('sleepy')">😴 Sleepy</button><button class="btn soft" onclick="finishCheck('same')">🙂 About the same</button></div></div></div>
+<div id="rewardChoiceModal" class="modal"><div class="sheet"><h2>We earned this together! ✨</h2><p id="rewardChoiceText">Would you like to save for Charlie or visit the food market?</p><div class="choice-grid"><button class="btn purple" onclick="chooseAfterReward('save')">🐕 Save for Charlie</button><button class="btn gold" onclick="chooseAfterReward('food')">🍎 Shop for food</button></div><button class="btn soft" onclick="chooseAfterReward('home')">Maybe later</button></div></div><div id="pinModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="pinTitle"><div class="sheet"><h2 id="pinTitle">Parent PIN</h2><p id="pinText">Enter the 4-digit parent PIN.</p><div class="pin-row"><input id="pinInput" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" aria-label="Four digit parent PIN"></div><button class="btn purple" id="pinSubmit" onclick="submitPin()">Continue</button><button class="btn soft" onclick="closeModal('pinModal')">Cancel</button></div></div><div id="playModal" class="modal"><div class="sheet"><h2>Pet Playground 🐾</h2><p id="playInstruction">Choose a game below.</p><div class="tabs"><button class="chip active" id="patTab" onclick="setPlayMode('pat')">🖐️ Pat & Tickle</button><button class="chip" id="ballTab" onclick="setPlayMode('ball')">🎾 Throw Ball</button></div><div class="play-area" id="playArea"><div id="gamePet" class="game-pet">🐱</div><div id="handHint" class="hand-hint">👇</div><div id="gameBall" class="game-ball" hidden>🎾</div><p id="playScore" style="font-weight:900;position:absolute;left:12px;top:10px">Joy 0 / 6</p></div><button class="btn soft" onclick="closePlay()">Finish playing</button></div></div>
+<div id="toastbox" class="toastbox"></div></div>
 <script>
 'use strict';
-/* ═══════════════════════════════════════════════════════════
-   DATA CONSTANTS
-═══════════════════════════════════════════════════════════ */
-const KEY = 'mindfulPetsOneFileV4';
-const APP_VERSION = 4;
-
-const PETS = [
-  {id:'cat',    name:'Whiskers',                icon:'🐱', cost:0},
-  {id:'dog',    name:'Buddy',                   icon:'🐶', cost:120},
-  {id:'bunny',  name:'Thumper',                 icon:'🐰', cost:180},
-  {id:'panda',  name:'Bao',                     icon:'🐼', cost:280},
-  {id:'fox',    name:'Ember',                   icon:'🦊', cost:360},
-  {id:'dragon', name:'Sparky',                  icon:'🐲', cost:550},
-  {id:'kingcharles', name:'Charlie the King Charles', icon:'🐕', cost:1200},
-];
-
-const ITEMS = [
-  // ── Food ──────────────────────────────────────────────────
-  {id:'seeds',     cat:'food', name:'Sunny Seeds',            icon:'🌾', cost:8,   energy:8,  happy:1,  rarity:'common'},
-  {id:'strawberry',cat:'food', name:'Sweet Strawberry',       icon:'🍓', cost:12,  energy:12, happy:2,  rarity:'common'},
-  {id:'carrot',    cat:'food', name:'Crunchy Carrot',         icon:'🥕', cost:16,  energy:16, happy:2,  rarity:'common'},
-  {id:'banana',    cat:'food', name:'Happy Banana',           icon:'🍌', cost:20,  energy:20, happy:3,  rarity:'common'},
-  {id:'apple',     cat:'food', name:'Shiny Apple',            icon:'🍎', cost:26,  energy:26, happy:4,  rarity:'common'},
-  {id:'fish',      cat:'food', name:'Ocean Fish',             icon:'🐟', cost:32,  energy:30, happy:7,  rarity:'special'},
-  {id:'bone',      cat:'food', name:'Hero Bone',              icon:'🦴', cost:36,  energy:32, happy:8,  rarity:'special'},
-  {id:'watermelon',cat:'food', name:'Watermelon Picnic',      icon:'🍉', cost:40,  energy:36, happy:6,  rarity:'special'},
-  {id:'berryBowl', cat:'food', name:'Magic Berry Bowl',       icon:'🫐', cost:48,  energy:40, happy:9,  rarity:'special'},
-  {id:'smoothie',  cat:'food', name:'Rainbow Smoothie',       icon:'🥤', cost:58,  energy:46, happy:12, rarity:'premium'},
-  {id:'cupcake',   cat:'food', name:'Celebration Cupcake',    icon:'🧁', cost:72,  energy:48, happy:18, rarity:'premium'},
-  {id:'moonCake',  cat:'food', name:'Moon Cake',              icon:'🥮', cost:86,  energy:58, happy:20, rarity:'premium'},
-  {id:'royalFeast',cat:'food', name:'Royal Friendship Feast', icon:'🍱', cost:125, energy:75, happy:25, friend:8, rarity:'royal'},
-  {id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',   icon:'🐉', cost:145, energy:82, happy:28, friend:10,rarity:'royal'},
-
-  // ── Accessories ───────────────────────────────────────────
-  {id:'flower',    cat:'accessory', name:'Flower Crown',       icon:'🌸', cost:90,  rarity:'common'},
-  {id:'scarf',     cat:'accessory', name:'Cozy Scarf',         icon:'🧣', cost:110, rarity:'common'},
-  {id:'glasses',   cat:'accessory', name:'Star Glasses',       icon:'🤩', cost:135, rarity:'special'},
-  {id:'backpack',  cat:'accessory', name:'Explorer Backpack',  icon:'🎒', cost:155, rarity:'special'},
-  {id:'raincoat',  cat:'accessory', name:'Sunny Raincoat',     icon:'🧥', cost:175, rarity:'special'},
-  {id:'cape',      cat:'accessory', name:'Calm Hero Cape',     icon:'🦸', cost:210, rarity:'premium'},
-  {id:'wizard',    cat:'accessory', name:'Dream Wizard Hat',   icon:'🧙', cost:235, rarity:'premium'},
-  {id:'headphones',cat:'accessory', name:'Cloud Headphones',   icon:'🎧', cost:260, rarity:'premium'},
-  {id:'crown',     cat:'accessory', name:'Royal Pet Crown',    icon:'👑', cost:390, rarity:'royal'},
-  {id:'wings',     cat:'accessory', name:'Rainbow Wings',      icon:'🪽', cost:450, rarity:'royal'},
-
-  // ── Rooms ─────────────────────────────────────────────────
-  {id:'forest',    cat:'room', name:'Enchanted Forest',   icon:'🌲', cost:150, theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',    rarity:'common'},
-  {id:'cloud',     cat:'room', name:'Cloud Castle',       icon:'☁️', cost:195, theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',    rarity:'special'},
-  {id:'ocean',     cat:'room', name:'Ocean Sanctuary',    icon:'🌊', cost:240, theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',    rarity:'special'},
-  {id:'garden',    cat:'room', name:'Kindness Garden',    icon:'🌷', cost:275, theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',    rarity:'special'},
-  {id:'candy',     cat:'room', name:'Candy Dream Room',   icon:'🍭', cost:310, theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',    rarity:'premium'},
-  {id:'space',     cat:'room', name:'Galaxy Bedroom',     icon:'🌌', cost:360, theme:'linear-gradient(145deg,#20204a,#553b83)',    rarity:'premium'},
-  {id:'castle',    cat:'room', name:'Royal Castle Suite', icon:'🏰', cost:525, theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',    rarity:'royal'},
-  {id:'dragonCave',cat:'room', name:'Crystal Dragon Cave',icon:'💎', cost:650, theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',   rarity:'royal'},
-
-  // ── Special (earned via long practice) ────────────────────
-  {id:'goldenCrown',cat:'special', name:'Golden Calm Crown',   icon:'👑', cost:0, rarity:'royal'},
-  {id:'starCape',   cat:'special', name:'Starlight Cape',      icon:'🌟', cost:0, rarity:'royal'},
-  {id:'moonRoom',   cat:'special', name:'Moon Sanctuary',      icon:'🌙', cost:0, rarity:'royal'},
-  {id:'rainbowAura',cat:'special', name:'Rainbow Aura',        icon:'🌈', cost:0, rarity:'royal'},
-];
-
-const PET_FAVORITES = {
-  cat:        ['fish','moonCake'],
-  dog:        ['bone','royalFeast'],
-  kingcharles:['royalFeast','cupcake'],
-  bunny:      ['carrot','berryBowl'],
-  fox:        ['fish','apple'],
-  panda:      ['apple','berryBowl'],
-  dragon:     ['dragonFruit','moonCake'],
-};
-
-const BADGES = [
-  {id:'first',   icon:'🌱', name:'First Calm Minute',    test:s=>s.progress.sessions>=1},
-  {id:'five',    icon:'⭐', name:'Five Practices',        test:s=>s.progress.sessions>=5},
-  {id:'variety', icon:'🌈', name:'Calm Explorer',         test:s=>s.progress.breathing>=1&&s.progress.meditation>=1},
-  {id:'tenmin',  icon:'🧘', name:'Ten Mindful Minutes',   test:s=>s.progress.totalSeconds>=600},
-  {id:'streak3', icon:'🔥', name:'Three Gentle Days',     test:s=>s.player.bestStreak>=3},
-];
-
-/* ═══════════════════════════════════════════════════════════
-   STATE MANAGEMENT
-═══════════════════════════════════════════════════════════ */
-function makePetProfile() {
-  return {
-    health:60, happiness:60, friendXP:0, level:1,
-    accessory:null, room:'meadow',
-    lastPlay:0, lastCareAt:Date.now(), lastDecayAt:Date.now(),
-  };
-}
-
-function defaults() {
-  return {
-    version: APP_VERSION,
-    player:  {name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null},
-    activePetId: 'cat',
-    pets:    {cat: makePetProfile()},
-    inventory: {apple:1},
-    ownedItems: [],
-    progress:  {sessions:0,breathing:0,meditation:0,totalSeconds:0,checkIns:[],badges:[]},
-    settings:  {sound:true,reducedMotion:false,buddy:true,petSignal:true},
-    daily:     {date:'',earned:0,missionCount:0},
-  };
-}
-
-/** Deep-validate an imported state object; returns cleaned state or null. */
-function validateImport(x) {
-  try {
-    if (!x || typeof x !== 'object') return null;
-    if (x.version !== APP_VERSION) return null;
-    // Require core keys
-    if (!x.player || typeof x.player !== 'object') return null;
-    if (!x.pets   || typeof x.pets   !== 'object') return null;
-    if (!x.progress|| typeof x.progress!=='object') return null;
-    if (!x.settings|| typeof x.settings!=='object') return null;
-    // Ensure every pet in .pets has a numeric health value
-    for (const k of Object.keys(x.pets)) {
-      const p = x.pets[k];
-      if (typeof p.health !== 'number' || typeof p.happiness !== 'number') return null;
-    }
-    // Ensure activePetId exists in pets
-    if (!x.pets[x.activePetId]) x.activePetId = Object.keys(x.pets)[0] || 'cat';
-    // Fill any missing fields with defaults
-    const d = defaults();
-    x.player   = Object.assign({}, d.player,   x.player);
-    x.settings = Object.assign({}, d.settings, x.settings);
-    x.progress = Object.assign({}, d.progress, x.progress);
-    x.daily    = Object.assign({}, d.daily,    x.daily || {});
-    x.inventory  = x.inventory  || {};
-    x.ownedItems = Array.isArray(x.ownedItems) ? x.ownedItems : [];
-    return x;
-  } catch {
-    return null;
-  }
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return defaults();
-    const parsed = JSON.parse(raw);
-    // Migrate v3 → v4
-    if (parsed && parsed.version === 3) {
-      parsed.version = APP_VERSION;
-      parsed.settings = parsed.settings || {};
-      if (parsed.settings.buddy     === undefined) parsed.settings.buddy     = true;
-      if (parsed.settings.petSignal === undefined) parsed.settings.petSignal = true;
-    }
-    const validated = validateImport(parsed);
-    return validated || defaults();
-  } catch {
-    return defaults();
-  }
-}
-
-let state = loadState();
-
-/* ═══════════════════════════════════════════════════════════
-   SESSION STATE  (null when not practising)
-═══════════════════════════════════════════════════════════ */
-let session      = null;
-let tickInterval = null;   // main countdown interval
-let breathTimeouts= [];    // array of setTimeout handles for breath cycle
-let attentionTimer= null;  // setTimeout handle for next presence check
-let marketCat    = 'food'; // active market tab
-let completingPractice = false; // guard against double-complete
-
-/* ═══════════════════════════════════════════════════════════
-   AUDIO  (Web Audio API, no external files)
-═══════════════════════════════════════════════════════════ */
-let audioCtx = null;
-
-function getAudioCtx() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  // Resume if suspended (browser autoplay policy)
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-
-function tone(freq, duration = 0.13, type = 'sine', volume = 0.12, delay = 0) {
-  if (!state.settings.sound) return;
-  try {
-    const ctx = getAudioCtx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    const t = ctx.currentTime + delay;
-    o.type = type;
-    o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(0.001, t);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.001, volume), t + 0.015);
-    g.gain.exponentialRampToValueAtTime(0.001, t + duration);
-    o.connect(g).connect(ctx.destination);
-    o.start(t);
-    o.stop(t + duration + 0.05);
-  } catch (e) { /* silent fail */ }
-}
-
-function playSound(kind) {
-  if (!state.settings.sound) return;
-  switch (kind) {
-    case 'coin':
-      tone(660,.10,'triangle',.11); tone(880,.16,'triangle',.10,.09); break;
-    case 'complete':
-      tone(523,.20,'sine',.12); tone(659,.22,'sine',.12,.18); tone(784,.35,'sine',.13,.38); break;
-    case 'treasure':
-      tone(523,.12,'triangle',.12); tone(659,.12,'triangle',.12,.12);
-      tone(784,.12,'triangle',.12,.24); tone(1047,.4,'triangle',.13,.36); break;
-    case 'attention':
-      tone(740,.16,'sine',.08); tone(740,.16,'sine',.08,.22); break;
-    case 'buy':
-      tone(440,.10,'triangle',.08); tone(660,.20,'triangle',.10,.08); break;
-    case 'tap':
-      tone(520,.08,'sine',.05); break;
-    case 'error':
-      tone(300,.18,'square',.06); break;
-  }
-}
-
-function petCompletionSignal() {
-  if (!state.settings.sound || !state.settings.petSignal) return;
-  const id = state.activePetId;
-  if (['dog','kingcharles'].includes(id)) {
-    tone(185,.13,'sawtooth',.09); tone(125,.19,'sawtooth',.08,.12);
-  } else if (id === 'cat') {
-    tone(520,.16,'sine',.08); tone(680,.23,'sine',.07,.13);
-  } else if (id === 'dragon') {
-    tone(95,.28,'sawtooth',.07); tone(190,.18,'triangle',.06,.24);
-  } else {
-    tone(460,.12,'triangle',.07); tone(620,.16,'triangle',.07,.13);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   UTILITY
-═══════════════════════════════════════════════════════════ */
-function clamp(n, lo = 0, hi = 100) { return Math.max(lo, Math.min(hi, n)); }
-function activePet()  { return state.pets[state.activePetId]; }
-function activePetDef(){ return PETS.find(x => x.id === state.activePetId); }
-function isFavoriteFood(foodId) {
-  return (PET_FAVORITES[state.activePetId] || []).includes(foodId);
-}
-
-function localDate() {
-  const d = new Date();
-  return [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2,'0'),
-    String(d.getDate()).padStart(2,'0'),
-  ].join('-');
-}
-
-function dayDiff(a, b) {
-  return Math.round(
-    (new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000
-  );
-}
-
-function formatTime(s) {
-  return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
-}
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function saveState() { localStorage.setItem(KEY, JSON.stringify(state)); }
-
-function announce(msg) {
-  const el = document.getElementById('liveRegion');
-  if (el) { el.textContent = ''; requestAnimationFrame(() => { el.textContent = msg; }); }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════════════ */
-function toast(text, duration = 3500) {
-  const box = document.getElementById('toastbox');
-  if (!box) return;
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = text;
-  box.appendChild(el);
-  setTimeout(() => el.remove(), duration);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   DAILY RESET
-═══════════════════════════════════════════════════════════ */
-function checkDaily() {
-  const d = localDate();
-  if (state.daily.date !== d) {
-    state.daily = { date: d, earned: 0, missionCount: 0 };
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PET CARE DECAY  (gentle, capped, runs at most once per day)
-═══════════════════════════════════════════════════════════ */
-function applyGentleCareDecay() {
-  const now = Date.now();
-  const dayMs = 86400000;
-  Object.values(state.pets).forEach(p => {
-    if (!p.lastDecayAt) p.lastDecayAt = now;
-    if (!p.lastCareAt)  p.lastCareAt  = now;
-    const daysElapsed = Math.floor((now - p.lastDecayAt) / dayMs);
-    if (daysElapsed < 1) return;
-    // Cap applied days to 5 to avoid punishing long absences harshly
-    const applied = Math.min(daysElapsed, 5);
-    p.health    = Math.max(35, p.health    - applied * 4);
-    p.happiness = Math.max(35, p.happiness - applied * 3);
-    // Advance lastDecayAt by the whole elapsed days (not just applied)
-    p.lastDecayAt += daysElapsed * dayMs;
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PET MESSAGES
-═══════════════════════════════════════════════════════════ */
-function updatePetMessage() {
-  const p    = activePet();
-  const name = activePetDef().name;
-  let msg  = "I'm happy you're here! Shall we practice or play?";
-  let care = false;
-
-  if (p.health < 50) {
-    msg  = `${name} is exhausted and resting. Let's practice together, earn some coins, and choose a healthy snack. 🍎`;
-    care = true;
-  } else if (p.happiness < 50) {
-    msg  = `${name} missed spending time together. Gentle pats or a game would feel lovely. 💛`;
-    care = true;
-  } else if (p.health <= 65) {
-    msg  = 'I used some energy today. Shall we earn and choose a healthy snack? 🥕';
-    care = true;
-  } else if (p.happiness <= 60) {
-    msg  = 'Can we play together after today's calm practice? 🌿';
-    care = true;
-  }
-
-  const el = document.getElementById('petMessage');
-  el.textContent = msg;
-  el.classList.toggle('needs-care', care);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PET LEVELLING
-═══════════════════════════════════════════════════════════ */
-function levelPet(p) {
-  while (p.friendXP >= p.level * 100) {
-    p.friendXP -= p.level * 100;
-    p.level++;
-    state.player.stars += 1;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   MAIN RENDER
-═══════════════════════════════════════════════════════════ */
-function render() {
-  checkDaily();
-  applyGentleCareDecay();
-
-  const petDef = activePetDef();
-  const ps     = activePet();
-
-  // Pet avatar
-  const accessoryIcon = ps.accessory
-    ? ' ' + (ITEMS.find(x => x.id === ps.accessory)?.icon || '')
-    : '';
-  document.getElementById('petAvatar').textContent = petDef.icon + accessoryIcon;
-  document.getElementById('petAvatar').setAttribute('aria-label', `${petDef.name}, your active pet`);
-
-  // Room background
-  const roomItem = ITEMS.find(x => x.id === ps.room && x.cat === 'room');
-  document.getElementById('heroCard').style.background =
-    roomItem?.theme || 'linear-gradient(145deg,#fff9,#ffffffd9)';
-
-  // Exhausted state
-  const petAvatarEl = document.getElementById('petAvatar');
-  petAvatarEl.classList.toggle('exhausted', ps.health < 50);
-
-  // Pet info
-  document.getElementById('petName').textContent  = petDef.name;
-  document.getElementById('petLevel').textContent = `Friendship level ${ps.level} • ${ps.room} room`;
-  updatePetMessage();
-
-  // Meters
-  const friendPct = ps.friendXP % 100;
-  for (const [id, val] of [['health', ps.health], ['happy', ps.happiness], ['friend', friendPct]]) {
-    const fill = document.getElementById(id + 'Fill');
-    const num  = document.getElementById(id + 'N');
-    const bar  = document.getElementById(id + 'Bar') || fill?.parentElement?.parentElement;
-    fill.style.width = val + '%';
-    num.textContent  = Math.round(val);
-    if (bar) bar.setAttribute('aria-valuenow', Math.round(val));
-  }
-
-  // Stats bar
-  document.getElementById('streak').textContent = state.player.streak;
-  document.getElementById('stars').textContent  = state.player.stars;
-  document.getElementById('coins').textContent  = state.player.coins;
-
-  // Mission
-  const mc = state.daily.missionCount;
-  document.getElementById('mission').innerHTML =
-    `<b>Complete ${Math.min(3, mc + 1)} of 3 calm activities</b>` +
-    `<p class="small">${mc}/3 today${mc >= 3 ? ' — Bonus earned! 🎉' : ''} • Bonus 30 coins at 3</p>`;
-
-  renderCharlieGoal();
-  renderMarket();
-  renderCollection();
-
-  // Settings
-  document.getElementById('childName').value     = state.player.name;
-  document.getElementById('ageGroup').value       = state.player.age;
-  document.getElementById('soundToggle').checked  = state.settings.sound;
-  document.getElementById('motionToggle').checked = state.settings.reducedMotion;
-  document.getElementById('buddyToggle').checked  = state.settings.buddy;
-  document.getElementById('petSignalToggle').checked = state.settings.petSignal;
-
-  document.body.classList.toggle('reduce', state.settings.reducedMotion);
-
-  renderParentLog();
-  saveState();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════════════════════ */
-function showView(id) {
-  document.querySelectorAll('.view').forEach(v => {
-    v.classList.toggle('active', v.id === id);
-  });
-  document.querySelectorAll('.nav').forEach(n => {
-    const active = n.dataset.view === id;
-    n.classList.toggle('active', active);
-    n.setAttribute('aria-current', active ? 'page' : 'false');
-  });
-  // Hide bottom nav during practice
-  document.querySelector('.bottom').style.display = id === 'practice' ? 'none' : 'grid';
-}
-
-document.querySelectorAll('.nav').forEach(n => {
-  n.addEventListener('click', () => showView(n.dataset.view));
-});
-
-/* ═══════════════════════════════════════════════════════════
-   MODALS
-═══════════════════════════════════════════════════════════ */
-function openModal(id) {
-  const modal = document.getElementById(id);
-  modal.classList.add('show');
-  // Focus first focusable element inside
-  requestAnimationFrame(() => {
-    const first = modal.querySelector('button, input, select, [tabindex]');
-    if (first) first.focus();
-  });
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-
-// Close modal on backdrop click
-document.querySelectorAll('.modal').forEach(modal => {
-  modal.addEventListener('click', e => {
-    if (e.target === modal) closeModal(modal.id);
-  });
-});
-
-/* ═══════════════════════════════════════════════════════════
-   CHARLIE GOAL CARD
-═══════════════════════════════════════════════════════════ */
-function renderCharlieGoal() {
-  const charlie = PETS.find(p => p.id === 'kingcharles');
-  const owned   = !!state.pets.kingcharles;
-  const el      = document.getElementById('charlieGoal');
-
-  if (owned) {
-    el.innerHTML =
-      `<div class="goal-row">
-        <div class="goal-icon">🐕</div>
-        <div><b>Charlie joined the family!</b>
-        <div class="small">You reached the royal dream-pet goal through patient saving.</div>
-        </div>
-      </div>`;
-    return;
-  }
-  const pct = Math.min(100, Math.round(state.player.coins / charlie.cost * 100));
-  el.innerHTML =
-    `<div class="goal-row">
-      <div class="goal-icon">🐕</div>
-      <div style="flex:1">
-        <b>Saving for Charlie</b>
-        <div class="small">${state.player.coins} / ${charlie.cost} coins • ${charlie.cost - state.player.coins} to go</div>
-        <div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div>
-      </div>
-    </div>`;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   MARKET
-═══════════════════════════════════════════════════════════ */
-function setMarket(cat) { marketCat = cat; renderMarket(); }
-
-function rarityClass(r) {
-  return { common:'common-r', special:'special-r', premium:'premium-r', royal:'royal-r' }[r] || 'common-r';
-}
-
-function renderMarket() {
-  const tabs = document.getElementById('marketTabs');
-  const grid = document.getElementById('marketGrid');
-  if (!tabs || !grid) return;
-
-  tabs.innerHTML = ['food','pet','accessory','room'].map(c => {
-    const labels = {food:'Food', pet:'Pets', accessory:'Accessories', room:'Rooms'};
-    return `<button class="chip ${marketCat === c ? 'active' : ''}"
-      onclick="setMarket('${c}')" role="tab"
-      aria-selected="${marketCat === c}">${labels[c]}</button>`;
-  }).join('');
-
-  const ps   = activePet();
-  const data = marketCat === 'pet' ? PETS : ITEMS.filter(x => x.cat === marketCat);
-
-  const noteText = {
-    food:      `💖 ${activePetDef().name}'s favorite foods give 50% more energy and happiness.`,
-    pet:       '🐾 Every adopted pet keeps separate energy, happiness, friendship, room, and accessory data.',
-    accessory: '🎀 Accessories are owned by the family but equipped separately for each pet.',
-    room:      '🏡 Every pet can use a different room. Purchased rooms can be reused by all pets.',
-  }[marketCat] || '';
-
-  grid.innerHTML = `<div class="market-note" style="grid-column:1/-1">${noteText}</div>` +
-    data.map(item => {
-      const isPet    = marketCat === 'pet';
-      const owned    = isPet ? !!state.pets[item.id] : (item.cat !== 'food' && state.ownedItems.includes(item.id));
-      const qty      = item.cat === 'food' ? (state.inventory[item.id] || 0) : null;
-      const equipped = (item.cat === 'accessory' && ps.accessory === item.id)
-                    || (item.cat === 'room'      && ps.room === item.id);
-      const isFav    = item.cat === 'food' && isFavoriteFood(item.id);
-      const rCls     = rarityClass(item.rarity || 'common');
-
-      let desc = '';
-      if      (isPet)            desc = item.id === 'kingcharles' ? 'Royal dream pet • Special goal' : 'Adopt this pet';
-      else if (item.cat ==='food') desc = `+${item.energy} energy • +${item.happy} joy${qty !== null ? ` • ${qty} owned` : ''}`;
-      else if (item.cat ==='accessory') desc = 'Dress your active pet';
-      else if (item.cat ==='room')      desc = 'Reusable pet room';
-
-      let action = '';
-      if (isPet) {
-        if (owned) {
-          action = `<button class="btn ${state.activePetId === item.id ? 'soft' : 'purple'}"
-            onclick="selectPet('${item.id}')">${state.activePetId === item.id ? 'Selected' : 'Select'}</button>`;
-        } else {
-          action = `<button class="btn purple" onclick="buy('pet','${item.id}')">Buy</button>`;
-        }
-      } else if (item.cat === 'food') {
-        action = `<button class="btn purple" onclick="buy('food','${item.id}')">Buy</button>`;
-      } else if (!owned) {
-        action = `<button class="btn purple" onclick="buy('${item.cat}','${item.id}')">Buy</button>`;
-      } else {
-        action = `<button class="btn ${equipped ? 'soft' : 'green'}"
-          onclick="equipItem('${item.cat}','${item.id}')">
-          ${equipped ? 'Equipped' : (item.cat === 'room' ? 'Use Room' : 'Equip')}</button>`;
-      }
-
-      const preview = item.cat === 'room'
-        ? `<div class="room-preview" style="background:${item.theme}">${item.icon}</div>`
-        : `<div class="icon">${item.icon}</div>`;
-
-      return `<div class="card ${equipped ? 'equipped' : ''}">
-        ${preview}
-        <b>${item.name}</b>
-        <div>
-          <span class="rarity ${rCls}">${(item.rarity || 'common').toUpperCase()}</span>
-          ${isFav ? '<span class="rarity favorite-r">PET FAVORITE</span>' : ''}
-        </div>
-        <div class="small">${desc}</div>
-        <div class="price">🪙 ${item.cost}</div>
-        ${action}
-      </div>`;
-    }).join('');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BUY / EQUIP
-═══════════════════════════════════════════════════════════ */
-function buy(cat, id) {
-  const isPet = cat === 'pet';
-  const obj   = isPet ? PETS.find(x => x.id === id) : ITEMS.find(x => x.id === id);
-  if (!obj) return;
-
-  // Already owned check
-  if (isPet && state.pets[id]) return toast(`You already have ${obj.name}!`);
-  if (!isPet && cat !== 'food' && state.ownedItems.includes(id))
-    return toast(`${obj.name} is already owned!`);
-
-  // Afford check
-  if (state.player.coins < obj.cost)
-    return toast(`You need ${obj.cost - state.player.coins} more coins. Complete practices to earn!`);
-
-  state.player.coins -= obj.cost;
-
-  if (isPet) {
-    state.pets[id] = makePetProfile();
-  } else if (cat === 'food') {
-    state.inventory[id] = (state.inventory[id] || 0) + 1;
-  } else {
-    state.ownedItems.push(id);
-    if (cat === 'accessory') activePet().accessory = id;
-    if (cat === 'room')      activePet().room      = id;
-  }
-
-  saveState();
-  render();
-  playSound('buy');
-  toast(`${obj.name} ${cat === 'accessory' ? 'equipped!' : cat === 'room' ? 'is now your pet room!' : 'added!'}`);
-}
-
-function equipItem(cat, id) {
-  if (!state.ownedItems.includes(id)) return;
-  const p = activePet();
-  if (cat === 'accessory') p.accessory = (p.accessory === id) ? null : id;
-  if (cat === 'room')      p.room      = id;
-  saveState();
-  renderMarket();
-  render();
-  playSound('tap');
-  toast(cat === 'room' ? 'Room changed for this pet.' :
-        p.accessory    ? 'Accessory equipped for this pet.' : 'Accessory removed.');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   COLLECTION
-═══════════════════════════════════════════════════════════ */
-function renderCollection() {
-  const pc = document.getElementById('petCollection');
-  const bg = document.getElementById('badgeGrid');
-  if (!pc || !bg) return;
-
-  pc.innerHTML = PETS
-    .filter(p => state.pets[p.id])
-    .map(p => `<div class="card">
-      <div class="icon">${p.icon}</div>
-      <b>${p.name}</b>
-      <button class="btn ${state.activePetId === p.id ? 'soft' : 'purple'}"
-        onclick="selectPet('${p.id}')">
-        ${state.activePetId === p.id ? 'Selected' : 'Select'}
-      </button>
-    </div>`).join('');
-
-  // Update badge list
-  state.progress.badges = BADGES.filter(b => b.test(state)).map(b => b.id);
-
-  bg.innerHTML =
-    BADGES.map(b => {
-      const earned = state.progress.badges.includes(b.id);
-      return `<div class="card ${earned ? '' : 'locked'}" aria-label="${b.name}${earned ? '' : ' (locked)'}">
-        <div class="icon">${b.icon}</div><b>${b.name}</b>
-      </div>`;
-    }).join('') +
-    ITEMS.filter(i => i.cat === 'special').map(i => {
-      const have = state.ownedItems.includes(i.id);
-      return `<div class="card ${have ? '' : 'locked'}" aria-label="${i.name}${have ? '' : ' (locked)'}">
-        <div class="icon">${i.icon}</div>
-        <b>${i.name}</b>
-        <div class="small">${have ? 'Long-practice treasure' : 'Complete 10+ min practice'}</div>
-      </div>`;
-    }).join('');
-}
-
-function selectPet(id) {
-  if (!state.pets[id]) return;
-  state.activePetId = id;
-  saveState();
-  render();
-  showView('home');
-  toast('Pet selected. Its progress is kept separately.');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FEED
-═══════════════════════════════════════════════════════════ */
-let feedModalOpen = false; // guard against double-open / double-feed
-
-function openFeed() {
-  if (feedModalOpen) return;
-  feedModalOpen = true;
-  const pantry = document.getElementById('pantry');
-  const food = ITEMS.filter(i => i.cat === 'food' && (state.inventory[i.id] || 0) > 0);
-  pantry.innerHTML = food.length
-    ? food.map(i => `<div class="row">
-        <span>
-          <b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br>
-          <span class="small">+${i.energy} energy • +${i.happy} joy
-            ${isFavoriteFood(i.id) ? ' • 💖 Favorite bonus' : ''}</span>
-        </span>
-        <button class="btn green" onclick="feed('${i.id}')">Feed</button>
-      </div>`).join('')
-    : '<p>Your pantry is empty. Visit the market.</p>';
-  openModal('feedModal');
-}
-
-const _origCloseModal = closeModal;
-function closeModal(id) {
-  if (id === 'feedModal') feedModalOpen = false;
-  document.getElementById(id).classList.remove('show');
-}
-
-function feed(foodId) {
-  // Prevent double-feed from rapid taps
-  const qty = state.inventory[foodId] || 0;
-  if (qty <= 0) { toast('No more of that food in your pantry.'); return; }
-
-  const item = ITEMS.find(x => x.id === foodId);
-  const p    = activePet();
-
-  if (p.health >= 100 && p.happiness >= 100) {
-    toast('Your pet is full and happy! Save this food for later.');
-    return;
-  }
-
-  // Decrement before any async/render paths
-  state.inventory[foodId] = qty - 1;
-
-  const fav  = isFavoriteFood(foodId);
-  const mult = fav ? 1.5 : 1;
-  p.health    = clamp(p.health    + Math.round(item.energy * mult));
-  p.happiness = clamp(p.happiness + Math.round(item.happy  * mult));
-  if (item.friend) p.friendXP += Math.round(item.friend * mult);
-  p.lastCareAt  = Date.now();
-  p.lastDecayAt = Date.now();
-  levelPet(p);
-
-  saveState();
-  closeModal('feedModal');
-  render();
-  playSound(fav ? 'treasure' : 'tap');
-  toast(fav
-    ? `${item.icon} Favourite food! Extra energy and joy for ${activePetDef().name}!`
-    : `${item.icon} Energy restored! Thank you for caring for me.`
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BUDDY (practice companion display)
-═══════════════════════════════════════════════════════════ */
-function buddyMessage(text) {
-  const el = document.getElementById('buddyBubble');
-  if (el) el.textContent = text;
-}
-
-function prepareBuddy(type) {
-  const pet  = activePetDef();
-  const bp   = document.getElementById('buddyPet');
-  const bb   = document.getElementById('buddyBubble');
-  const zone = document.getElementById('buddyZone');
-  if (!bp || !bb || !zone) return;
-  bp.textContent = pet.icon;
-  const show = state.settings.buddy;
-  zone.style.display = show ? 'flex' : 'none';
-  bp.className  = 'buddy-pet ' + (type === 'meditation' ? 'resting' : '');
-  bb.textContent = type === 'meditation'
-    ? `I will sit quietly with you. We can notice the calm together.`
-    : `I will follow the gentle breathing circle with you.`;
-}
-
-function celebrateBuddy() {
-  if (!state.settings.buddy) return;
-  const bp = document.getElementById('buddyPet');
-  if (!bp) return;
-  bp.className = 'buddy-pet celebrate';
-  const name = activePetDef().name;
-  buddyMessage(`${name}: We finished together! Great calm practice!`);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BREATHING CYCLE  (uses chained setTimeouts, not setInterval)
-═══════════════════════════════════════════════════════════ */
-function clearBreathTimeouts() {
-  breathTimeouts.forEach(id => clearTimeout(id));
-  breathTimeouts = [];
-}
-
-function startBreathCycle() {
-  clearBreathTimeouts();
-  runBreathPhase(true); // start with inhale
-}
-
-function runBreathPhase(isInhale) {
-  if (!session || !session.running) return;
-
-  const orb = document.getElementById('orb');
-  if (!orb) return;
-
-  // Apply the correct animation class without clobbering 'orb'
-  orb.className = 'orb ' + (isInhale ? 'inhale' : 'exhale');
-  orb.textContent = isInhale ? 'Breathe in' : 'Breathe out';
-
-  const duration = isInhale ? 4000 : 5000; // ms
-  const handle = setTimeout(() => runBreathPhase(!isInhale), duration);
-  breathTimeouts.push(handle);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PRACTICE — OPEN / START
-═══════════════════════════════════════════════════════════ */
-const EXERCISES = {
-  breathing:  [['Calm Balloon', 300], ['Rainbow Breathing', 600], ['Breeze Master', 900]],
-  meditation: [['Kindness Garden', 300], ['Moonlight Calm', 600], ['Peaceful Explorer', 900]],
-};
-
-function openPractice(type) {
-  const chooseTitle = document.getElementById('chooseTitle');
-  const chooseIntro = document.getElementById('chooseIntro');
-  const opts        = document.getElementById('practiceOptions');
-  chooseTitle.textContent = type === 'breathing'
-    ? 'Choose a breathing adventure' : 'Choose a meditation adventure';
-  chooseIntro.textContent = type === 'breathing'
-    ? 'Your pet will follow the calm circle with you. Breathe comfortably, never force the breath.'
-    : 'Your pet will sit quietly beside you. No special breathing pattern is needed.';
-
-  opts.innerHTML = EXERCISES[type].map(([name, sec]) => {
-    const reward = sec >= 900 ? '✨ Super Calm Treasure' : sec >= 600 ? '🎁 Calm Treasure' : '🌱 Habit Builder';
-    return `<button class="btn ${type === 'breathing' ? 'blue' : 'green'}"
-      onclick="startPractice('${type}','${encodeURIComponent(name)}',${sec})">
-      <span>${name} • ${sec / 60} min<br>
-      <small style="opacity:.9">${reward}</small></span>
-    </button>`;
-  }).join('');
-
-  openModal('chooseModal');
-}
-
-function startPractice(type, encodedName, seconds) {
-  playSound('tap');
-  closeModal('chooseModal');
-
-  const name = decodeURIComponent(encodedName);
-  completingPractice = false;
-
-  session = {
-    type,
-    name,
-    planned:         seconds,
-    remaining:       seconds,
-    running:         true,
-    lastTick:        Date.now(),   // tracks last tick timestamp
-    pausedAt:        null,         // set when paused
-    hiddenPauses:    0,
-    attentionPassed: 0,
-    attentionMissed: 0,
-    attentionDue:    false,
-    visibleSeconds:  0,
-    presenceScore:   100,
-    checkDeadline:   null,
-    presenceAnswer:  null,
-  };
-
-  document.getElementById('practiceTitle').textContent = name;
-  document.getElementById('practiceGuide').textContent = type === 'breathing'
-    ? 'Follow the expanding circle gently. Return to normal breathing if uncomfortable.'
-    : 'Sit or lie comfortably. Notice sounds, body sensations, or the quiet around you. No special breathing is required.';
-
-  // Reset orb
-  const orb = document.getElementById('orb');
-  orb.className  = type === 'meditation' ? 'orb meditation' : 'orb';
-  orb.textContent = type === 'meditation' ? 'Be still' : 'Get ready';
-
-  prepareBuddy(type);
-  document.getElementById('pauseBtn').textContent = '⏸ Pause';
-  document.getElementById('presenceCard').classList.remove('show');
-  document.getElementById('focusBanner').classList.remove('show');
-
-  showView('practice');
-  startTimerLoop();
-  if (type === 'breathing') startBreathCycle();
-  scheduleAttentionCheck();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TIMER LOOP
-═══════════════════════════════════════════════════════════ */
-function startTimerLoop() {
-  stopTimerLoop();
-  tickInterval = setInterval(timerTick, 250);
-}
-
-function stopTimerLoop() {
-  clearInterval(tickInterval);
-  tickInterval = null;
-}
-
-function timerTick() {
-  if (!session) return;
-
-  const now     = Date.now();
-  const elapsed = (now - session.lastTick) / 1000; // seconds, possibly fractional
-  session.lastTick = now;
-
-  if (session.running && !document.hidden) {
-    session.visibleSeconds += elapsed;
-    session.remaining       = Math.max(0, session.remaining - elapsed);
-  }
-  // (pausedSeconds are implicit from (elapsed - visible), but we don't need them separately)
-
-  document.getElementById('timer').textContent = formatTime(Math.ceil(session.remaining));
-  updateParticipation();
-
-  if (session.remaining <= 0) completePractice();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PAUSE / RESUME
-═══════════════════════════════════════════════════════════ */
-function setSessionRunning(shouldRun) {
-  if (!session) return;
-  session.running  = shouldRun;
-  session.lastTick = Date.now(); // reset tick reference in BOTH directions
-
-  const btn = document.getElementById('pauseBtn');
-  btn.textContent = shouldRun ? '⏸ Pause' : '▶ Resume';
-
-  const orb = document.getElementById('orb');
-  if (!shouldRun) {
-    orb.className  = 'orb';        // remove animation classes cleanly
-    orb.textContent = 'Paused';
-  } else {
-    if (session.type === 'meditation') {
-      orb.className   = 'orb meditation';
-      orb.textContent = 'Be still';
-    }
-    // Breathing animation restarts via startBreathCycle()
-  }
-}
-
-function pauseResume() {
-  if (!session) return;
-  if (session.attentionDue) { toast('Complete the mindful check first.'); return; }
-
-  const nowRunning = !session.running;
-  setSessionRunning(nowRunning);
-
-  if (nowRunning) {
-    if (session.type === 'breathing') startBreathCycle();
-    toast('Practice resumed.');
-  } else {
-    clearBreathTimeouts();
-    toast('Practice paused. Tap Resume when ready.');
-  }
-}
-
-function quitPractice() {
-  cleanupPractice();
-  showView('home');
-  render();
-  toast('Practice ended. No penalty — well done for showing up.');
-}
-
-function cleanupPractice() {
-  stopTimerLoop();
-  clearBreathTimeouts();
-  clearTimeout(attentionTimer);
-  attentionTimer = null;
-  if (session && session.checkDeadline) clearTimeout(session.checkDeadline);
-  completingPractice = false;
-  session = null;
-
-  // Reset orb state
-  const orb = document.getElementById('orb');
-  if (orb) { orb.className = 'orb'; orb.textContent = 'Ready'; }
-
-  // Reset buddy
-  const bp = document.getElementById('buddyPet');
-  if (bp) bp.className = 'buddy-pet';
-
-  document.getElementById('presenceCard').classList.remove('show');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PRESENCE CHECK  (mindful attention prompt mid-practice)
-═══════════════════════════════════════════════════════════ */
-const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
-
-function scheduleAttentionCheck() {
-  clearTimeout(attentionTimer);
-  attentionTimer = null;
-  if (!session || session.remaining < 90) return;
-
-  // Schedule between 60–90 s from now, but not in the final 40 s
-  const minWait = 60000;
-  const maxWait = Math.min(90000, (session.remaining - 40) * 1000);
-  if (maxWait < minWait) return;
-
-  const wait = minWait + Math.random() * (maxWait - minWait);
-  attentionTimer = setTimeout(showPresenceCheck, wait);
-}
-
-function showPresenceCheck() {
-  if (!session || !session.running) return;
-
-  // Pause countdown while check is active
-  session.running    = false;
-  session.lastTick   = Date.now();
-  session.attentionDue = true;
-
-  playSound('attention');
-  clearBreathTimeouts(); // stop breathing animation during check
-
-  // Pick answer *first*, then shuffle display
-  const answer = PRESENCE_SYMBOLS[Math.floor(Math.random() * PRESENCE_SYMBOLS.length)];
-  session.presenceAnswer = answer;
-
-  const buddyType = session.type;
-  buddyMessage('A tiny check, then we will continue together.');
-
-  document.getElementById('presencePrompt').textContent =
-    buddyType === 'breathing' ? 'Breathing buddy check' : 'Mindful listening check';
-  document.getElementById('presenceInstruction').textContent =
-    buddyType === 'breathing'
-      ? `Tap ${answer} and take one comfortable breath.`
-      : `Tap ${answer} after noticing one sound around you.`;
-
-  document.getElementById('presenceChoices').innerHTML =
-    shuffle(PRESENCE_SYMBOLS).map(sym =>
-      `<button class="btn soft" onclick="answerPresence('${sym}')">${sym}</button>`
-    ).join('');
-
-  document.getElementById('presenceCard').classList.add('show');
-  document.getElementById('pauseBtn').textContent = '▶ Resume after check';
-
-  // Auto-miss after 25 s
-  session.checkDeadline = setTimeout(() => {
-    if (!session || !session.attentionDue) return;
-    session.attentionMissed++;
-    document.getElementById('presenceInstruction').textContent =
-      'The check was missed. Find the correct symbol and tap it when ready.';
-    updateParticipation();
-  }, 25000);
-}
-
-function answerPresence(tapped) {
-  if (!session || !session.attentionDue) return;
-
-  if (tapped !== session.presenceAnswer) {
-    playSound('error');
-    toast(`Look again — find the ${session.presenceAnswer} symbol.`);
-    return;
-  }
-
-  clearTimeout(session.checkDeadline);
-  session.checkDeadline  = null;
-  session.attentionPassed++;
-  session.attentionDue   = false;
-
-  document.getElementById('presenceCard').classList.remove('show');
-
-  // Resume session
-  session.running  = true;
-  session.lastTick = Date.now();
-  document.getElementById('pauseBtn').textContent = '⏸ Pause';
-
-  const orb = document.getElementById('orb');
-  if (session.type === 'meditation') {
-    orb.className   = 'orb meditation';
-    orb.textContent = 'Be still';
-  }
-  if (session.type === 'breathing') startBreathCycle();
-
-  buddyMessage(session.type === 'meditation'
-    ? 'Back to quiet time together.'
-    : 'Let's follow the gentle circle again.');
-
-  scheduleAttentionCheck();
-  updateParticipation();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PARTICIPATION SCORE
-═══════════════════════════════════════════════════════════ */
-function updateParticipation() {
-  if (!session) return;
-
-  const elapsed    = session.planned - session.remaining;
-  const expected   = Math.max(1, elapsed);
-  const pctVisible = Math.min(100, Math.round(session.visibleSeconds / Math.max(1, session.planned) * 100));
-  const penalty    = session.hiddenPauses * 12 + session.attentionMissed * 18;
-  const score      = Math.max(0, Math.min(100, pctVisible - penalty));
-  session.presenceScore = score;
-
-  const fill = document.getElementById('participationFill');
-  const text = document.getElementById('participationText');
-  if (fill) { fill.style.width = score + '%'; fill.setAttribute('aria-valuenow', score); }
-  if (text)  text.textContent =
-    `${score}% presence • ${session.attentionPassed} checks completed • ${session.hiddenPauses} app exits`;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   COMPLETE PRACTICE
-═══════════════════════════════════════════════════════════ */
-function completePractice() {
-  if (completingPractice) return; // guard double-call
-  completingPractice = true;
-
-  playSound('complete');
-  celebrateBuddy();
-  setTimeout(petCompletionSignal, 850);
-
-  const done = {
-    type:            session.type,
-    name:            session.name,
-    planned:         session.planned,
-    remaining:       session.remaining,
-    visibleSeconds:  session.visibleSeconds,
-    hiddenPauses:    session.hiddenPauses,
-    attentionPassed: session.attentionPassed,
-    attentionMissed: session.attentionMissed,
-    presenceScore:   session.presenceScore,
-  };
-
-  cleanupPractice();
-
-  setTimeout(() => {
-    const cm = document.getElementById('checkModal');
-    cm.dataset.done = JSON.stringify(done);
-    openModal('checkModal');
-  }, 1200);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   POST-PRACTICE CHECK-IN
-═══════════════════════════════════════════════════════════ */
-function finishCheck(feeling) {
-  const checkModal = document.getElementById('checkModal');
-  let done;
-  try { done = JSON.parse(checkModal.dataset.done || '{}'); }
-  catch { done = {}; }
-  checkModal.classList.remove('show');
-
-  checkDaily();
-
-  const actual   = done.planned - (done.remaining || 0);
-  const presence = done.presenceScore ?? 100;
-
-  // Base reward: 1 coin per 15 visible seconds, minimum 20
-  let reward = Math.max(20, Math.round(actual / 15));
-  if (presence < 60) reward = Math.max(20, Math.round(reward * 0.5));
-
-  // Treasure bonuses
-  let specialMessage = '';
-  if      (actual >= 900) { reward += 40; specialMessage = unlockSpecial(2, 'Super Calm Treasure'); }
-  else if (actual >= 600) { reward += 20; specialMessage = unlockSpecial(1, 'Calm Treasure'); }
-
-  // Daily cap
-  const capLeft = Math.max(0, 220 - state.daily.earned);
-  reward = Math.min(reward, capLeft);
-  state.daily.earned += reward;
-  state.daily.missionCount = Math.min(3, state.daily.missionCount + 1);
-
-  // Bonus for completing 3 missions
-  if (state.daily.missionCount === 3 && capLeft > 0) {
-    const bonus = Math.min(30, 220 - state.daily.earned);
-    state.player.coins += bonus;
-    state.daily.earned += bonus;
-    if (bonus > 0) toast('Daily mission complete! Bonus 30 coins. 🎉');
-  }
-
-  const starsEarned = actual >= 600 ? 3 : 1;
-  state.player.coins  += reward;
-  state.player.stars  += starsEarned;
-
-  // Progress tracking
-  state.progress.sessions++;
-  state.progress[done.type] = (state.progress[done.type] || 0) + 1;
-  state.progress.totalSeconds += actual;
-  state.progress.checkIns.push({
-    feeling,
-    type:            done.type,
-    seconds:         actual,
-    at:              new Date().toISOString(),
-    hiddenPauses:    done.hiddenPauses    || 0,
-    attentionPassed: done.attentionPassed || 0,
-    attentionMissed: done.attentionMissed || 0,
-    presenceScore:   done.presenceScore   ?? 100,
-    visibleSeconds:  done.visibleSeconds  || 0,
-  });
-
-  updateStreak();
-
-  // Pet care update
-  const p = activePet();
-  p.lastCareAt  = Date.now();
-  p.lastDecayAt = Date.now();
-  p.friendXP   += Math.round(actual / 20);
-  levelPet(p);
-
-  saveState();
-  render();
-  showView('home');
-
-  playSound(specialMessage ? 'treasure' : 'coin');
-  toast(`Earned ${reward} coins and ${starsEarned} star${starsEarned > 1 ? 's' : ''}!`);
-  if (specialMessage) setTimeout(() => toast(specialMessage), 600);
-
-  const rcText = document.getElementById('rewardChoiceText');
-  if (rcText) rcText.textContent = `You earned ${reward} coins. Save toward Charlie, or use some coins to care for your pet?`;
-  setTimeout(() => openModal('rewardChoiceModal'), 950);
-}
-
-function unlockSpecial(count, label) {
-  const pool = ITEMS.filter(i => i.cat === 'special' && !state.ownedItems.includes(i.id));
-  const won  = pool.slice(0, count);
-  won.forEach(i => state.ownedItems.push(i.id));
-  if (won.length > 0) {
-    return `${label} unlocked: ${won.map(i => i.icon + ' ' + i.name).join(' and ')}`;
-  }
-  // Collection already complete — give bonus coins instead
-  const bonus = count * 50;
-  state.player.coins += bonus;
-  state.daily.earned += bonus;
-  return `${label}: collection complete! You received ${bonus} bonus coins.`;
-}
-
-function chooseAfterReward(choice) {
-  closeModal('rewardChoiceModal');
-  if (choice === 'food') {
-    marketCat = 'food';
-    showView('market');
-    renderMarket();
-    toast('Choose food thoughtfully. You can save the rest for Charlie.');
-  } else if (choice === 'save') {
-    showView('home');
-    toast('Great saving choice! Every practice brings Charlie closer. 🐕');
-  } else {
-    showView('home');
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   STREAK
-═══════════════════════════════════════════════════════════ */
-function updateStreak() {
-  const today = localDate();
-  const last  = state.player.lastPracticeDate;
-  if (!last) {
-    state.player.streak = 1;
-  } else {
-    const diff = dayDiff(last, today);
-    if      (diff === 0) { /* same day, streak unchanged */ }
-    else if (diff === 1) state.player.streak++;
-    else                 state.player.streak = 1;
-  }
-  state.player.lastPracticeDate = today;
-  state.player.bestStreak = Math.max(state.player.bestStreak, state.player.streak);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   APP VISIBILITY  (tab hidden / minimised)
-═══════════════════════════════════════════════════════════ */
-document.addEventListener('visibilitychange', () => {
-  if (!session) {
-    // Show the re-focus banner if the user was away
-    if (!document.hidden) {
-      const banner = document.getElementById('focusBanner');
-      if (banner) banner.classList.remove('show'); // hide if practice not active
-    }
-    return;
-  }
-
-  if (document.hidden && session.running) {
-    session.hiddenPauses++;
-    setSessionRunning(false);
-    clearBreathTimeouts();
-    // Don't toast — app is not visible
-  } else if (!document.hidden && !session.running && !session.attentionDue) {
-    // App came back; show banner and let user manually resume
-    const banner = document.getElementById('focusBanner');
-    if (banner) banner.classList.add('show');
-    session.lastTick = Date.now();
-    toast('Welcome back! Tap ▶ Resume when you are ready to continue.');
-  }
-});
-
-/* ═══════════════════════════════════════════════════════════
-   PLAY MODAL
-═══════════════════════════════════════════════════════════ */
-let playMode       = 'pat';
-let patCount       = 0;
-let ballThrows     = 0;
-let playRewardReady= false;
-let ballDragging   = false;
-let ballOriginX    = 0;  // ball position when drag started (relative to playArea)
-let ballOriginY    = 0;
-let ballDragOffX   = 0;  // pointer offset within ball
-let ballDragOffY   = 0;
-let patDebounce    = 0;  // timestamp of last pat to debounce fast swipes
-
-function playPet() {
-  const p    = activePet();
-  const pet  = activePetDef();
-  patCount   = 0;
-  ballThrows = 0;
-  playRewardReady = (Date.now() - p.lastPlay) >= 3600000;
-
-  const gp = document.getElementById('gamePet');
-  gp.textContent = pet.icon;
-  gp.style.left  = '50%';
-  gp.style.bottom= '35px';
-
-  document.getElementById('playScore').textContent = 'Joy 0 / 6';
-  openModal('playModal');
-
-  // Defer coordinate setup until modal is painted
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      setPlayMode('pat');
-    });
-  });
-
-  playSound('tap');
-}
-
-function setPlayMode(mode) {
-  const p       = activePet();
-  const ball    = document.getElementById('gameBall');
-  const hint    = document.getElementById('handHint');
-  const instr   = document.getElementById('playInstruction');
-  const patTab  = document.getElementById('patTab');
-  const ballTab = document.getElementById('ballTab');
-
-  if (mode === 'ball' && p.health < 50) {
-    toast('Your pet is too tired for ball. Feed them to restore energy!');
-    mode = 'pat';
-  }
-
-  playMode = mode;
-  patTab.classList.toggle('active', mode === 'pat');
-  ballTab.classList.toggle('active', mode === 'ball');
-  patTab.setAttribute('aria-pressed', mode === 'pat' ? 'true' : 'false');
-  ballTab.setAttribute('aria-pressed', mode === 'ball' ? 'true' : 'false');
-
-  if (mode === 'pat') {
-    ball.style.display = 'none';
-    hint.style.display = 'block';
-    instr.textContent  = 'Gently tap or rub your pet. Find the spots that make it giggle!';
-    placeHandHint();
-  } else {
-    ball.style.display = 'block';
-    hint.style.display = 'none';
-    instr.textContent  = 'Drag the ball upward and release. Your pet will run and catch it!';
-    resetBall();
-  }
-}
-
-function placeHandHint() {
-  const area = document.getElementById('playArea');
-  const hint = document.getElementById('handHint');
-  if (!area || !hint) return;
-  const w = area.clientWidth;
-  const h = area.clientHeight;
-  hint.style.left = (w * 0.45) + 'px';
-  hint.style.top  = (h * 0.35) + 'px';
-}
-
-function joyPop(icon, x, y) {
-  const area = document.getElementById('playArea');
-  if (!area) return;
-  const el = document.createElement('div');
-  el.className  = 'joy-pop';
-  el.textContent = icon;
-  el.style.left  = x + 'px';
-  el.style.top   = y + 'px';
-  area.appendChild(el);
-  setTimeout(() => el.remove(), 900);
-}
-
-/* PAT GAME ─────────────────────────────────────────────── */
-function handlePatPointerDown(e) {
-  if (playMode !== 'pat') return;
-  e.preventDefault();
-  registerPat(e);
-}
-
-function handlePatPointerMove(e) {
-  if (playMode !== 'pat') return;
-  if (!(e.buttons & 1) && e.pointerType !== 'touch') return;
-  // Debounce: only count one pat per 300 ms to prevent swipe-farming
-  const now = Date.now();
-  if (now - patDebounce < 300) return;
-  patDebounce = now;
-  registerPat(e);
-}
-
-function registerPat(e) {
-  patCount = Math.min(6, patCount + 1);
-  const area = document.getElementById('playArea');
-  const r    = area.getBoundingClientRect();
-  const cx   = (e.clientX || (e.touches && e.touches[0].clientX) || r.left + r.width / 2) - r.left;
-  const cy   = (e.clientY || (e.touches && e.touches[0].clientY) || r.top  + r.height / 2) - r.top;
-  joyPop(patCount % 2 === 0 ? '💖' : '😄', cx, cy);
-
-  const gp = document.getElementById('gamePet');
-  gp.classList.remove('giggle');
-  void gp.offsetWidth; // force reflow to restart animation
-  gp.classList.add('giggle');
-
-  document.getElementById('playScore').textContent = `Joy ${patCount} / 6`;
-  playSound('tap');
-
-  if (patCount >= 6) {
-    completePlayReward('Your pet giggled and loved the gentle pats!');
-  }
-}
-
-/* BALL GAME ─────────────────────────────────────────────── */
-function resetBall() {
-  const ball = document.getElementById('gameBall');
-  const gp   = document.getElementById('gamePet');
-  if (!ball) return;
-  ballDragging = false;
-  ball.classList.remove('flying');
-  ball.style.transition = 'none';
-  ball.style.left   = '28px';
-  ball.style.bottom = '28px';
-  if (gp) { gp.style.left = '50%'; gp.classList.remove('catch'); }
-}
-
-function ballPointerDown(e) {
-  if (playMode !== 'ball') return;
-  e.preventDefault();
-  ballDragging = true;
-  const area = document.getElementById('playArea');
-  const r    = area.getBoundingClientRect();
-  const ball = document.getElementById('gameBall');
-  const br   = ball.getBoundingClientRect();
-  ballDragOffX = e.clientX - br.left;
-  ballDragOffY = e.clientY - br.top;
-  ball.style.transition = 'none';
-  // Capture pointer for reliable move/up events on all devices
-  try { ball.setPointerCapture(e.pointerId); } catch(err){}
-}
-
-function ballPointerMove(e) {
-  if (!ballDragging || playMode !== 'ball') return;
-  e.preventDefault();
-  const area = document.getElementById('playArea');
-  const r    = area.getBoundingClientRect();
-  const ball = document.getElementById('gameBall');
-  const newL = Math.max(0, Math.min(r.width  - 56, e.clientX - r.left - ballDragOffX));
-  const newB = Math.max(0, Math.min(r.height - 56, r.bottom - e.clientY - (56 - ballDragOffY)));
-  ball.style.left   = newL + 'px';
-  ball.style.bottom = newB + 'px';
-}
-
-function ballPointerUp(e) {
-  if (!ballDragging) return;
-  ballDragging = false;
-  throwBall();
-}
-
-function throwBall() {
-  ballThrows++;
-  const area = document.getElementById('playArea');
-  const ball = document.getElementById('gameBall');
-  const gp   = document.getElementById('gamePet');
-  if (!area || !ball || !gp) return;
-
-  const w = area.clientWidth;
-  const h = area.clientHeight;
-
-  // Target position (top-right area)
-  const targetL = Math.max(20, w - 100);
-  const targetB = Math.max(80, h - 100);
-
-  ball.classList.add('flying');
-  ball.style.transition = `left .6s cubic-bezier(.2,.7,.2,1), bottom .6s cubic-bezier(.2,.7,.2,1)`;
-  ball.style.left   = targetL + 'px';
-  ball.style.bottom = targetB + 'px';
-
-  // Pet runs to catch
-  gp.style.transition = 'left .4s ease';
-  gp.style.left = '72%';
-  gp.classList.remove('catch');
-  void gp.offsetWidth;
-  gp.classList.add('catch');
-  playSound('tap');
-
-  setTimeout(() => {
-    // Ball lands near pet
-    ball.style.left   = (targetL - 10) + 'px';
-    ball.style.bottom = '55px';
-    joyPop('✨', targetL, h - targetB - 20);
-    const scoreEl = document.getElementById('playScore');
-    scoreEl.textContent = `Catches ${Math.min(ballThrows, 3)} / 3`;
-
-    if (ballThrows >= 3) {
-      completePlayReward('Amazing! Your pet caught the ball three times!');
-    } else {
-      setTimeout(() => {
-        gp.style.left = '50%';
-        gp.classList.remove('catch');
-        resetBall();
-      }, 600);
-    }
-  }, 640);
-}
-
-function completePlayReward(message) {
-  document.getElementById('playInstruction').textContent = message;
-  const p = activePet();
-  if (playRewardReady) {
-    playRewardReady  = false;
-    p.lastPlay       = Date.now();
-    p.lastCareAt     = Date.now();
-    p.lastDecayAt    = Date.now();
-    p.happiness      = clamp(p.happiness + 8);
-    p.friendXP      += 5;
-    levelPet(p);
-    saveState();
-    render();
-    playSound('coin');
-    setTimeout(() => toast('Happiness +8 • Friendship +5 🎉'), 300);
-  } else {
-    toast('Play reward is recharging (once per hour), but the game stays open for fun!');
-  }
-}
-
-function closePlay() {
-  closeModal('playModal');
-  resetBall();
-  patCount   = 0;
-  ballThrows = 0;
-}
-
-/* Attach play area pointer events once DOM is ready */
-function attachPlayEvents() {
-  const area = document.getElementById('playArea');
-  const ball = document.getElementById('gameBall');
-  if (!area || !ball) return;
-
-  // Pat events on the whole play area (not just the pet sprite)
-  area.addEventListener('pointerdown', e => {
-    if (e.target === ball) return; // handled by ball handler
-    handlePatPointerDown(e);
-  });
-  area.addEventListener('pointermove', e => {
-    if (e.target === ball || !ballDragging) handlePatPointerMove(e);
-  });
-
-  // Ball drag events
-  ball.addEventListener('pointerdown', ballPointerDown);
-  ball.addEventListener('pointermove', ballPointerMove);
-  ball.addEventListener('pointerup',   ballPointerUp);
-  ball.addEventListener('pointercancel', ballPointerUp);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PARENT LOG
-═══════════════════════════════════════════════════════════ */
-function renderParentLog() {
-  const el = document.getElementById('parentLog');
-  if (!el) return;
-  const rows = [...state.progress.checkIns].slice(-8).reverse();
-  el.innerHTML = rows.length
-    ? rows.map(r => {
-        const d   = new Date(r.at);
-        const min = Math.round(r.seconds / 60);
-        return `<div class="row">
-          <span>
-            <b>${r.type}</b><br>
-            ${min} min • ${d.toLocaleDateString()}
-          </span>
-          <span>
-            ${r.presenceScore ?? '—'}% presence<br>
-            ${r.attentionPassed || 0} checks • ${r.hiddenPauses || 0} exits
-          </span>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:13px">No completed practices yet.</p>';
-}
-
-/* ═══════════════════════════════════════════════════════════
-   SETTINGS
-═══════════════════════════════════════════════════════════ */
-function saveSettings() {
-  const name = document.getElementById('childName').value.trim();
-  state.player.name           = name || 'Explorer';
-  state.player.age            = document.getElementById('ageGroup').value;
-  state.settings.sound        = document.getElementById('soundToggle').checked;
-  state.settings.reducedMotion= document.getElementById('motionToggle').checked;
-  state.settings.buddy        = document.getElementById('buddyToggle').checked;
-  state.settings.petSignal    = document.getElementById('petSignalToggle').checked;
-  saveState();
-  render();
-  toast('Settings saved.');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   EXPORT / IMPORT / RESET
-═══════════════════════════════════════════════════════════ */
-function exportData() {
-  try {
-    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-    const a    = document.createElement('a');
-    a.href     = URL.createObjectURL(blob);
-    a.download = 'mindful-pets-backup.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  } catch (err) {
-    toast('Export failed. Try copying the page source to save your data.');
-  }
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed    = JSON.parse(reader.result);
-      const validated = validateImport(parsed);
-      if (!validated) {
-        toast('That backup is not valid or is from a different version. No changes made.');
-        return;
-      }
-      state = validated;
-      saveState();
-      render();
-      toast('Backup restored successfully!');
-    } catch {
-      toast('Could not read that file. Please choose a valid JSON backup.');
-    }
-    // Reset file input so the same file can be re-imported if needed
-    event.target.value = '';
-  };
-  reader.onerror = () => toast('File could not be read.');
-  reader.readAsText(file);
-}
-
-function parentReset() {
-  // Use a two-step confirmation to avoid accidental reset and to work on iOS WebView
-  const step1 = document.getElementById('resetStep1');
-  if (step1) {
-    // Custom modal already open — this path handled below
-    return;
-  }
-  // Show inline confirmation instead of prompt()
-  showResetConfirm();
-}
-
-let resetConfirmShown = false;
-function showResetConfirm() {
-  if (resetConfirmShown) return;
-  resetConfirmShown = true;
-  const container = document.querySelector('#settings .card .setup');
-  const div = document.createElement('div');
-  div.id = 'resetStep1';
-  div.style.cssText = 'background:#fff0f1;border-radius:13px;padding:13px;margin-top:6px';
-  div.innerHTML = `
-    <b style="color:#bc4250">⚠️ This will erase all pets, coins, and progress.</b>
-    <p style="font-size:13px;margin:6px 0">Are you sure? This cannot be undone.</p>
-    <div style="display:flex;gap:9px;margin-top:8px">
-      <button class="btn danger" id="confirmReset">Yes, reset everything</button>
-      <button class="btn soft"   id="cancelReset">Cancel</button>
-    </div>`;
-  container.appendChild(div);
-  document.getElementById('confirmReset').onclick = () => {
-    state = defaults();
-    saveState();
-    render();
-    showView('home');
-    toast('All progress has been reset.');
-    div.remove();
-    resetConfirmShown = false;
-  };
-  document.getElementById('cancelReset').onclick = () => {
-    div.remove();
-    resetConfirmShown = false;
-  };
-}
-
-/* ═══════════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  attachPlayEvents();
-  render();
-});
-
-// Fallback if DOMContentLoaded already fired (script is at end of body)
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  attachPlayEvents();
-  render();
-}
-</script>
-</body>
-</html>
+const KEY='mindfulPetsOneFileV3';
+const PETS=[{id:'cat',name:'Whiskers',icon:'🐱',cost:0},{id:'dog',name:'Buddy',icon:'🐶',cost:120},{id:'bunny',name:'Thumper',icon:'🐰',cost:180},{id:'panda',name:'Bao',icon:'🐼',cost:280},{id:'fox',name:'Ember',icon:'🦊',cost:360},{id:'dragon',name:'Sparky',icon:'🐲',cost:550},{id:'kingcharles',name:'Charlie the King Charles',icon:'🐕',cost:1200}];
+const ITEMS=[
+{id:'seeds',cat:'food',name:'Sunny Seeds',icon:'🌾',cost:8,energy:8,happy:1,rarity:'common'},
+{id:'strawberry',cat:'food',name:'Sweet Strawberry',icon:'🍓',cost:12,energy:12,happy:2,rarity:'common'},
+{id:'carrot',cat:'food',name:'Crunchy Carrot',icon:'🥕',cost:16,energy:16,happy:2,rarity:'common'},
+{id:'banana',cat:'food',name:'Happy Banana',icon:'🍌',cost:20,energy:20,happy:3,rarity:'common'},
+{id:'apple',cat:'food',name:'Shiny Apple',icon:'🍎',cost:26,energy:26,happy:4,rarity:'common'},
+{id:'fish',cat:'food',name:'Ocean Fish',icon:'🐟',cost:32,energy:30,happy:7,rarity:'special'},
+{id:'bone',cat:'food',name:'Hero Bone',icon:'🦴',cost:36,energy:32,happy:8,rarity:'special'},
+{id:'watermelon',cat:'food',name:'Watermelon Picnic',icon:'🍉',cost:40,energy:36,happy:6,rarity:'special'},
+{id:'berryBowl',cat:'food',name:'Magic Berry Bowl',icon:'🫐',cost:48,energy:40,happy:9,rarity:'special'},
+{id:'smoothie',cat:'food',name:'Rainbow Smoothie',icon:'🥤',cost:58,energy:46,happy:12,rarity:'premium'},
+{id:'cupcake',cat:'food',name:'Celebration Cupcake',icon:'🧁',cost:72,energy:48,happy:18,rarity:'premium'},
+{id:'moonCake',cat:'food',name:'Moon Cake',icon:'🥮',cost:86,energy:58,happy:20,rarity:'premium'},
+{id:'royalFeast',cat:'food',name:'Royal Friendship Feast',icon:'🍱',cost:125,energy:75,happy:25,friend:8,rarity:'royal'},
+{id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',icon:'🐉',cost:145,energy:82,happy:28,friend:10,rarity:'royal'},
+
+{id:'flower',cat:'accessory',name:'Flower Crown',icon:'🌸',cost:90,rarity:'common'},
+{id:'scarf',cat:'accessory',name:'Cozy Scarf',icon:'🧣',cost:110,rarity:'common'},
+{id:'glasses',cat:'accessory',name:'Star Glasses',icon:'🤩',cost:135,rarity:'special'},
+{id:'backpack',cat:'accessory',name:'Explorer Backpack',icon:'🎒',cost:155,rarity:'special'},
+{id:'raincoat',cat:'accessory',name:'Sunny Raincoat',icon:'🧥',cost:175,rarity:'special'},
+{id:'cape',cat:'accessory',name:'Calm Hero Cape',icon:'🦸',cost:210,rarity:'premium'},
+{id:'wizard',cat:'accessory',name:'Dream Wizard Hat',icon:'🧙',cost:235,rarity:'premium'},
+{id:'headphones',cat:'accessory',name:'Cloud Headphones',icon:'🎧',cost:260,rarity:'premium'},
+{id:'crown',cat:'accessory',name:'Royal Pet Crown',icon:'👑',cost:390,rarity:'royal'},
+{id:'wings',cat:'accessory',name:'Rainbow Wings',icon:'🪽',cost:450,rarity:'royal'},
+
+{id:'forest',cat:'room',name:'Enchanted Forest',icon:'🌲',cost:150,theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',rarity:'common'},
+{id:'cloud',cat:'room',name:'Cloud Castle',icon:'☁️',cost:195,theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',rarity:'special'},
+{id:'ocean',cat:'room',name:'Ocean Sanctuary',icon:'🌊',cost:240,theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',rarity:'special'},
+{id:'garden',cat:'room',name:'Kindness Garden',icon:'🌷',cost:275,theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',rarity:'special'},
+{id:'candy',cat:'room',name:'Candy Dream Room',icon:'🍭',cost:310,theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',rarity:'premium'},
+{id:'space',cat:'room',name:'Galaxy Bedroom',icon:'🌌',cost:360,theme:'linear-gradient(145deg,#20204a,#553b83)',rarity:'premium'},
+{id:'castle',cat:'room',name:'Royal Castle Suite',icon:'🏰',cost:525,theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',rarity:'royal'},
+{id:'dragonCave',cat:'room',name:'Crystal Dragon Cave',icon:'💎',cost:650,theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',rarity:'royal'},
+
+{id:'goldenCrown',cat:'special',name:'Golden Calm Crown',icon:'👑',cost:0,rarity:'royal'},
+{id:'starCape',cat:'special',name:'Starlight Cape',icon:'🌟',cost:0,rarity:'royal'},
+{id:'moonRoom',cat:'special',name:'Moon Sanctuary',icon:'🌙',cost:0,rarity:'royal'},
+{id:'rainbowAura',cat:'special',name:'Rainbow Aura',icon:'🌈',cost:0,rarity:'royal'}];
+const PET_FAVORITES={cat:['fish','moonCake'],dog:['bone','royalFeast'],kingcharles:['royalFeast','cupcake'],bunny:['carrot','berryBowl'],bird:['seeds','strawberry'],frog:['berryBowl','watermelon'],fox:['fish','apple'],panda:['apple','berryBowl'],dragon:['dragonFruit','moonCake']};
+function isFavoriteFood(foodId){return (PET_FAVORITES[state.activePetId]||[]).includes(foodId)}
+const BADGES=[{id:'first',icon:'🌱',name:'First Calm Minute',test:s=>s.progress.sessions>=1},{id:'five',icon:'⭐',name:'Five Practices',test:s=>s.progress.sessions>=5},{id:'variety',icon:'🌈',name:'Calm Explorer',test:s=>s.progress.breathing>=1&&s.progress.meditation>=1},{id:'tenmin',icon:'🧘',name:'Ten Mindful Minutes',test:s=>s.progress.totalSeconds>=600},{id:'streak3',icon:'🔥',name:'Three Gentle Days',test:s=>s.player.bestStreak>=3}];
+function petProfile(){return{health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now()}}
+function defaults(){return{version:3,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null},daily:{date:'',earned:0,missionCount:0}}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.version===3){x.settings=x.settings||{};if(x.settings.buddy===undefined)x.settings.buddy=true;if(x.settings.petSignal===undefined)x.settings.petSignal=true;if(x.settings.haptic===undefined)x.settings.haptic=true;if(x.settings.pinHash===undefined)x.settings.pinHash=null;return x}return defaults()}catch{return defaults()}}
+let state=load(),marketCat='food',session=null,tick=null,breathTick=null,attentionTick=null,feedLocked=false,completionLocked=false,breathPhaseTimer=null,breathRAF=null,pendingProtectedAction=null,lastPatAt=0;
+let audioCtx=null;
+function tone(freq,duration=.13,type='sine',volume=.12,delay=0){
+ if(!state.settings.sound)return;
+ try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(volume,t+.015);g.gain.exponentialRampToValueAtTime(0.001,t+duration);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+duration+.03)}catch(e){}
+}
+function playSound(kind){
+ if(kind==='coin'){tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)}
+ else if(kind==='complete'){tone(523,.2,'sine',.12);tone(659,.22,'sine',.12,.18);tone(784,.35,'sine',.13,.38)}
+ else if(kind==='treasure'){tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)}
+ else if(kind==='attention'){tone(740,.16,'sine',.08);tone(740,.16,'sine',.08,.22)}
+ else if(kind==='buy'){tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)}
+ else if(kind==='tap'){tone(520,.08,'sine',.05)}
+}
+function haptic(pattern){if(state.settings.haptic&&navigator.vibrate)try{navigator.vibrate(pattern)}catch(e){}}
+function petCompletionSignal(){
+ if(!state.settings.sound||!state.settings.petSignal)return;
+ const id=state.activePetId;
+ // Short, synthesized, child-friendly animal-like cues. No external audio files are needed.
+ if(['dog','kingcharles'].includes(id)){tone(185,.13,'sawtooth',.09);tone(125,.19,'sawtooth',.08,.12)}
+ else if(id==='cat'){tone(520,.16,'sine',.08);tone(680,.23,'sine',.07,.13)}
+ else if(id==='bird'){tone(1100,.09,'sine',.07);tone(1450,.1,'sine',.06,.12);tone(1250,.1,'sine',.06,.24)}
+ else if(id==='frog'){tone(150,.18,'square',.05);tone(115,.2,'square',.05,.2)}
+ else if(id==='dragon'){tone(95,.28,'sawtooth',.07);tone(190,.18,'triangle',.06,.24)}
+ else{tone(460,.12,'triangle',.07);tone(620,.16,'triangle',.07,.13)}
+}
+function buddyMessage(text){buddyBubble.textContent=text}
+function prepareBuddy(type){
+ const pet=PETS.find(x=>x.id===state.activePetId);buddyPet.textContent=pet.icon;buddyPet.style.display=state.settings.buddy?'block':'none';buddyBubble.style.display=state.settings.buddy?'block':'none';
+ buddyPet.className='buddy-pet '+(type==='meditation'?'resting':'');buddyMessage(type==='meditation'?`I will sit quietly with you. We can notice the calm together.`:`I will follow the gentle breathing circle with you.`)
+}
+function celebrateBuddy(){if(!state.settings.buddy)return;buddyPet.className='buddy-pet celebrate';const pet=PETS.find(x=>x.id===state.activePetId);buddyMessage(`${pet.name}: We finished together! Great calm practice!`)}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function clamp(n){return Math.max(0,Math.min(100,n))}
+function activePet(){return state.pets[state.activePetId]}
+function localDate(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)}
+function checkDaily(){const d=localDate();if(state.daily.date!==d)state.daily={date:d,earned:0,missionCount:0}}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;toastbox.append(e);setTimeout(()=>e.remove(),3500)}
+function ensurePetCareData(p){const now=Date.now();if(!p.lastCareAt)p.lastCareAt=now;if(!p.lastDecayAt)p.lastDecayAt=now}
+function applyGentleCareDecay(){
+ const now=Date.now(),day=86400000;
+ Object.values(state.pets).forEach(p=>{ensurePetCareData(p);const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;
+  // Gentle, capped change. The pet never becomes critically ill and missed days do not create a large debt.
+  const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day;
+ });
+}
+function updatePetMessage(){
+ const p=activePet(),name=PETS.find(x=>x.id===state.activePetId).name;let msg='I’m happy you’re here! Shall we practice or play?',care=false;
+ if(p.health<50){msg=`${name} is exhausted and resting. Let’s practice together, earn some coins, and choose a healthy snack. 🍎`;care=true}
+ else if(p.happiness<50){msg=`${name} missed spending time together. Gentle pats or a game would feel lovely. 💛`;care=true}
+ else if(p.health<=65){msg='I used some energy today. Shall we earn and choose a healthy snack? 🥕';care=true}
+ else if(p.happiness<=60){msg='Can we play together after today’s calm practice? 🌿';care=true}
+ petMessage.textContent=msg;petMessage.classList.toggle('needs-care',care);
+}
+function render(){checkDaily();applyGentleCareDecay();const p=PETS.find(x=>x.id===state.activePetId),ps=activePet();petAvatar.textContent=p.icon+(ps.accessory?' '+ITEMS.find(x=>x.id===ps.accessory)?.icon:'');const roomItem=ITEMS.find(x=>x.id===ps.room&&x.cat==='room');document.querySelector('.hero').style.background=roomItem?.theme||'linear-gradient(145deg,#fff9,#ffffffd9)';petAvatar.classList.toggle('exhausted',ps.health<50);petName.textContent=p.name;petLevel.textContent=`Friendship level ${ps.level} • ${ps.room} room`;updatePetMessage();for(const [id,n] of [['health',ps.health],['happy',ps.happiness],['friend',ps.friendXP%100]]){document.getElementById(id+'Fill').style.width=n+'%';document.getElementById(id+'N').textContent=Math.round(n)}streak.textContent=state.player.streak;stars.textContent=state.player.stars;coins.textContent=state.player.coins;mission.innerHTML=`<b>Complete ${Math.min(3,state.daily.missionCount+1)} of 3 calm activities</b><p class="small">${state.daily.missionCount}/3 today • Bonus 30 coins at 3</p>`;renderCharlieGoal();renderMarket();renderCollection();childName.value=state.player.name;ageGroup.value=state.player.age;soundToggle.checked=state.settings.sound;motionToggle.checked=state.settings.reducedMotion;buddyToggle.checked=state.settings.buddy;petSignalToggle.checked=state.settings.petSignal;hapticToggle.checked=state.settings.haptic;document.body.classList.toggle('reduce',state.settings.reducedMotion);renderParentLog();renderWeeklySummary();save()}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===id));document.querySelector('.bottom').style.display=id==='practice'?'none':'grid'}
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>showView(n.dataset.view));
+function renderCharlieGoal(){
+ const charlie=PETS.find(p=>p.id==='kingcharles'),owned=!!state.pets.kingcharles;
+ if(owned){charlieGoal.innerHTML='<div class="goal-row"><div class="goal-icon">🐕</div><div><b>Charlie joined the family!</b><div class="small">You reached the royal dream-pet goal through patient saving.</div></div></div>';return}
+ const pct=Math.min(100,Math.round(state.player.coins/charlie.cost*100));
+ charlieGoal.innerHTML=`<div class="goal-row"><div class="goal-icon">🐕</div><div style="flex:1"><b>Saving for Charlie</b><div class="small">${state.player.coins} / ${charlie.cost} coins • ${charlie.cost-state.player.coins} to go</div><div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div></div></div>`
+}
+function renderMarket(){
+ marketTabs.innerHTML=['food','pet','accessory','room'].map(c=>`<button class="chip ${marketCat===c?'active':''}" onclick="setMarket('${c}')">${{food:'Food',pet:'Pets',accessory:'Accessories',room:'Rooms'}[c]}</button>`).join('');
+ let data=marketCat==='pet'?PETS:ITEMS.filter(x=>x.cat===marketCat),ps=activePet();
+ const note=marketCat==='food'?`💖 ${PETS.find(p=>p.id===state.activePetId).name}'s favorite foods give 50% more energy and happiness.`:marketCat==='accessory'?'🎀 Accessories are owned by the family but equipped separately for each pet.':marketCat==='room'?'🏡 Every pet can use a different room. Purchased rooms can be reused by all pets.':'🐾 Every adopted pet keeps separate energy, happiness, friendship, room, and accessory data.';
+ marketGrid.innerHTML=`<div class="market-note" style="grid-column:1/-1">${note}</div>`+data.map(i=>{
+  const owned=marketCat==='pet'?!!state.pets[i.id]:(i.cat!=='food'&&state.ownedItems.includes(i.id));
+  const qty=i.cat==='food'?(state.inventory[i.id]||0):'';
+  const equipped=i.cat==='accessory'&&ps.accessory===i.id || i.cat==='room'&&ps.room===i.id;
+  const fav=i.cat==='food'&&isFavoriteFood(i.id);
+  const desc=i.id==='kingcharles'?'Royal dream pet • Special goal':i.cat==='food'?`+${i.energy} energy • +${i.happy} joy • ${qty} owned`:i.cat==='accessory'?'Dress your active pet':i.cat==='room'?'Reusable pet room':owned?'Owned':'Collectible';
+  let action='';
+  if(marketCat==='pet')action=owned?`<button class="btn ${state.activePetId===i.id?'soft':'purple'}" onclick="selectPet('${i.id}')">${state.activePetId===i.id?'Selected':'Select'}</button>`:`<button class="btn purple" onclick="buy('pet','${i.id}')">Buy</button>`;
+  else if(i.cat==='food')action=`<button class="btn purple" onclick="buy('food','${i.id}')">Buy</button>`;
+  else if(!owned)action=`<button class="btn purple" onclick="buy('${i.cat}','${i.id}')">Buy</button>`;
+  else action=`<button class="btn ${equipped?'soft':'green'}" onclick="equipItem('${i.cat}','${i.id}')">${equipped?'Equipped':i.cat==='room'?'Use Room':'Equip'}</button>`;
+  const preview=i.cat==='room'?`<div class="room-preview" style="background:${i.theme}">${i.icon}</div>`:`<div class="icon">${i.icon}</div>`;
+  return `<div class="card ${equipped?'equipped':''}">${preview}<b>${i.name}</b><div><span class="rarity ${i.rarity||'common'}">${(i.rarity||'common').toUpperCase()}</span>${fav?'<span class="rarity favorite">PET FAVORITE</span>':''}</div><div class="small">${desc}</div><div class="price">🪙 ${i.cost}</div>${action}</div>`
+ }).join('')
+}
+function setMarket(c){marketCat=c;renderMarket()}
+function buy(cat,id){const obj=cat==='pet'?PETS.find(x=>x.id===id):ITEMS.find(x=>x.id===id);if(cat!=='food'&&((cat==='pet'&&state.pets[id])||state.ownedItems.includes(id)))return;if(state.player.coins<obj.cost)return toast('Complete practices to earn more coins.');state.player.coins-=obj.cost;if(cat==='pet')state.pets[id]=petProfile();else if(cat==='food')state.inventory[id]=(state.inventory[id]||0)+1;else{state.ownedItems.push(id);if(cat==='accessory')activePet().accessory=id;if(cat==='room')activePet().room=id}save();render();playSound('buy');toast(`${obj.name} ${cat==='accessory'?'equipped!':cat==='room'?'is now your pet room!':'added!'}`) }
+function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();renderMarket();playSound('tap');toast(cat==='room'?'Room changed for this pet.':p.accessory?'Accessory equipped for this pet.':'Accessory removed.')}
+function renderCollection(){petCollection.innerHTML=PETS.filter(p=>state.pets[p.id]).map(p=>`<div class="card"><div class="icon">${p.icon}</div><b>${p.name}</b><button class="btn ${state.activePetId===p.id?'soft':'purple'}" onclick="selectPet('${p.id}')">${state.activePetId===p.id?'Selected':'Select'}</button></div>`).join('');state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);badgeGrid.innerHTML=BADGES.map(b=>`<div class="card ${state.progress.badges.includes(b.id)?'':'locked'}"><div class="icon">${b.icon}</div><b>${b.name}</b></div>`).join('')+ITEMS.filter(i=>i.cat==='special').map(i=>`<div class="card ${state.ownedItems.includes(i.id)?'':'locked'}"><div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${state.ownedItems.includes(i.id)?'Long-practice treasure':'Complete 10+ minutes'}</div></div>`).join('')}
+function selectPet(id){state.activePetId=id;save();render();showView('home');toast('Pet selected. Its progress is separate.')}
+function openFeed(){pantry.innerHTML=ITEMS.filter(i=>i.cat==='food'&&(state.inventory[i.id]||0)>0).map(i=>`<div class="row"><span><b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br><span class="small">+${i.energy} energy • +${i.happy} joy ${isFavoriteFood(i.id)?'• 💖 Favorite bonus':''}</span></span><button class="btn green" onclick="feed('${i.id}')">Feed</button></div>`).join('')||'<p>Your pantry is empty. Visit the market.</p>';feedModal.classList.add('show')}
+function feed(id){if(feedLocked)return;feedLocked=true;setTimeout(()=>feedLocked=false,600);const i=ITEMS.find(x=>x.id===id),p=activePet();if(!i||(state.inventory[id]||0)<=0){feedLocked=false;return toast('That food is no longer available.');}if(p.health>=100&&p.happiness>=100)return toast('Your pet is full and happy. Save this food for later.');state.inventory[id]=Math.max(0,(state.inventory[id]||0)-1);const favorite=isFavoriteFood(id),mult=favorite?1.5:1;p.health=clamp(p.health+Math.round(i.energy*mult));p.happiness=clamp(p.happiness+Math.round(i.happy*mult));if(i.friend)p.friendXP+=Math.round(i.friend*mult);p.lastCareAt=Date.now();p.lastDecayAt=Date.now();levelPet(p);save();closeModal('feedModal');render();playSound(favorite?'treasure':'tap');toast(favorite?`${i.icon} Favorite food! Extra energy and joy!`:`${i.icon} Energy restored! Thank you for caring for me.`) }
+let playHits=0,playRewardReady=false,playMode='pat',patCount=0,ballThrows=0,dragging=false;
+function playPet(){const p=activePet(),now=Date.now();playHits=0;patCount=0;ballThrows=0;playRewardReady=now-p.lastPlay>=3600000;const pet=PETS.find(x=>x.id===state.activePetId);gamePet.textContent=pet.icon;playScore.textContent='Joy 0 / 6';gamePet.classList.toggle('exhausted',p.health<50);playModal.classList.add('show');requestAnimationFrame(()=>requestAnimationFrame(()=>setPlayMode('pat')));playSound('tap')}
+function setPlayMode(mode){if(mode==='ball'&&activePet().health<50){playMode='pat';patTab.classList.add('active');ballTab.classList.remove('active');gameBall.hidden=true;handHint.hidden=false;playInstruction.textContent='Your pet is exhausted, so the ball game can wait. Gentle pats are welcome. Feed your pet to restore energy.';placeHandHint();return}playMode=mode;patTab.classList.toggle('active',mode==='pat');ballTab.classList.toggle('active',mode==='ball');gameBall.hidden=mode!=='ball';handHint.hidden=mode!=='pat';playInstruction.textContent=mode==='pat'?'Gently tap or rub your pet. Find the spots that make it giggle!':'Drag the ball upward and release. Your pet will run and catch it!';if(mode==='pat')placeHandHint();else resetBall()}
+function placeHandHint(){requestAnimationFrame(()=>{const a=playArea;handHint.style.left=(a.clientWidth*.48)+'px';handHint.style.top='115px'});}
+function joyPop(icon,x,y){const e=document.createElement('div');e.className='joy-pop';e.textContent=icon;e.style.left=x+'px';e.style.top=y+'px';playArea.appendChild(e);setTimeout(()=>e.remove(),900)}
+function patPet(e){if(playMode!=='pat')return;const now=performance.now();if(now-lastPatAt<280)return;lastPatAt=now;patCount=Math.min(6,patCount+1);const r=playArea.getBoundingClientRect();joyPop(patCount%3===0?'😂':'💖',e.clientX-r.left,e.clientY-r.top);gamePet.classList.remove('giggle');void gamePet.offsetWidth;gamePet.classList.add('giggle');playScore.textContent=`Joy ${patCount} / 6`;playSound('tap');if(patCount===6)completePlayReward('Your pet giggled and loved the gentle pats!')}
+function resetBall(){gameBall.style.transition='none';gameBall.style.left='25px';gameBall.style.bottom='25px';gameBall.style.transform='rotate(0deg)';gameBall.classList.remove('flying')}
+function ballDown(e){if(playMode!=='ball')return;dragging=true;gameBall.setPointerCapture?.(e.pointerId);e.preventDefault()}
+function ballMove(e){if(!dragging)return;e.preventDefault();const r=playArea.getBoundingClientRect();gameBall.style.left=Math.max(5,Math.min(r.width-55,e.clientX-r.left-25))+'px';gameBall.style.bottom=Math.max(10,Math.min(r.height-60,r.bottom-e.clientY-25))+'px'}
+function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;throwBall()}
+function throwBall(){const rect=playArea.getBoundingClientRect();if(rect.width<100)return;const areaWidth=rect.width;ballThrows++;gameBall.classList.add('flying');gameBall.style.left=(areaWidth-105)+'px';gameBall.style.bottom='140px';gameBall.style.transform=`rotate(${ballThrows*420}deg)`;gamePet.style.left='78%';gamePet.classList.add('catch');playSound('tap');haptic(25);setTimeout(()=>{gameBall.style.left=(areaWidth-88)+'px';gameBall.style.bottom='86px';joyPop('✨',areaWidth-90,150);playScore.textContent=`Catches ${Math.min(ballThrows,3)} / 3`;if(ballThrows>=3)completePlayReward('Amazing! Your pet caught the ball three times!');else setTimeout(()=>{gamePet.style.left='50%';gamePet.classList.remove('catch');resetBall()},650)},650)}
+function completePlayReward(message){playInstruction.textContent=message;const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.happiness=clamp(p.happiness+8);p.friendXP+=5;levelPet(p);save();render();playSound('coin');setTimeout(()=>toast('Happiness +8 • Friendship +5'),300)}else toast('Play reward is recharging, but the game remains open for fun.')}
+function closePlay(){playModal.classList.remove('show');gamePet.style.left='50%';resetBall()}
+gamePet.addEventListener('pointerdown',patPet);gameBall.addEventListener('pointerdown',ballDown);gameBall.addEventListener('pointermove',ballMove);gameBall.addEventListener('pointerup',ballUp);gameBall.addEventListener('pointercancel',ballUp);
+function levelPet(p){while(p.friendXP>=p.level*100){p.friendXP-=p.level*100;p.level++;state.player.stars+=1}}
+const EX={breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],meditation:[['Kindness Garden',300],['Moonlight Calm',600],['Peaceful Explorer',900]]};
+function openPractice(type){chooseTitle.textContent=type==='breathing'?'Choose a breathing adventure':'Choose a meditation adventure';chooseIntro.textContent=type==='breathing'?'Your pet will follow the calm circle with you. Breathe comfortably, never force the breath.':'Your pet will sit quietly beside you. No special breathing pattern is needed.';practiceOptions.innerHTML=EX[type].map(([name,sec])=>{const reward=sec>=900?'✨ Super Calm Treasure':sec>=600?'🎁 Calm Treasure':'🌱 Habit Builder';return `<button class="btn ${type==='breathing'?'blue':'green'}" onclick="startPractice('${type}','${name}',${sec})"><span>${name} • ${sec/60} min<br><small style="opacity:.9">${reward}</small></span></button>`}).join('');chooseModal.classList.add('show')}
+function startPractice(type,name,seconds){playSound('tap');closeModal('chooseModal');completionLocked=false;session={id:crypto.randomUUID?.()||String(Date.now()),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),hiddenPauses:0,attentionPassed:0,attentionMissed:0,attentionDue:false,visibleSeconds:0,pausedSeconds:0};practiceTitle.textContent=name;practiceGuide.textContent=type==='breathing'?'Follow the expanding circle gently. Return to normal breathing if uncomfortable.':'Sit or lie comfortably. Notice sounds, body sensations, or the quiet around you. No special breathing pattern is required.';orb.className=type==='meditation'?'orb meditation':'orb';orb.textContent=type==='meditation'?'Be still':'Get ready';prepareBuddy(type);pauseBtn.textContent='⏸ Pause';showView('practice');timerLoop();if(type==='breathing')breathLoop();scheduleAttention()}
+function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!session)return;const now=Date.now(),elapsed=Math.floor((now-session.last)/1000);if(elapsed>0){session.last=now;if(session.running&&!document.hidden){session.visibleSeconds+=elapsed;session.remaining=Math.max(0,session.remaining-elapsed)}else session.pausedSeconds+=elapsed;timer.textContent=format(session.remaining);if(session.remaining%60===0&&session.remaining>0)a11yAnnounce.textContent=`${session.remaining/60} minutes remaining`;if(session.remaining===Math.floor(session.planned/2))a11yAnnounce.textContent='Halfway complete';updateParticipation();if(session.remaining<=0)completePractice()}},250)}
+function stopBreathLoop(){clearTimeout(breathPhaseTimer);cancelAnimationFrame(breathRAF);breathPhaseTimer=null;breathRAF=null}
+function breathLoop(phase='inhale'){
+ stopBreathLoop();if(!session||session.type!=='breathing'||!session.running)return;
+ const duration=phase==='inhale'?4000:5000;orb.className='orb '+phase;orb.textContent=phase==='inhale'?'Breathe in':'Breathe out';
+ if(state.settings.reducedMotion){orb.className='orb';const start=performance.now();const step=now=>{if(!session||!session.running)return;const pct=Math.min(1,(now-start)/duration);orb.style.background=`conic-gradient(${phase==='inhale'?'#2f9cf4':'#22b884'} ${pct*360}deg,#ddebfa 0)`;if(pct<1)breathRAF=requestAnimationFrame(step)};breathRAF=requestAnimationFrame(step)}
+ breathPhaseTimer=setTimeout(()=>breathLoop(phase==='inhale'?'exhale':'inhale'),duration)
+}
+function scheduleAttention(){
+ clearTimeout(attentionTick);if(!session||session.remaining<75||session.attentionDue)return;const token=session.id;
+ const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));
+ attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue)showPresenceCheck()},wait+Math.random()*30000)
+}
+function showPresenceCheck(){
+ if(!session||!session.running||session.attentionDue)return;clearTimeout(attentionTick);session.running=false;session.attentionDue=true;playSound('attention');
+ const symbols=['⭐','🌿','☁️','🌙'],answer=symbols[Math.floor(Math.random()*symbols.length)];session.presenceAnswer=answer;
+ buddyMessage('A tiny check, then we will continue together.');presencePrompt.textContent=session.type==='breathing'?'Breathing buddy check':'Mindful listening check';
+ presenceInstruction.textContent=session.type==='breathing'?`Tap ${answer} and take one comfortable breath.`:`Tap ${answer} after noticing one sound around you.`;
+ presenceChoices.innerHTML=shuffle([...symbols]).map(x=>`<button class="btn soft" onclick="answerPresence('${x}')">${x}</button>`).join('');presenceCard.classList.add('show');pauseBtn.textContent='▶ Resume after check';
+ session.checkDeadline=setTimeout(()=>{if(session&&session.attentionDue){session.attentionMissed++;presenceInstruction.textContent='The check was missed. Choose the correct symbol when ready.';updateParticipation()}},20000)
+}
+function answerPresence(x){if(!session||!session.attentionDue||!session.presenceAnswer)return;if(x!==session.presenceAnswer){playSound('attention');toast('Look again for the matching symbol.');return}clearTimeout(session.checkDeadline);session.attentionPassed++;session.attentionDue=false;session.presenceAnswer=null;presenceCard.classList.remove('show');setSessionRunning(true,'Check complete. Practice resumed.');buddyMessage(session.type==='meditation'?'Back to quiet time together.':'Let us follow the circle again.');scheduleAttention();updateParticipation()}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function updateParticipation(){if(!session)return;const expected=Math.max(1,session.planned-session.remaining),visible=Math.min(100,Math.round(session.visibleSeconds/expected*100)),penalty=session.hiddenPauses*12+session.attentionMissed*18,score=Math.max(0,Math.min(100,visible-penalty));participationFill.style.width=score+'%';participationFill.parentElement.setAttribute('aria-valuenow',score);participationText.textContent=`${score}% presence • ${session.attentionPassed} checks completed • ${session.hiddenPauses} app exits`;session.presenceScore=score}
+function setSessionRunning(shouldRun,message=''){
+ if(!session||session.running===shouldRun)return;const now=Date.now(),elapsed=Math.max(0,Math.floor((now-session.last)/1000));
+ if(session.running&&!document.hidden)session.visibleSeconds+=elapsed;else session.pausedSeconds+=elapsed;
+ session.running=shouldRun;session.last=now;pauseBtn.textContent=shouldRun?'⏸ Pause':'▶ Resume';
+ if(!shouldRun){stopBreathLoop();orb.textContent='Paused'}else if(session.type==='meditation'){orb.className='orb meditation';orb.textContent='Be still'}else breathLoop('inhale');
+ a11yAnnounce.textContent=shouldRun?'Practice resumed':'Practice paused';if(message)toast(message)
+}
+function pauseResume(){if(!session)return;if(session.attentionDue)return toast('Complete the mindful check first.');setSessionRunning(!session.running,session.running?'Practice paused. Tap Resume when ready.':'Practice resumed.');}
+
+function quitPractice(){cleanup();showView('home');toast('Practice ended. No penalty.')}
+function cleanup(){clearInterval(tick);stopBreathLoop();clearTimeout(attentionTick);if(session)clearTimeout(session.checkDeadline);presenceCard.classList.remove('show');session=null;orb.className='orb';pauseBtn.textContent='Pause'}
+function completePractice(){if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);a11yAnnounce.textContent='Practice complete';celebrateBuddy();setTimeout(petCompletionSignal,850);const done={...session};clearInterval(tick);stopBreathLoop();clearTimeout(attentionTick);session=null;setTimeout(()=>{checkModal.classList.add('show');checkModal.dataset.claimed='0';checkModal.dataset.done=JSON.stringify(done)},1250)}
+function finishCheck(feeling){
+ if(checkModal.dataset.claimed==='1')return;checkModal.dataset.claimed='1';const s=JSON.parse(checkModal.dataset.done);checkModal.classList.remove('show');checkDaily();
+ const actual=s.planned-s.remaining;const presence=s.presenceScore||100;let reward=Math.max(20,Math.round(actual/15));if(presence<60)reward=Math.max(20,Math.round(reward*.5));
+ let specialMessage='';
+ if(actual>=900){reward+=40;specialMessage=unlockSpecial(2,'Super Calm Treasure');}
+ else if(actual>=600){reward+=20;specialMessage=unlockSpecial(1,'Calm Treasure');}
+ const capLeft=Math.max(0,220-state.daily.earned);reward=Math.min(reward,capLeft);state.daily.earned+=reward;state.daily.missionCount++;
+ if(state.daily.missionCount===3){state.player.coins+=30;toast('Daily mission complete! Bonus 30 coins.');}
+ state.player.coins+=reward;state.player.stars+=actual>=600?3:1;state.progress.sessions++;state.progress[s.type]++;state.progress.totalSeconds+=actual;state.progress.checkIns.push({feeling,type:s.type,seconds:actual,at:new Date().toISOString(),hiddenPauses:s.hiddenPauses,attentionPassed:s.attentionPassed,attentionMissed:s.attentionMissed,presenceScore:s.presenceScore||100,visibleSeconds:s.visibleSeconds});updateStreak();
+ const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);save();render();showView('home');
+ playSound(specialMessage?'treasure':'coin');haptic(specialMessage?[40,50,40,50,100]:30);toast(`Earned ${reward} coins and ${actual>=600?3:1} star${actual>=600?'s':''}!`);if(specialMessage)setTimeout(()=>toast(specialMessage),500);rewardChoiceText.textContent=`You earned ${reward} coins. Save toward Charlie, or use some coins to care for your pet?`;setTimeout(()=>rewardChoiceModal.classList.add('show'),900)
+}
+function unlockSpecial(count,label){
+ const pool=ITEMS.filter(i=>i.cat==='special'&&!state.ownedItems.includes(i.id));
+ const won=pool.slice(0,count);won.forEach(i=>state.ownedItems.push(i.id));
+ if(won.length)return `${label} unlocked: ${won.map(i=>i.icon+' '+i.name).join(' and ')}`;
+ state.player.coins+=count*50;return `${label}: collection complete, so you received ${count*50} bonus coins!`;
+}
+function chooseAfterReward(choice){rewardChoiceModal.classList.remove('show');if(choice==='food'){marketCat='food';showView('market');renderMarket();toast('Choose food thoughtfully. You can save the rest for Charlie.')}else{showView('home');if(choice==='save')toast('Great saving choice! Every practice brings Charlie closer.')}}
+function updateStreak(){const today=localDate(),last=state.player.lastPracticeDate;if(!last)state.player.streak=1;else{const d=dayDiff(last,today);if(d===1)state.player.streak++;else if(d>1)state.player.streak=1}state.player.lastPracticeDate=today;state.player.bestStreak=Math.max(state.player.bestStreak,state.player.streak)}
+document.addEventListener('visibilitychange',()=>{if(!session)return;if(document.hidden&&session.running){session.hiddenPauses++;focusBanner.classList.add('show');setSessionRunning(false)}else if(!document.hidden&&!session.running){session.last=Date.now();toast('Practice is paused. Tap the ▶ Resume button to continue.')}});
+function renderParentLog(){const rows=[...state.progress.checkIns].slice(-8).reverse();parentLog.innerHTML=rows.length?rows.map(r=>{const d=new Date(r.at);return `<div class="row"><span><b>${r.type}</b><br>${Math.round(r.seconds/60)} min • ${d.toLocaleDateString()}</span><span>${r.presenceScore??'—'}% presence<br>${r.attentionPassed||0} checks • ${r.hiddenPauses||0} exits</span></div>`}).join(''):'No completed practices yet.'}
+function saveSettings(){state.player.name=childName.value.trim()||'Explorer';state.player.age=ageGroup.value;state.settings.sound=soundToggle.checked;state.settings.reducedMotion=motionToggle.checked;state.settings.buddy=buddyToggle.checked;state.settings.petSignal=petSignalToggle.checked;state.settings.haptic=hapticToggle.checked;save();render();toast('Settings saved.')}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mindful-pets-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function validateBackup(x){
+ if(!x||typeof x!=='object'||x.version!==3)return false;if(!x.player||!Number.isFinite(x.player.coins)||x.player.coins<0||!Number.isFinite(x.player.stars)||x.player.stars<0)return false;
+ if(!PETS.some(p=>p.id===x.activePetId)||!x.pets||!x.pets[x.activePetId]||!x.inventory||!x.progress||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems)||!x.settings||!x.daily)return false;
+ for(const [id,n] of Object.entries(x.inventory)){if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false}
+ for(const [id,p] of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!p||![p.health,p.happiness,p.friendXP,p.level].every(Number.isFinite))return false;p.health=clamp(p.health);p.happiness=clamp(p.happiness)}
+ x.player.name=String(x.player.name||'Explorer').replace(/[<>]/g,'').slice(0,18);x.ownedItems=x.ownedItems.filter(id=>ITEMS.some(i=>i.id===id));x.progress.checkIns=x.progress.checkIns.slice(-500);return true
+}
+function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000)return toast('Backup is too large.');const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=x;save();render();toast('Backup restored.')}catch{toast('That backup is not valid.')}};r.readAsText(f);e.target.value=''}
+async function hashPin(pin){const data=new TextEncoder().encode('mindful-pets:'+pin);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function openPinSetup(){pendingProtectedAction='setup';pinTitle.textContent=state.settings.pinHash?'Change parent PIN':'Create parent PIN';pinText.textContent='Enter a new 4-digit PIN.';pinInput.value='';pinModal.classList.add('show');setTimeout(()=>pinInput.focus(),50)}
+function requestProtectedAction(action){if(!state.settings.pinHash)return openPinSetup();pendingProtectedAction=action;pinTitle.textContent='Parent PIN';pinText.textContent='Enter the 4-digit parent PIN.';pinInput.value='';pinModal.classList.add('show');setTimeout(()=>pinInput.focus(),50)}
+async function submitPin(){const pin=pinInput.value;if(!/^\d{4}$/.test(pin))return toast('Enter exactly four digits.');const h=await hashPin(pin);if(pendingProtectedAction==='setup'){state.settings.pinHash=h;save();closeModal('pinModal');toast('Parent PIN saved.');return}if(h!==state.settings.pinHash)return toast('Incorrect PIN.');const action=pendingProtectedAction;closeModal('pinModal');if(action==='reset')parentReset()}
+function parentReset(){state=defaults();save();render();showView('home');toast('Progress reset. Set a new parent PIN when ready.')}
+function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*86400000),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),avg=week.length?Math.round(week.reduce((a,r)=>a+(Number(r.presenceScore)||0),0)/week.length):0;weeklySummary.innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Mindful minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Average presence</span></div><div class="weekly-stat"><b>${week.filter(r=>r.type==='breathing').length}</b><br><span class="small">Breathing sessions</span></div>`}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+document.querySelectorAll('.modal').forEach(m=>{m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');new MutationObserver(()=>{if(m.classList.contains('show'))setTimeout(()=>m.querySelector('button,input,select,[tabindex]')?.focus(),30)}).observe(m,{attributes:true,attributeFilter:['class']});m.addEventListener('keydown',e=>{if(e.key==='Escape'){m.classList.remove('show');return}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]')];if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}})});document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label'))b.setAttribute('aria-label',b.textContent.trim().replace(/\s+/g,' '))});
+function format(s){return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+render();
+</script></body></html>
