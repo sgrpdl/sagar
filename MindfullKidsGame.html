@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#007AFF">
+<meta name="theme-color" content="#6d5dfc">
 <title>Mindful Pets Adventure</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
 :root{
 --ink:#1C1C1E;--muted:#6f7f96;--card:rgba(255,255,255,.9);
@@ -16,7 +18,6 @@
 html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif;color:var(--ink);background:#20243a;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit}
 button{cursor:pointer}
-.rounded{font-family:ui-rounded,-apple-system,"SF Pro Rounded",system-ui,sans-serif}
 .app{width:min(100%,520px);min-height:100dvh;margin:auto;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);position:relative;overflow:hidden}
 .top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.75);backdrop-filter:blur(15px);border-bottom:1px solid #fff}
 .brand{font-weight:800;letter-spacing:-.3px}
@@ -203,6 +204,9 @@ h2{font-weight:800;letter-spacing:-.3px}
 body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{animation:none!important;transform:none!important}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.garden{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:linear-gradient(#c8e6c9,#a5d6a7);border-radius:18px;padding:12px;min-height:100px;align-items:end;margin:12px 0}
+.garden-item{font-size:28px;text-align:center}
+.garden-empty{color:#bbb;font-size:20px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -243,6 +247,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div>
 </div>
 </div>
+<button class="btn purple" id="btnSleepStory" style="width:100%;margin-bottom:12px">🌙 Sleep Story</button>
 <div class="grid3">
 <button class="btn blue" id="btnBreathe">💨 Breathe</button>
 <button class="btn green" id="btnMeditate">🧘 Meditate</button>
@@ -252,9 +257,12 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn gold" id="btnFeed">🍎 Feed</button>
 <button class="btn purple" id="btnPlay">💖 Play</button>
 </div>
+<button class="btn soft" id="btnWorry" style="width:100%;margin-top:10px">💭 Worry Jar</button>
 <div id="wishlistBar" class="wishlist-bar"></div>
 <div id="nextBadgeCard" class="next-badge-card" style="display:none"></div>
 <div id="charlieGoal" class="goal-card"></div>
+<div class="section-title"><h2>My Mindful Garden 🌸</h2></div>
+<div id="mindfulGarden" class="garden"></div>
 <div class="section-title"><h2>Today's gentle mission</h2></div>
 <div class="card" id="mission"></div>
 <div class="special-reward">🎁 Practice 10 min for a Calm Treasure. 15 min for a Super Calm Treasure!</div>
@@ -313,7 +321,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div class="section-title"><h2>Recent record</h2></div>
 <div class="card parent-log" id="parentLog"></div>
 </div>
-<div class="notice">Privacy: all data stays in this browser, on this device. No camera, microphone, or network use, ever. Gentle check-ins simply confirm a glance at the screen — pets never blame the child.</div>
+<div class="notice">Privacy: all data stays in this browser, on this device. No camera, microphone, or network use. Gentle check-ins simply confirm a glance at the screen — pets never blame the child.</div>
 </section>
 
 <section id="practice" class="view">
@@ -328,7 +336,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="orb" class="orb">Ready</div>
 </div>
 <div id="bodyscanGuide" class="bodyscan-guide" style="display:none"></div>
-<div id="timer" class="timer rounded" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
+<div id="timer" class="timer" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
 <div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div id="continuityBanner" class="continuity-banner" style="display:none">
 <b id="continuityTitle">🧘 Practice continues safely</b>
@@ -365,6 +373,15 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="breathPatternArea" style="display:none">
 <p class="small" style="margin:8px 0 4px;font-weight:900">Breathing pattern</p>
 <div id="breathPatternTabs" class="tabs"></div>
+</div>
+<div id="ambientArea" style="display:none;margin:8px 0">
+<p class="small" style="font-weight:900">Calm sound</p>
+<select id="ambientSound" style="width:100%;padding:10px;border:1px solid #dce2ec;border-radius:13px">
+<option value="none">🔇 No sound</option>
+<option value="rain">🌧️ Rainfall</option>
+<option value="ocean">🌊 Ocean waves</option>
+<option value="forest">🌲 Forest birds</option>
+</select>
 </div>
 <div id="practiceOptions" class="list"></div>
 <div class="notice">🌱 5 min builds habit. 🎁 10 min = Calm Treasure. ✨ 15 min = Super Calm Treasure.</div>
@@ -456,6 +473,14 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" id="btnClosePlay">Finish playing</button>
 </div></div>
 
+<div id="worryModal" class="modal"><div class="sheet">
+<h2>Worry Jar 💭</h2>
+<p class="small">Type a worry, then pop it like a bubble.</p>
+<input id="worryInput" maxlength="80" placeholder="Write what's on your mind..." style="width:100%;padding:12px;border:1px solid #dce2ec;border-radius:13px;margin:10px 0">
+<button class="btn purple" id="btnReleaseWorry" style="width:100%">Release it 🎈</button>
+<button class="btn soft" data-close="worryModal" style="width:100%;margin-top:6px">Close</button>
+</div></div>
+
 <div id="milestoneModal" class="modal"><div class="sheet" id="milestoneContent"></div></div>
 <div id="storyModal" class="modal"><div class="sheet" id="storyContent"></div></div>
 </div>
@@ -465,10 +490,11 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="alertCheckSymbols" class="alert-check-symbols"></div>
 </div>
 <div id="toastbox" class="toastbox"></div>
-<script>
-'use strict';
 
-/* ═══ PERMANENT STORAGE KEY — never change this again ═══ */
+<script>
+  'use strict';
+
+/* ═══ PERMANENT STORAGE KEY ═══ */
 const KEY = 'mindfulPetsData';
 const LEGACY_KEYS = ['mindfulPetsOneFileV4','mindfulPetsOneFileV3'];
 
@@ -520,7 +546,6 @@ const ITEMS = [
 ];
 const PET_FAVORITES = {cat:['fish','moonCake'],dog:['bone','royalFeast'],kingcharles:['royalFeast','cupcake'],bunny:['carrot','berryBowl'],fox:['fish','apple'],panda:['apple','berryBowl'],dragon:['dragonFruit','moonCake']};
 
-/* 29 badges — designed for 1-day through 1-year continuity */
 const BADGES = [
   {id:'first',icon:'🌱',name:'First Calm Minute',cat:'sessions',target:1,test:s=>s.progress.sessions>=1},
   {id:'five',icon:'⭐',name:'Five Practices',cat:'sessions',target:5,test:s=>s.progress.sessions>=5},
@@ -564,7 +589,6 @@ const STREAK_MILESTONES = {
   365:{icon:'👑',title:'ONE FULL YEAR!',desc:'365 days of calm. You are officially a Mindfulness Legend!'}
 };
 
-/* Symmetric breathing patterns — equal inhale/exhale/hold durations */
 const BREATH_PATTERNS = [
   {id:'balloon',name:'Balloon Breath',ages:['5-7','8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in like a balloon'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
   {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:3000,t:'Sniff in like a bunny'},{p:'exhale',d:3000,t:'Breathe out slowly'}]},
@@ -576,6 +600,11 @@ const BODYSCAN_SCRIPTS = {
   '8-10':[{t:'Feel your feet touching the floor',d:10},{t:'Notice your legs',d:10},{t:'Pay attention to your tummy rising and falling',d:12},{t:'Feel your hands',d:10},{t:'Notice your shoulders. Let them drop.',d:10},{t:'Feel your face. Relax your jaw.',d:10},{t:'Listen to the quietest sound',d:12}],
   '11-12':[{t:'Bring attention to the soles of your feet',d:10},{t:'Notice sensations in ankles and calves',d:10},{t:'Feel the weight of your legs',d:10},{t:'Notice your abdomen expanding',d:12},{t:'Become aware of your hands and fingers',d:10},{t:'Notice the rise and fall of your chest',d:10},{t:'Relax muscles around your eyes',d:10},{t:'Let your jaw soften',d:10}]
 };
+const SLEEP_STORIES = {
+ '5-7':['Once upon a time, a little cloud named Puff wanted to find the softest place to sleep.','Puff floated over forests and rivers until it saw a cozy pond with lily pads.','It tucked itself between two lily pads and let the waves rock it gently.','The stars hummed a quiet lullaby, and Puff felt its eyes grow heavy.','Goodnight, Puff. Goodnight, little dreamer.'],
+ '8-10':['The moon was full and round over the quiet village.','A small lighthouse keeper named Luna climbed up to turn on the light.','The beam swept across the ocean, guiding sleepy ships home.','Luna sat beside the warm lamp and watched the stars.','She felt the whole world slow down, breath by breath.','And she knew it was time to rest.'],
+ '11-12':['In a quiet valley, there was an old bell that rang only at twilight.','Everyone in the valley would stop and listen to the deep, slow hum.','It reminded them that the day was done.','The bell said: you have done enough. You are safe.','The valley filled with soft darkness, and the stars dimmed their glow.','And the people rested, knowing the bell would ring again tomorrow.']
+};
 const EX = {
   breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],
   meditation:[['Kindness Garden',300],['Moonlight Calm',600],['Peaceful Explorer',900]],
@@ -585,9 +614,8 @@ const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
 function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
 function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
-function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,onboardingDone:false}; }
+function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,monthlyGift:null,onboardingDone:false}; }
 
-/* ═══ SAFE MIGRATION — never wipes existing progress ═══ */
 function migrate(x){
   const d = defaults();
   if(!x || typeof x!=='object') return d;
@@ -598,11 +626,11 @@ function migrate(x){
   merged.daily = {...d.daily, ...(x.daily||{})};
   merged.inventory = {...(x.inventory||{apple:1})};
   merged.ownedItems = Array.isArray(x.ownedItems)?x.ownedItems:[];
+  if(merged.monthlyGift===undefined) merged.monthlyGift=null;
   merged.pets = {};
-  const base = petProfile();
   const src = (x.pets && Object.keys(x.pets).length) ? x.pets : {cat:petProfile()};
   Object.keys(src).forEach(id=>{
-    merged.pets[id] = {...base, ...src[id]};
+    merged.pets[id] = {...petProfile(), ...src[id]};
     if(!Array.isArray(merged.pets[id].milestones)) merged.pets[id].milestones = [];
     merged.pets[id].health = Math.max(0,Math.min(100,merged.pets[id].health ?? 60));
     merged.pets[id].happiness = Math.max(0,Math.min(100,merged.pets[id].happiness ?? 60));
@@ -649,6 +677,7 @@ let parentUnlockedUntil = 0;
 let renamingPetId = null;
 let marketCat = 'food';
 let wakeLockSentinel = null;
+let ambientNodes=[];
 
 const $ = id => document.getElementById(id);
 const activePet = () => state.pets[state.activePetId];
@@ -676,12 +705,30 @@ function playSound(k){
 }
 function haptic(p){if(state.settings.haptic&&navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
 function petCompletionSignal(){
-  if(!state.settings.sound||!state.settings.petSignal)return;
+  if(!state.settings.sound) return;
   const id=state.activePetId;
-  if(['dog','kingcharles'].includes(id)){tone(185,.13,'sawtooth',.09);tone(125,.19,'sawtooth',.08,.12);}
-  else if(id==='cat'){tone(520,.16,'sine',.08);tone(680,.23,'sine',.07,.13);}
-  else if(id==='dragon'){tone(95,.28,'sawtooth',.07);tone(190,.18,'triangle',.06,.24);}
-  else{tone(460,.12,'triangle',.07);tone(620,.16,'triangle',.07,.13);}
+  const petSounds = {
+    dog:[185,125,0.09,0.13,0.08,0.19],
+    cat:[520,680,0.08,0.16,0.07,0.23],
+    dragon:[95,190,0.07,0.28,0.06,0.24],
+    bunny:[460,620,0.07,0.12,0.07,0.16],
+    panda:[330,440,0.06,0.15,0.06,0.18],
+    fox:[560,710,0.06,0.12,0.07,0.15],
+    kingcharles:[185,125,0.09,0.13,0.08,0.19]
+  };
+  const p = petSounds[id] || petSounds.cat;
+  tone(p[0],p[1],'triangle',p[2]); tone(p[3],p[4],'sine',p[5],p[1]/1000+0.05);
+  if(state.settings.petSignal && 'speechSynthesis' in window){
+    const phrases = ['Great job!','You did it!','I am so proud!','Nice work!','Calm and strong!'];
+    const msg = new SpeechSynthesisUtterance(phrases[Math.floor(Math.random()*phrases.length)]);
+    msg.pitch = id==='dragon'?0.5:1.7;
+    msg.rate = 1.05;
+    msg.volume = 0.6;
+    const voices = speechSynthesis.getVoices();
+    const local = voices.find(v=>v.localService);
+    if(local) msg.voice = local;
+    speechSynthesis.speak(msg);
+  }
 }
 
 /* ═══ UTILITY ═══ */
@@ -720,7 +767,7 @@ function hasComeback(s){
   return false;
 }
 
-/* ═══ WAKE LOCK (used for all 3 practice types now) ═══ */
+/* ═══ WAKE LOCK ═══ */
 async function requestWakeLock(){
   if(!('wakeLock' in navigator))return false;
   try{
@@ -739,7 +786,6 @@ function updateWakeLockUI(){
   else{el.className='wakelock-status wakelock-inactive';el.textContent='Screen may dim — timer continues safely';}
 }
 
-/* ═══ PRACTICE CONTINUITY (breathing, meditation, bodyscan all behave the same on hide/return) ═══ */
 document.addEventListener('visibilitychange',()=>{
   if(!session)return;
   if(document.hidden) handlePracticeHide();
@@ -760,8 +806,9 @@ function handlePracticeReturn(){
   if(!session.running)return;
   if(Date.now()>=session.endAt){session.remaining=0;completePractice();return;}
   session.remaining=Math.max(0,Math.ceil((session.endAt-Date.now())/1000));
-  if(session.type==='bodyscan')resyncBodyScan();
-  else if(session.type==='breathing')resyncBreathing();
+  if(session.type==='bodyscan') resyncBodyScan();
+  else if(session.mode==='sleep') startSleepStory(false);
+  else if(session.type==='breathing') resyncBreathing();
   requestWakeLock();
   if(awaySec>5)toast('Welcome back! 🌿 Practice continued.');
   scheduleAlertCheck();
@@ -816,6 +863,19 @@ function renderNextBadge(){
   else if(n.cat==='minutes')unitText=`${Math.ceil(n.remain/60)} more minute${Math.ceil(n.remain/60)===1?'':'s'}`;
   el.innerHTML=`<div class="next-badge-row"><div class="next-badge-icon">${n.icon}</div><div style="flex:1"><b>Next badge: ${n.name}</b><div class="small">${unitText} to go!</div><div class="goalbar"><div class="goalfill" style="width:${n.pct}%"></div></div></div></div>`;
 }
+function renderGarden(){
+  const garden=$('mindfulGarden');
+  if(!garden) return;
+  const n=Math.min(24,state.progress.sessions);
+  const icons=['🌱','🌿','🌼','🌻','🌺','🌸','🪴','🌳'];
+  garden.innerHTML='';
+  for(let i=0;i<24;i++){
+    const d=document.createElement('div');
+    if(i<n){d.className='garden-item';d.textContent=icons[Math.min(icons.length-1,Math.floor(i/3))];d.title=(i+1)+' practices';}
+    else{d.className='garden-item garden-empty';d.textContent='+';}
+    garden.appendChild(d);
+  }
+}
 
 function render(){
   checkDaily();applyGentleCareDecay();
@@ -838,7 +898,7 @@ function render(){
   $('streak').textContent=state.player.streak+(state.player.streakShields>0?' 🛡️'+state.player.streakShields:'');
   $('stars').textContent=state.player.stars;$('coins').textContent=state.player.coins;
   $('mission').innerHTML=`<b>Complete ${Math.min(3,state.daily.missionCount+1)} of 3 activities</b><p class="small">${state.daily.missionCount}/3 today</p>`;
-  renderCharlieGoal();renderWishlist();renderNextBadge();renderMarket();renderCollection();renderParentArea();
+  renderCharlieGoal();renderWishlist();renderNextBadge();renderGarden();renderMarket();renderCollection();renderParentArea();
   $('soundToggle').checked=state.settings.sound;$('motionToggle').checked=state.settings.reducedMotion;
   $('buddyToggle').checked=state.settings.buddy;$('petSignalToggle').checked=state.settings.petSignal;
   $('hapticToggle').checked=state.settings.haptic;
@@ -879,7 +939,7 @@ function renderWishlist(){
   btn.addEventListener('click',()=>{state.wishlist=null;save();render();});bar.appendChild(btn);
 }
 
-/* ═══ MARKET ═══ */
+/* ═══ MARKET & COLLECTION ═══ */
 function setMarket(c){marketCat=c;renderMarket();}
 function renderMarket(){
   const tabs=$('marketTabs'),grid=$('marketGrid');
@@ -930,7 +990,6 @@ function buy(cat,id){
 function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();playSound('tap');}
 function selectPet(id){state.activePetId=id;save();render();showView('home');toast('Pet selected.');}
 
-/* ═══ COLLECTION ═══ */
 function renderCollection(){
   const pc=$('petCollection'),bg=$('badgeGrid');pc.innerHTML='';bg.innerHTML='';
   PETS.filter(p=>state.pets[p.id]).forEach(p=>{
@@ -1011,7 +1070,27 @@ function showStreakCelebration(day){
   $('milestoneContent').appendChild(cb);openModal('milestoneModal');
 }
 
-/* ═══ PRACTICE ═══ */
+/* ═══ AMBIENT SOUNDS ═══ */
+function startAmbient(type){
+  if(!type || type==='none' || !state.settings.sound) return;
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const ctx=audioCtx, bufferSize=ctx.sampleRate*2, buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate), data=buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i]=Math.random()*2-1;
+    const source=ctx.createBufferSource();source.buffer=buffer;source.loop=true;
+    const filter=ctx.createBiquadFilter();filter.type='lowpass';
+    if(type==='rain') filter.frequency.value=1000;
+    if(type==='ocean') filter.frequency.value=500;
+    if(type==='forest') filter.frequency.value=2200;
+    const gain=ctx.createGain();gain.gain.value=0.1;
+    source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+    source.start();
+    ambientNodes=[source,filter,gain];
+  }catch(e){console.warn('Ambient sound failed',e);}
+}
+function stopAmbient(){ambientNodes.forEach(n=>{try{n.stop()}catch(e){}});ambientNodes=[];}
+  /* ═══ PRACTICE ═══ */
 function getAgeExercises(type){
   const age=state.player.age,base=EX[type]||[];
   if(type==='breathing'||type==='meditation'){
@@ -1019,7 +1098,22 @@ function getAgeExercises(type){
     if(age==='11-12')return[...base,['Extended '+base[2][0],1200]];
   }return base;
 }
+
 function openPractice(type){
+  if(type==='sleep'){
+    $('chooseTitle').textContent='Sleep Story 🌙';
+    $('chooseIntro').textContent='A gentle story will guide you to sleep. No interruptions — close your eyes and listen.';
+    $('breathPatternArea').style.display='none';
+    $('ambientArea').style.display='block';
+    const stories=SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
+    const options=[['Quiet Story',Math.min(600,stories.length*45)],['Long Sleep Story',900]];
+    $('practiceOptions').replaceChildren();
+    options.forEach(([name,sec])=>{
+      const btn=document.createElement('button');btn.className='btn purple';btn.textContent=`${name} • ${Math.floor(sec/60)} min`;btn.addEventListener('click',()=>startPractice('sleep',name,sec));$('practiceOptions').appendChild(btn);
+    });
+    openModal('chooseModal');return;
+  }
+
   $('chooseTitle').textContent={breathing:'Breathing Adventure',meditation:'Meditation Adventure',bodyscan:'Body Scan Adventure'}[type]||'Practice';
   $('chooseIntro').textContent={
     breathing:'Follow the calm circle. Practice keeps going even if you glance away — a gentle hello check may appear at the top.',
@@ -1032,7 +1126,11 @@ function openPractice(type){
     selectedBreathPattern=avail.find(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:avail[0].id;
     $('breathPatternTabs').innerHTML='';
     avail.forEach(bp=>{const c=document.createElement('button');c.className='chip'+(selectedBreathPattern===bp.id?' active':'');c.textContent=bp.name;c.addEventListener('click',()=>{selectedBreathPattern=bp.id;state.settings.breathPattern=bp.id;save();$('breathPatternTabs').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});$('breathPatternTabs').appendChild(c);});
-  }else $('breathPatternArea').style.display='none';
+    $('ambientArea').style.display='block';
+  }else{
+    $('breathPatternArea').style.display='none';
+    $('ambientArea').style.display = (type==='meditation'||type==='bodyscan') ? 'block' : 'none';
+  }
   const exs=getAgeExercises(type);$('practiceOptions').replaceChildren();
   exs.forEach(([name,sec])=>{const reward=sec>=900?'✨ Super Treasure':sec>=600?'🎁 Treasure':'🌱 Habit';const btn=document.createElement('button');btn.className='btn '+(type==='breathing'?'blue':type==='bodyscan'?'teal':'green');btn.innerHTML=`<span>${name} • ${Math.floor(sec/60)} min<br><small style="opacity:.9">${reward}</small></span>`;btn.addEventListener('click',()=>startPractice(type,name,sec));$('practiceOptions').appendChild(btn);});
   openModal('chooseModal');
@@ -1040,45 +1138,63 @@ function openPractice(type){
 
 function startPractice(type,name,seconds){
   playSound('tap');closeModal('chooseModal');completionLocked=false;
-  session={id:(crypto.randomUUID?.()||String(Date.now())),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),endAt:Date.now()+seconds*1000,breathPhaseIdx:0,breathPhaseElapsed:0,breathPhaseStartAt:0,bodyscanIdx:0,bodyscanStepElapsed:0,bodyscanStepStartAt:0,hiddenAt:0,attentionPassed:0,attentionMissed:0,alertActive:false,alertAnswer:null,alertTimeout:null,lastAnnounced:null,presenceScore:100};
+  stopAmbient();
+  startAmbient($('ambientSound') ? $('ambientSound').value : 'none');
+  session={id:(crypto.randomUUID?.()||String(Date.now())),type: (type==='sleep'?'meditation':type), mode: (type==='sleep'?'sleep':null), name, planned:seconds, remaining:seconds, running:true, last:Date.now(), endAt:Date.now()+seconds*1000, breathPhaseIdx:0, breathPhaseElapsed:0, breathPhaseStartAt:0,bodyscanIdx:0,bodyscanStepElapsed:0,bodyscanStepStartAt:0,hiddenAt:0,attentionPassed:0,attentionMissed:0,alertActive:false,alertAnswer:null,alertTimeout:null,lastAnnounced:null,presenceScore:100, storyScript: (type==='sleep' ? (SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10']) : null)};
   $('practiceTitle').textContent=name;
-  $('practiceGuide').textContent={breathing:'Follow the expanding circle.',meditation:'Sit comfortably. Close your eyes when ready.',bodyscan:'Follow the body prompts. Close your eyes when ready.'}[type]||'';
+  $('practiceGuide').textContent={
+    breathing:'Follow the expanding circle.',
+    meditation:'Sit comfortably. Close your eyes when ready.',
+    bodyscan:'Follow the body prompts. Close your eyes when ready.',
+    sleep:'Lie down, relax, and let the story carry you to sleep.'
+  }[type]||'';
   requestWakeLock();
   $('continuityBanner').style.display='block';
-  if(type==='meditation'){
+  if(type==='sleep'){
+    $('continuityTitle').textContent='🌙 Sleep story active';
+    $('continuityText').textContent='No interruptions. Close your eyes and let the words carry you.';
+    $('participationBlock').style.display='none';
+    $('bodyscanGuide').style.display='block';
+    $('orb').className='orb bodyscan';$('orb').textContent='Rest';
+    startSleepStory(true);
+    $('practiceNotice').textContent='This is a time to relax completely.';
+  } else if(type==='meditation'){
     $('continuityTitle').textContent='🧘 Eyes-closed mode active';
     $('continuityText').textContent='No interruptions at all. The timer continues safely even if the screen locks.';
     $('participationBlock').style.display='none';
     $('bodyscanGuide').style.display='none';
     $('orb').className='orb meditation';$('orb').textContent='Be still';
-  }else if(type==='bodyscan'){
+    $('practiceNotice').textContent='Presence is estimated gently and privately — we never use camera or microphone.';
+  } else if(type==='bodyscan'){
     $('continuityTitle').textContent='🧍 Practice continues safely';
     $('continuityText').textContent='Look away or close your eyes anytime. A gentle hello check may appear at the top sometimes.';
     $('participationBlock').style.display='block';
     $('bodyscanGuide').style.display='block';
     $('orb').className='orb bodyscan';$('orb').textContent='Notice';
     startBodyScan(true);
-  }else{
+    $('practiceNotice').textContent='A quick, friendly check-in may appear at the top sometimes. It never pauses your practice — just tap and keep going.';
+  } else {
     $('continuityTitle').textContent='💨 Practice continues safely';
     $('continuityText').textContent='Look away anytime. A gentle hello check may appear at the top sometimes.';
     $('participationBlock').style.display='block';
     $('bodyscanGuide').style.display='none';
     $('orb').className='orb';$('orb').textContent='Get ready';
+    $('practiceNotice').textContent='A quick, friendly check-in may appear at the top sometimes. It never pauses your practice — just tap and keep going.';
   }
-  $('practiceNotice').textContent = type==='meditation'
-    ? 'Presence is estimated gently and privately — we never use camera or microphone.'
-    : 'A quick, friendly check-in may appear at the top sometimes. It never pauses your practice — just tap and keep going.';
   const pet=activePetDef();$('buddyPet').textContent=pet.icon;
   $('buddyPet').style.display=state.settings.buddy?'block':'none';
   $('buddyBubble').style.display=state.settings.buddy?'block':'none';
-  $('buddyPet').className='buddy-pet'+((type==='meditation'||type==='bodyscan')?' resting':'');
-  $('buddyBubble').textContent={breathing:'I will follow the circle with you.',meditation:'I will sit quietly with you. Close your eyes when ready.',bodyscan:'I will relax my body with you.'}[type]||'';
-  $('btnPauseResume').textContent='⏸ Pause';showView('practice');
+  $('buddyPet').className='buddy-pet'+((type==='meditation'||type==='bodyscan'||type==='sleep')?' resting':'');
+  if(type==='sleep') $('buddyBubble').textContent = 'I will rest with you. 🐾';
+  else $('buddyBubble').textContent = {breathing:'I will follow the circle with you.',meditation:'I will sit quietly with you. Close your eyes when ready.',bodyscan:'I will relax my body with you.'}[type]||'';
+  $('btnPauseResume').textContent='⏸ Pause'; showView('practice');
   updateParticipation();
-  timerLoop();if(type==='breathing')breathLoop(true);scheduleAlertCheck();
+  timerLoop();
+  if(type==='breathing') breathLoop(true);
+  if(type==='meditation' || type==='bodyscan' || type==='sleep') scheduleAlertCheck();
 }
 
-/* ─── Body scan ─── */
+/* ─── Body scan & sleep story ─── */
 function startBodyScan(reset){clearTimeout(bodyscanTimer);if(reset&&session){session.bodyscanIdx=0;session.bodyscanStepElapsed=0;}advanceBodyScan();}
 function advanceBodyScan(){if(!session||!session.running||session.type!=='bodyscan')return;const script=BODYSCAN_SCRIPTS[state.player.age]||BODYSCAN_SCRIPTS['8-10'];if(session.bodyscanIdx>=script.length){$('bodyscanGuide').textContent='Rest and notice your whole body...';return;}const step=script[session.bodyscanIdx];$('bodyscanGuide').textContent=step.t;$('bodyscanGuide').style.opacity='0';requestAnimationFrame(()=>$('bodyscanGuide').style.opacity='1');const rem=Math.max(500,step.d*1000-(session.bodyscanStepElapsed||0));session.bodyscanStepStartAt=Date.now();bodyscanTimer=setTimeout(()=>{if(!session)return;session.bodyscanIdx++;session.bodyscanStepElapsed=0;advanceBodyScan();},rem);}
 function pauseBodyScan(){if(!session||session.type!=='bodyscan')return;clearTimeout(bodyscanTimer);if(session.bodyscanStepStartAt)session.bodyscanStepElapsed=(session.bodyscanStepElapsed||0)+(Date.now()-session.bodyscanStepStartAt);session.bodyscanStepStartAt=0;}
@@ -1094,6 +1210,31 @@ function resyncBodyScan(){
   session.bodyscanIdx=Math.min(idx,script.length);
   session.bodyscanStepElapsed=stepElapsedMs;
   advanceBodyScan();
+}
+function startSleepStory(reset){
+  clearTimeout(bodyscanTimer);
+  if(reset && session){session.bodyscanIdx=0;session.bodyscanStepElapsed=0;}
+  advanceSleepStory();
+}
+function advanceSleepStory(){
+  if(!session || session.type!=='meditation' || !session.mode || session.mode!=='sleep' || !session.running) return;
+  const story = session.storyScript || SLEEP_STORIES[state.player.age] || SLEEP_STORIES['8-10'];
+  if(session.bodyscanIdx>=story.length){
+    $('bodyscanGuide').textContent='Rest now... 🌙';
+    return;
+  }
+  const line = story[session.bodyscanIdx];
+  $('bodyscanGuide').textContent = line;
+  $('bodyscanGuide').style.opacity='0';
+  requestAnimationFrame(()=>$('bodyscanGuide').style.opacity='1');
+  const rem = Math.max(2500, 45000 - (session.bodyscanStepElapsed||0));
+  session.bodyscanStepStartAt = Date.now();
+  bodyscanTimer = setTimeout(()=>{
+    if(!session) return;
+    session.bodyscanIdx++;
+    session.bodyscanStepElapsed=0;
+    advanceSleepStory();
+  }, rem);
 }
 
 /* ─── Timer ─── */
@@ -1134,10 +1275,11 @@ function resyncBreathing(){
   breathLoop(false);
 }
 
-/* ─── Non-blocking Alert Check (breathing & bodyscan only — never pauses practice) ─── */
+/* ─── Non-blocking alert check ─── */
 function scheduleAlertCheck(){
   clearTimeout(alertScheduleTimer);
-  if(!session||session.type==='meditation')return;
+  if(!session) return;
+  if(session.type==='meditation' || session.mode==='sleep') return;
   if(session.remaining<45)return;
   const token=session.id;const wait=45000+Math.random()*45000;
   alertScheduleTimer=setTimeout(()=>{if(session&&session.id===token&&session.type!=='meditation'&&!session.alertActive)showAlertCheck();},wait);
@@ -1184,14 +1326,14 @@ function setSessionRunning(shouldRun,message=''){
 }
 function pauseResume(){if(!session)return;setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
 function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
-function cleanupPractice(){clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
+function cleanupPractice(){clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
 
 function completePractice(){
   if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);
   $('a11yAnnounce').textContent='Practice complete';
   if(state.settings.buddy){$('buddyPet').className='buddy-pet celebrate';$('buddyBubble').textContent='We finished together! 🎉';}
   setTimeout(petCompletionSignal,850);
-  const done={...session};clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');session=null;
+  const done={...session};clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
   setTimeout(()=>{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(done);openModal('checkModal');},1250);
 }
 function finishCheck(feeling){
@@ -1211,8 +1353,31 @@ function finishJournal(notice){
   const capLeft=Math.max(0,220-state.daily.earned);reward=Math.min(reward,capLeft);state.daily.earned+=reward;state.daily.missionCount++;
   if(state.daily.missionCount===3){const bonus=Math.min(30,Math.max(0,220-state.daily.earned));state.player.coins+=bonus;state.daily.earned+=bonus;if(bonus>0)toast('Mission complete! +30 coins.');}
   state.player.coins+=reward;state.player.stars+=actual>=600?3:1;state.progress.sessions++;
-  const typeKey=s.type||'breathing';state.progress[typeKey]=(state.progress[typeKey]||0)+1;state.progress.totalSeconds+=actual;
+  const typeKey=s.mode||s.type||'breathing';state.progress[typeKey]=(state.progress[typeKey]||0)+1;state.progress.totalSeconds+=actual;
   state.progress.checkIns.push({feeling,notice:notice==='__skip'?null:(notice||null),type:typeKey,seconds:actual,at:new Date().toISOString(),attentionPassed:s.attentionPassed,attentionMissed:s.attentionMissed,presenceScore:s.presenceScore??100});
+  // Seasonal gift — once per month
+  const month = new Date().getMonth();
+  const seasonalMap = {0:'scarf', 11:'flower', 2:'flower', 9:'flower'};
+  if(month !== state.monthlyGift && seasonalMap[month]){
+    const item = ITEMS.find(x=>x.id===seasonalMap[month]);
+    if(item && !state.ownedItems.includes(item.id)){
+      state.ownedItems.push(item.id);
+      toast(`🎁 Seasonal gift: ${item.icon} ${item.name}!`);
+    }
+    state.monthlyGift = month;
+  }
+  // Mystery egg every 5th practice
+  if(state.progress.sessions % 5 === 0){
+    const pool = ITEMS.filter(i=>i.cat==='accessory' && !state.ownedItems.includes(i.id) && i.cost <= Math.max(200, state.player.coins));
+    if(pool.length){
+      const gift = pool[Math.floor(Math.random()*pool.length)];
+      state.ownedItems.push(gift.id);
+      setTimeout(()=>toast(`🥚 Mystery egg! Got ${gift.icon} ${gift.name}!`),1500);
+    } else {
+      state.player.coins += 20;
+      setTimeout(()=>toast('🥚 Mystery egg! +20 coins!'),1500);
+    }
+  }
   const oldBest=state.player.bestStreak;
   updateStreak();
   const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);
@@ -1307,8 +1472,21 @@ function showOnboarding(){if(state.onboardingDone)return;$('onboarding').classLi
 $('btnBreathe').addEventListener('click',()=>openPractice('breathing'));
 $('btnMeditate').addEventListener('click',()=>openPractice('meditation'));
 $('btnBodyscan').addEventListener('click',()=>openPractice('bodyscan'));
+$('btnSleepStory').addEventListener('click',()=>openPractice('sleep'));
 $('btnFeed').addEventListener('click',openFeed);
 $('btnPlay').addEventListener('click',playPet);
+$('btnWorry').addEventListener('click',()=>{openModal('worryModal');$('worryInput').value='';});
+$('btnReleaseWorry').addEventListener('click',()=>{
+  const text=$('worryInput').value.trim();
+  if(!text){toast('Write something first.');return;}
+  const b=document.createElement('div');b.textContent='🎈';
+  b.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);font-size:48px;z-index:999;pointer-events:none;transition:transform 1.2s ease,opacity 1.2s ease;';
+  document.body.appendChild(b);
+  requestAnimationFrame(()=>{b.style.transform='translate(-50%,-200px) scale(1.5)';b.style.opacity='.8';});
+  setTimeout(()=>{b.textContent='✨';b.style.transform='translate(-50%,-300px) scale(2)';b.style.opacity='0';},1200);
+  setTimeout(()=>b.remove(),2400);
+  closeModal('worryModal');playSound('tap');toast('Worry released! 💨');
+});
 $('petAvatar').addEventListener('click',()=>{const p=activePet();if(p.level>=3&&p.milestones.includes(3)){$('petAvatar').style.transition='transform .8s';$('petAvatar').style.transform='rotate(360deg) scale(1.1)';playSound('tap');setTimeout(()=>{$('petAvatar').style.transition='';$('petAvatar').style.transform='';},850);}});
 $('btnPauseResume').addEventListener('click',pauseResume);
 $('btnQuitPractice').addEventListener('click',quitPractice);
@@ -1328,6 +1506,20 @@ $('btnSaveNickname').addEventListener('click',()=>{if(!renamingPetId)return;cons
 $('checkModal').querySelectorAll('[data-feeling]').forEach(b=>b.addEventListener('click',()=>finishCheck(b.dataset.feeling)));
 $('journalModal').querySelectorAll('[data-journal]').forEach(b=>b.addEventListener('click',()=>finishJournal(b.dataset.journal)));
 $('rewardChoiceModal').querySelectorAll('[data-reward]').forEach(b=>b.addEventListener('click',()=>chooseAfterReward(b.dataset.reward)));
+
+/* ═══ PWA ICON LOGIC ═══ */
+function updateManifestIcon(){
+  const petIcon=activePetDef().icon;
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' rx='40' fill='#6d5dfc'/><text x='100' y='150' font-size='120' text-anchor='middle'>${petIcon}</text></svg>`;
+  const manifest={name:'Mindful Pets Adventure',short_name:'Mindful Pets',display:'standalone',background_color:'#6d5dfc',theme_color:'#6d5dfc',start_url:'.',icons:[{src:`data:image/svg+xml,${encodeURIComponent(svg)}`,sizes:'any',type:'image/svg+xml'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  let link=document.querySelector('link[rel="manifest"]');
+  if(link) link.remove();
+  link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+}
+updateManifestIcon();
+setInterval(()=>{if(activePetDef().icon!==window.__lastIcon){window.__lastIcon=activePetDef().icon;updateManifestIcon();}},1000);
 
 /* ═══ INIT ═══ */
 render();
