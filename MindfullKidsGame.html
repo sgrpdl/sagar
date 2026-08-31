@@ -7,251 +7,1275 @@
 <title>Mindful Pets Adventure</title>
 <style>
 :root{--ink:#23324a;--muted:#6f7f96;--card:rgba(255,255,255,.88);--purple:#6d5dfc;--blue:#2f9cf4;--green:#22b884;--gold:#ffb728;--red:#ec6470;--shadow:0 14px 36px rgba(63,72,115,.16)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#20243a}button,input,select{font:inherit}button{cursor:pointer}.app{width:min(100%,520px);min-height:100dvh;margin:auto;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);position:relative;overflow:hidden}.top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.72);backdrop-filter:blur(15px);border-bottom:1px solid #fff}.brand{font-weight:900}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{background:#fff;border-radius:999px;padding:6px 9px;font-weight:900;font-size:13px;box-shadow:0 4px 12px #65719a19}.main{padding:15px 15px 92px}.view{display:none;animation:in .25s ease}.view.active{display:block}@keyframes in{from{opacity:.3;transform:translateY(4px)}}h1,h2,h3,p{margin-top:0}.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);border:2px solid #fff;border-radius:28px;padding:18px;box-shadow:var(--shadow);text-align:center}.pet{font-size:106px;cursor:pointer;filter:drop-shadow(0 14px 12px #5260802c);animation:float 3.2s ease-in-out infinite;margin:8px 0;display:inline-block}@keyframes float{50%{transform:translateY(-9px)}}.pet.exhausted{animation:exhaustedPet 3.2s ease-in-out infinite;filter:grayscale(.18) drop-shadow(0 10px 9px #53607b2b)}@keyframes exhaustedPet{50%{transform:translateY(7px) rotate(2deg) scale(.96)}}.pet.excited{animation:excitedPet .5s ease 4}@keyframes excitedPet{25%{transform:translateY(-18px) rotate(-5deg) scale(1.08)}75%{transform:translateY(-18px) rotate(5deg) scale(1.08)}}.pet.sleepy{animation:sleepyPet 4s ease-in-out infinite}@keyframes sleepyPet{50%{transform:translateY(4px) rotate(3deg) scale(.97)}}.pet.playful{animation:playfulPet 2s ease-in-out infinite}@keyframes playfulPet{25%{transform:rotate(-5deg)}50%{transform:translateY(-12px) scale(1.05)}75%{transform:rotate(5deg)}}.pet.grateful{animation:gratefulPet .6s ease 3}@keyframes gratefulPet{50%{transform:scale(1.12) translateY(-8px)}}.pet.play-jump{animation:playJump .55s ease 3}.pet.play-spin{animation:playSpin .8s ease}.pet.play-bounce{animation:playBounce .45s ease 4}@keyframes playJump{50%{transform:translateY(-38px) scale(1.08)}}@keyframes playSpin{to{transform:rotate(360deg) scale(1.1)}}@keyframes playBounce{50%{transform:scale(.86) translateY(12px)}}.play-area{position:relative;min-height:330px;touch-action:none;background:linear-gradient(145deg,#fff8d8,#e5f8ff);border-radius:24px;overflow:hidden;padding:18px;text-align:center}
-.game-pet{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);font-size:92px;transition:left .45s ease,bottom .35s ease,transform .35s ease;z-index:3;filter:drop-shadow(0 10px 8px #53607b33);touch-action:none}.game-pet.catch{animation:petCatch .7s ease}.game-pet.giggle{animation:petGiggle .5s ease 3}.game-ball{position:absolute;left:28px;bottom:30px;font-size:48px;z-index:5;touch-action:none;cursor:grab;transition:none;filter:drop-shadow(0 7px 6px #53607b33)}.game-ball.flying{transition:left .65s cubic-bezier(.2,.7,.2,1),bottom .65s cubic-bezier(.2,.7,.2,1),transform .65s linear}.hand-hint{position:absolute;font-size:38px;pointer-events:none;animation:handHint 1.2s ease-in-out infinite}.joy-pop{position:absolute;font-size:32px;z-index:9;pointer-events:none;animation:joyUp .9s ease forwards}@keyframes petCatch{45%{transform:translateX(-50%) translateY(-45px) scale(1.15);filter:drop-shadow(0 12px 8px #53607b44)}}@keyframes petGiggle{25%{transform:translateX(-50%) rotate(-10deg) scale(1.08)}75%{transform:translateX(-50%) rotate(10deg) scale(1.08)}}@keyframes handHint{50%{transform:translateY(8px) scale(.92)}}@keyframes joyUp{to{opacity:0;transform:translateY(-80px) scale(1.4)}}
-.participation{width:100%;background:#ffffffd9;border-radius:18px;padding:12px;margin:12px 0;text-align:left}.participation-bar{height:10px;background:#e9edf5;border-radius:99px;overflow:hidden}.participation-fill{height:100%;background:linear-gradient(90deg,#45d49c,#6d5dfc);width:100%;transition:width .3s}.presence-card{display:none;width:100%;background:#fff6ce;border:2px solid #ffe08a;border-radius:18px;padding:15px;margin:12px 0}.presence-card.show{display:block}.parent-log{font-size:12px;text-align:left;max-height:220px;overflow:auto}.pet-message{margin:8px auto 14px;max-width:330px;background:#fff;border-radius:18px;padding:10px 13px;font-weight:850;color:#536179;box-shadow:0 6px 15px #56627d18;position:relative}.pet-message:after{content:"";position:absolute;top:-8px;left:50%;border-width:0 9px 9px;border-style:solid;border-color:transparent transparent #fff}.pet-message.needs-care{background:#fff3cd;color:#735700}.pet-message.needs-care:after{border-color:transparent transparent #fff3cd}.meters{display:grid;gap:8px;text-align:left}.meterline{display:grid;grid-template-columns:76px 1fr 36px;align-items:center;gap:7px;font-size:12px;font-weight:800}.bar{height:11px;background:#e8edf3;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;transition:width .4s}.health{background:linear-gradient(90deg,#52dc96,#22b884)}.happy{background:linear-gradient(90deg,#ffd15a,#ff9e3d)}.friend{background:linear-gradient(90deg,#9d84ff,#6d5dfc)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:13px}.btn{border:0;border-radius:17px;padding:14px 12px;font-weight:900;box-shadow:0 7px 15px #5a668327;transition:.15s;color:#fff}.btn:active{transform:scale(.97)}.blue{background:linear-gradient(135deg,#49b9ff,#247ee8)}.green{background:linear-gradient(135deg,#42d8a0,#139d70)}.gold{background:linear-gradient(135deg,#ffc950,#ee8c18)}.purple{background:linear-gradient(135deg,#9483ff,#5a49e8)}.teal{background:linear-gradient(135deg,#56c8d8,#2196a8)}.soft{background:#edf1f6;color:#4d5a6f;box-shadow:none}.danger{background:#fff0f1;color:#bc4250;box-shadow:none}.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 3px 10px}.section-title h2{font-size:20px;margin:0}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.card{background:var(--card);border:1px solid #fff;border-radius:21px;padding:14px;box-shadow:0 8px 20px #65719a16;text-align:center}.icon{font-size:44px}.small{font-size:12px;color:var(--muted);font-weight:700}.price{font-weight:900;margin:7px 0}.rarity{display:inline-block;border-radius:99px;padding:3px 8px;font-size:10px;font-weight:900;margin:4px}.rarity-common{background:#e7f8ef;color:#16865e}.rarity-special{background:#eee9ff;color:#604bd0}.rarity-premium{background:#fff0bd;color:#956500}.rarity-royal{background:linear-gradient(135deg,#fff0a6,#eadcff);color:#6b4b00}.favorite{background:#ffe6ef;color:#b63e6a}.equipped{outline:3px solid #795fff;background:linear-gradient(145deg,#fff,#eeeaff)}.room-preview{border-radius:18px;padding:13px;margin-bottom:10px;background:linear-gradient(145deg,#dff7e8,#e7f3ff);min-height:92px;display:grid;place-items:center;font-size:42px}.market-note{background:#eef7ff;color:#3f6485;border-radius:16px;padding:10px 12px;font-size:12px;font-weight:800;margin-bottom:12px}.tabs{display:flex;gap:6px;overflow:auto;padding:3px 2px 10px}.chip{white-space:nowrap;border:0;border-radius:99px;background:#ffffffb8;color:#617087;padding:9px 12px;font-weight:850}.chip.active{background:var(--purple);color:#fff}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(100%,520px);display:grid;grid-template-columns:repeat(4,1fr);background:#fffffff2;backdrop-filter:blur(14px);padding:7px 6px max(7px,env(safe-area-inset-bottom));box-shadow:0 -6px 24px #4651721c}.nav{border:0;background:none;color:#8b97a9;font-weight:850;font-size:11px;padding:7px 2px;border-radius:14px}.nav span{display:block;font-size:22px}.nav.active{color:var(--purple);background:#f0edff}.modal{display:none;position:fixed;inset:0;z-index:100;background:#27304799;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.sheet{width:min(100%,480px);max-height:88dvh;overflow:auto;background:#fff;border-radius:26px;padding:20px;box-shadow:0 25px 70px #10152666}.list{display:grid;gap:9px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f5f7fb;border-radius:16px;padding:11px}.practice{min-height:calc(100dvh - 170px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:21px;font-weight:900;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform 1s ease}.orb.inhale{animation:inhale 4s ease-in-out forwards}.orb.exhale{animation:exhale 5s ease-in-out forwards}.orb.hold-in{animation:holdIn 4s ease-in-out forwards}.orb.hold-out{animation:holdOut 4s ease-in-out forwards}@keyframes holdIn{from,to{transform:scale(1.45)}}@keyframes holdOut{from,to{transform:scale(.92)}}.orb.meditation{background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);animation:meditateGlow 5s ease-in-out infinite}.orb.bodyscan{background:radial-gradient(circle at 35% 30%,#f0d9ff,#9b6dfc 65%,#6a4bb9);animation:bodyscanGlow 6s ease-in-out infinite}@keyframes bodyscanGlow{50%{transform:scale(1.05);box-shadow:0 0 0 22px #a06dfc22,0 18px 50px #7b5dcc40}}.goal-card{background:linear-gradient(135deg,#fff,#fff4ce);border:2px solid #fff;border-radius:20px;padding:14px;margin:14px 0;box-shadow:0 8px 20px #65719a16}.goal-row{display:flex;align-items:center;gap:11px;text-align:left}.goal-icon{font-size:48px}.goalbar{height:12px;background:#e8e5dc;border-radius:99px;overflow:hidden;margin-top:9px}.goalfill{height:100%;background:linear-gradient(90deg,#ffb728,#6d5dfc);transition:width .4s}.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);border:2px solid #fff;border-radius:18px;padding:12px;margin:10px 0;font-weight:900;color:#59429b}@keyframes meditateGlow{50%{transform:scale(1.08);box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}@keyframes inhale{to{transform:scale(1.45)}}@keyframes exhale{from{transform:scale(1.45)}to{transform:scale(.92)}}.buddy-zone{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:105px;margin:4px 0 10px}.buddy-pet{font-size:76px;filter:drop-shadow(0 10px 8px #53607b33);animation:buddyBreathe 5s ease-in-out infinite}.buddy-pet.resting{animation:buddyRest 4s ease-in-out infinite}.buddy-pet.celebrate{animation:buddyCelebrate .55s ease 4}.buddy-bubble{max-width:180px;background:#fff;border-radius:18px 18px 18px 4px;padding:9px 11px;font-size:12px;font-weight:850;color:#526178;box-shadow:0 6px 15px #53607b18}@keyframes buddyBreathe{50%{transform:scale(1.08) translateY(-5px)}}@keyframes buddyRest{50%{transform:rotate(2deg) translateY(3px) scale(.98)}}@keyframes buddyCelebrate{50%{transform:translateY(-28px) rotate(8deg) scale(1.12)}}.timer{font:900 50px ui-monospace,monospace;margin:38px 0 8px}.notice{background:#fff7d9;color:#755b00;border-radius:15px;padding:10px 12px;font-size:12px;font-weight:800;margin:10px 0}.check{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.locked{filter:grayscale(1);opacity:.55}.toastbox{position:fixed;z-index:200;top:75px;left:50%;transform:translateX(-50%);width:min(90%,430px);display:grid;gap:7px}.toast{background:#26344bea;color:#fff;border-radius:15px;padding:11px 14px;font-weight:800;box-shadow:var(--shadow)}.setup{display:grid;gap:10px}.setting-item{display:flex;gap:10px;align-items:flex-start;background:#f5f7fb;border-radius:15px;padding:11px}.setting-item input{width:auto!important;margin-top:3px;transform:scale(1.15)}.setting-copy{display:block}.setting-copy b{display:block;color:#344258}.setting-copy small{display:block;color:#748197;font-weight:700;line-height:1.35;margin-top:2px}.setup input,.setup select{width:100%;padding:12px;border:1px solid #dce2ec;border-radius:13px;background:#fff}.focus-banner{display:none;background:#fff0cf;color:#735300;border-radius:16px;padding:12px;font-weight:850;margin-bottom:10px}.focus-banner.show{display:block}.welcome-banner{background:linear-gradient(135deg,#e8f5ff,#f0e9ff);border:2px solid #fff;border-radius:20px;padding:16px;margin-bottom:14px;text-align:center}.welcome-banner .pet{font-size:72px;margin:4px 0}.mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin:8px 0}.mood-cell{background:#f5f7fb;border-radius:10px;padding:6px 2px;font-size:11px}.mood-cell .mood-emoji{font-size:22px;display:block}.mood-cell .mood-day{font-weight:800;color:var(--muted)}.streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0}.cal-cell{width:100%;aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:16px}.cal-done{background:#e7f8ef}.cal-miss{background:#f5f7fb}.cal-today{outline:2px solid var(--purple)}.bodyscan-guide{font-size:15px;font-weight:800;color:var(--ink);margin:8px 0;min-height:28px;transition:opacity .4s}.journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.journal-btn{border:0;background:#f5f7fb;border-radius:14px;padding:10px 6px;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:.15s}.journal-btn:hover,.journal-btn:active{background:#eee9ff}.journal-btn span{font-size:24px;display:block;margin-bottom:2px}.wishlist-bar{background:linear-gradient(135deg,#fff8e0,#f0e9ff);border:2px solid #fff;border-radius:16px;padding:11px 13px;margin:10px 0;display:none}.wishlist-bar.show{display:block}.wishlist-bar .goalbar{margin-top:6px}body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{animation:none!important;transform:none!important}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.weekly-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.weekly-stat{background:#f5f7fb;border-radius:14px;padding:10px;text-align:center}.pin-row input{max-width:180px;text-align:center;letter-spacing:8px;font-size:22px}.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300;overflow:hidden}.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 1.8s ease-out forwards}.confetti-piece:nth-child(odd){border-radius:50%}@keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(.3)}}
-.onboarding{position:fixed;inset:0;z-index:500;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);display:flex;align-items:center;justify-content:center;padding:20px}.onboarding.hidden{display:none}.ob-card{text-align:center;max-width:380px;width:100%}.ob-pet{font-size:100px;display:block;margin:10px auto;animation:float 3.2s ease-in-out infinite}.ob-dots{display:flex;gap:8px;justify-content:center;margin:14px 0}.ob-dot{width:10px;height:10px;border-radius:50%;background:#d4d8e0}.ob-dot.active{background:var(--purple)}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#20243a}button,input,select{font:inherit}button{cursor:pointer}
+.app{width:min(100%,520px);min-height:100dvh;margin:auto;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);position:relative;overflow:hidden}
+.top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.72);backdrop-filter:blur(15px);border-bottom:1px solid #fff}
+.brand{font-weight:900}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.pill{background:#fff;border-radius:999px;padding:6px 9px;font-weight:900;font-size:13px;box-shadow:0 4px 12px #65719a19}
+.main{padding:15px 15px 92px}.view{display:none;animation:in .25s ease}.view.active{display:block}
+@keyframes in{from{opacity:.3;transform:translateY(4px)}}
+h1,h2,h3,p{margin-top:0}
+.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);border:2px solid #fff;border-radius:28px;padding:18px;box-shadow:var(--shadow);text-align:center}
+.pet{font-size:106px;cursor:pointer;filter:drop-shadow(0 14px 12px #5260802c);animation:float 3.2s ease-in-out infinite;margin:8px 0;display:inline-block}
+@keyframes float{50%{transform:translateY(-9px)}}
+.pet.exhausted{animation:exhaustedPet 3.2s ease-in-out infinite;filter:grayscale(.18) drop-shadow(0 10px 9px #53607b2b)}
+@keyframes exhaustedPet{50%{transform:translateY(7px) rotate(2deg) scale(.96)}}
+.pet.excited{animation:excitedPet .5s ease 4}
+@keyframes excitedPet{25%{transform:translateY(-18px) rotate(-5deg) scale(1.08)}75%{transform:translateY(-18px) rotate(5deg) scale(1.08)}}
+.pet.sleepy{animation:sleepyPet 4s ease-in-out infinite}
+@keyframes sleepyPet{50%{transform:translateY(4px) rotate(3deg) scale(.97)}}
+.pet.playful{animation:playfulPet 2s ease-in-out infinite}
+@keyframes playfulPet{25%{transform:rotate(-5deg)}50%{transform:translateY(-12px) scale(1.05)}75%{transform:rotate(5deg)}}
+.pet.grateful{animation:gratefulPet .6s ease 3}
+@keyframes gratefulPet{50%{transform:scale(1.12) translateY(-8px)}}
+.pet.sparkle{filter:drop-shadow(0 0 12px #ffb728) drop-shadow(0 14px 12px #5260802c)}
+.pet.master{filter:drop-shadow(0 0 15px #6d5dfc) drop-shadow(0 0 25px #ffb728) drop-shadow(0 14px 12px #5260802c)}
+.play-area{position:relative;min-height:330px;touch-action:none;background:linear-gradient(145deg,#fff8d8,#e5f8ff);border-radius:24px;overflow:hidden;padding:18px;text-align:center}
+.game-pet{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);font-size:92px;transition:left .45s ease,bottom .35s ease,transform .35s ease;z-index:3;filter:drop-shadow(0 10px 8px #53607b33);touch-action:none}
+.game-pet.catch{animation:petCatch .7s ease}.game-pet.giggle{animation:petGiggle .5s ease 3}
+.game-ball{position:absolute;left:28px;bottom:30px;font-size:48px;z-index:5;touch-action:none;cursor:grab;transition:none;filter:drop-shadow(0 7px 6px #53607b33)}
+.game-ball.flying{transition:left .65s cubic-bezier(.2,.7,.2,1),bottom .65s cubic-bezier(.2,.7,.2,1),transform .65s linear}
+.hand-hint{position:absolute;font-size:38px;pointer-events:none;animation:handHint 1.2s ease-in-out infinite}
+.joy-pop{position:absolute;font-size:32px;z-index:9;pointer-events:none;animation:joyUp .9s ease forwards}
+@keyframes petCatch{45%{transform:translateX(-50%) translateY(-45px) scale(1.15)}}
+@keyframes petGiggle{25%{transform:translateX(-50%) rotate(-10deg) scale(1.08)}75%{transform:translateX(-50%) rotate(10deg) scale(1.08)}}
+@keyframes handHint{50%{transform:translateY(8px) scale(.92)}}
+@keyframes joyUp{to{opacity:0;transform:translateY(-80px) scale(1.4)}}
+.participation{width:100%;background:#ffffffd9;border-radius:18px;padding:12px;margin:12px 0;text-align:left}
+.participation-bar{height:10px;background:#e9edf5;border-radius:99px;overflow:hidden}
+.participation-fill{height:100%;background:linear-gradient(90deg,#45d49c,#6d5dfc);width:100%;transition:width .3s}
+.presence-card{display:none;width:100%;background:#fff6ce;border:2px solid #ffe08a;border-radius:18px;padding:15px;margin:12px 0}
+.presence-card.show{display:block}
+.parent-log{font-size:12px;text-align:left;max-height:220px;overflow:auto}
+.pet-message{margin:8px auto 14px;max-width:330px;background:#fff;border-radius:18px;padding:10px 13px;font-weight:850;color:#536179;box-shadow:0 6px 15px #56627d18;position:relative}
+.pet-message:after{content:"";position:absolute;top:-8px;left:50%;border-width:0 9px 9px;border-style:solid;border-color:transparent transparent #fff}
+.pet-message.needs-care{background:#fff3cd;color:#735700}
+.pet-message.needs-care:after{border-color:transparent transparent #fff3cd}
+.meters{display:grid;gap:8px;text-align:left}
+.meterline{display:grid;grid-template-columns:76px 1fr 36px;align-items:center;gap:7px;font-size:12px;font-weight:800}
+.bar{height:11px;background:#e8edf3;border-radius:99px;overflow:hidden}
+.fill{height:100%;border-radius:99px;transition:width .4s}
+.health{background:linear-gradient(90deg,#52dc96,#22b884)}
+.happy{background:linear-gradient(90deg,#ffd15a,#ff9e3d)}
+.friend{background:linear-gradient(90deg,#9d84ff,#6d5dfc)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:13px}
+.btn{border:0;border-radius:17px;padding:14px 12px;font-weight:900;box-shadow:0 7px 15px #5a668327;transition:.15s;color:#fff}
+.btn:active{transform:scale(.97)}
+.blue{background:linear-gradient(135deg,#49b9ff,#247ee8)}
+.green{background:linear-gradient(135deg,#42d8a0,#139d70)}
+.gold{background:linear-gradient(135deg,#ffc950,#ee8c18)}
+.purple{background:linear-gradient(135deg,#9483ff,#5a49e8)}
+.teal{background:linear-gradient(135deg,#56c8d8,#2196a8)}
+.soft{background:#edf1f6;color:#4d5a6f;box-shadow:none}
+.danger{background:#fff0f1;color:#bc4250;box-shadow:none}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 3px 10px}
+.section-title h2{font-size:20px;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.card{background:var(--card);border:1px solid #fff;border-radius:21px;padding:14px;box-shadow:0 8px 20px #65719a16;text-align:center}
+.icon{font-size:44px}
+.small{font-size:12px;color:var(--muted);font-weight:700}
+.price{font-weight:900;margin:7px 0}
+.rarity{display:inline-block;border-radius:99px;padding:3px 8px;font-size:10px;font-weight:900;margin:4px}
+.rarity-common{background:#e7f8ef;color:#16865e}
+.rarity-special{background:#eee9ff;color:#604bd0}
+.rarity-premium{background:#fff0bd;color:#956500}
+.rarity-royal{background:linear-gradient(135deg,#fff0a6,#eadcff);color:#6b4b00}
+.favorite{background:#ffe6ef;color:#b63e6a}
+.equipped{outline:3px solid #795fff;background:linear-gradient(145deg,#fff,#eeeaff)}
+.room-preview{border-radius:18px;padding:13px;margin-bottom:10px;background:linear-gradient(145deg,#dff7e8,#e7f3ff);min-height:92px;display:grid;place-items:center;font-size:42px}
+.market-note{background:#eef7ff;color:#3f6485;border-radius:16px;padding:10px 12px;font-size:12px;font-weight:800;margin-bottom:12px}
+.tabs{display:flex;gap:6px;overflow:auto;padding:3px 2px 10px}
+.chip{white-space:nowrap;border:0;border-radius:99px;background:#ffffffb8;color:#617087;padding:9px 12px;font-weight:850}
+.chip.active{background:var(--purple);color:#fff}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(100%,520px);display:grid;grid-template-columns:repeat(4,1fr);background:#fffffff2;backdrop-filter:blur(14px);padding:7px 6px max(7px,env(safe-area-inset-bottom));box-shadow:0 -6px 24px #4651721c}
+.nav{border:0;background:none;color:#8b97a9;font-weight:850;font-size:11px;padding:7px 2px;border-radius:14px}
+.nav span{display:block;font-size:22px}
+.nav.active{color:var(--purple);background:#f0edff}
+.modal{display:none;position:fixed;inset:0;z-index:100;background:#27304799;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.sheet{width:min(100%,480px);max-height:88dvh;overflow:auto;background:#fff;border-radius:26px;padding:20px;box-shadow:0 25px 70px #10152666}
+.list{display:grid;gap:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f5f7fb;border-radius:16px;padding:11px}
+.practice{min-height:calc(100dvh - 170px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:21px;font-weight:900;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform 1s ease}
+.orb.inhale{animation:inhale 4s ease-in-out forwards}
+.orb.exhale{animation:exhale 5s ease-in-out forwards}
+.orb.hold-in{animation:holdIn 4s ease-in-out forwards}
+.orb.hold-out{animation:holdOut 4s ease-in-out forwards}
+@keyframes holdIn{from,to{transform:scale(1.45)}}
+@keyframes holdOut{from,to{transform:scale(.92)}}
+.orb.meditation{background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);animation:meditateGlow 5s ease-in-out infinite}
+.orb.bodyscan{background:radial-gradient(circle at 35% 30%,#f0d9ff,#9b6dfc 65%,#6a4bb9);animation:bodyscanGlow 6s ease-in-out infinite}
+@keyframes bodyscanGlow{50%{transform:scale(1.05);box-shadow:0 0 0 22px #a06dfc22,0 18px 50px #7b5dcc40}}
+.goal-card{background:linear-gradient(135deg,#fff,#fff4ce);border:2px solid #fff;border-radius:20px;padding:14px;margin:14px 0;box-shadow:0 8px 20px #65719a16}
+.goal-row{display:flex;align-items:center;gap:11px;text-align:left}
+.goal-icon{font-size:48px}
+.goalbar{height:12px;background:#e8e5dc;border-radius:99px;overflow:hidden;margin-top:9px}
+.goalfill{height:100%;background:linear-gradient(90deg,#ffb728,#6d5dfc);transition:width .4s}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);border:2px solid #fff;border-radius:18px;padding:12px;margin:10px 0;font-weight:900;color:#59429b}
+@keyframes meditateGlow{50%{transform:scale(1.08);box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}
+@keyframes inhale{to{transform:scale(1.45)}}
+@keyframes exhale{from{transform:scale(1.45)}to{transform:scale(.92)}}
+.buddy-zone{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:105px;margin:4px 0 10px}
+.buddy-pet{font-size:76px;filter:drop-shadow(0 10px 8px #53607b33);animation:buddyBreathe 5s ease-in-out infinite}
+.buddy-pet.resting{animation:buddyRest 4s ease-in-out infinite}
+.buddy-pet.celebrate{animation:buddyCelebrate .55s ease 4}
+.buddy-bubble{max-width:180px;background:#fff;border-radius:18px 18px 18px 4px;padding:9px 11px;font-size:12px;font-weight:850;color:#526178;box-shadow:0 6px 15px #53607b18}
+@keyframes buddyBreathe{50%{transform:scale(1.08) translateY(-5px)}}
+@keyframes buddyRest{50%{transform:rotate(2deg) translateY(3px) scale(.98)}}
+@keyframes buddyCelebrate{50%{transform:translateY(-28px) rotate(8deg) scale(1.12)}}
+.timer{font:900 50px ui-monospace,monospace;margin:38px 0 8px}
+.notice{background:#fff7d9;color:#755b00;border-radius:15px;padding:10px 12px;font-size:12px;font-weight:800;margin:10px 0}
+.check{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.locked{filter:grayscale(1);opacity:.55}
+.toastbox{position:fixed;z-index:200;top:75px;left:50%;transform:translateX(-50%);width:min(90%,430px);display:grid;gap:7px}
+.toast{background:#26344bea;color:#fff;border-radius:15px;padding:11px 14px;font-weight:800;box-shadow:var(--shadow)}
+.setup{display:grid;gap:10px}
+.setting-item{display:flex;gap:10px;align-items:flex-start;background:#f5f7fb;border-radius:15px;padding:11px}
+.setting-item input{width:auto!important;margin-top:3px;transform:scale(1.15)}
+.setting-copy{display:block}
+.setting-copy b{display:block;color:#344258}
+.setting-copy small{display:block;color:#748197;font-weight:700;line-height:1.35;margin-top:2px}
+.setup input,.setup select{width:100%;padding:12px;border:1px solid #dce2ec;border-radius:13px;background:#fff}
+.focus-banner{display:none;background:#fff0cf;color:#735300;border-radius:16px;padding:12px;font-weight:850;margin-bottom:10px}
+.focus-banner.show{display:block}
+.welcome-banner{background:linear-gradient(135deg,#e8f5ff,#f0e9ff);border:2px solid #fff;border-radius:20px;padding:16px;margin-bottom:14px;text-align:center}
+.weekly-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.weekly-stat{background:#f5f7fb;border-radius:14px;padding:10px;text-align:center}
+.pin-row input{max-width:180px;text-align:center;letter-spacing:8px;font-size:22px;padding:12px;border:1px solid #dce2ec;border-radius:13px;background:#fff;width:100%}
+.pin-row{margin:10px 0}
+.pin-row label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:4px;text-align:center}
+.mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin:8px 0}
+.mood-cell{background:#f5f7fb;border-radius:10px;padding:6px 2px;font-size:11px}
+.mood-cell .mood-emoji{font-size:22px;display:block}
+.mood-cell .mood-day{font-weight:800;color:var(--muted)}
+.streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0}
+.cal-cell{width:100%;aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:16px}
+.cal-done{background:#e7f8ef}.cal-miss{background:#f5f7fb}.cal-today{outline:2px solid var(--purple)}
+.bodyscan-guide{font-size:15px;font-weight:800;color:var(--ink);margin:8px 0;min-height:28px;transition:opacity .4s}
+.journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.journal-btn{border:0;background:#f5f7fb;border-radius:14px;padding:10px 6px;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:.15s}
+.journal-btn:hover,.journal-btn:active{background:#eee9ff}
+.journal-btn span{font-size:24px;display:block;margin-bottom:2px}
+.wishlist-bar{background:linear-gradient(135deg,#fff8e0,#f0e9ff);border:2px solid #fff;border-radius:16px;padding:11px 13px;margin:10px 0;display:none}
+.wishlist-bar.show{display:block}
+.wishlist-bar .goalbar{margin-top:6px}
+.eyes-closed-banner{background:linear-gradient(135deg,#e1f5e8,#e6ecff);border:2px solid #b8e6cc;border-radius:18px;padding:14px;margin:10px 0;text-align:center}
+.eyes-closed-banner b{display:block;margin-bottom:4px;color:#1a7544}
+.eyes-closed-banner .small{color:#3d7a56}
+.wakelock-status{font-size:11px;font-weight:700;border-radius:99px;padding:3px 10px;display:inline-block;margin:4px 0}
+.wakelock-active{background:#e1f5e8;color:#1a7544}
+.wakelock-inactive{background:#fff3cd;color:#735700}
+.returncheck{text-align:center;padding:10px 0}
+.returncheck h3{margin:0 0 8px}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 1.8s ease-out forwards}
+.confetti-piece:nth-child(odd){border-radius:50%}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(.3)}}
+.onboarding{position:fixed;inset:0;z-index:500;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);display:flex;align-items:center;justify-content:center;padding:20px}
+.onboarding.hidden{display:none}
+.ob-card{text-align:center;max-width:380px;width:100%}
+.ob-pet{font-size:100px;display:block;margin:10px auto;animation:float 3.2s ease-in-out infinite}
+.ob-dots{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.ob-dot{width:10px;height:10px;border-radius:50%;background:#d4d8e0}
+.ob-dot.active{background:var(--purple)}
+body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{animation:none!important;transform:none!important}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<!-- Onboarding overlay -->
+
 <div id="onboarding" class="onboarding hidden">
 <div class="ob-card">
 <div id="obPet" class="ob-pet">🐱</div>
 <h1 id="obTitle">Meet Whiskers!</h1>
-<p id="obText" style="font-size:15px;color:var(--muted);font-weight:700">I will practice calm with you. Together we will breathe, meditate, and play!</p>
+<p id="obText" style="font-size:15px;color:var(--muted);font-weight:700">I will practice calm with you.</p>
 <div class="ob-dots"><div class="ob-dot active" id="obDot0"></div><div class="ob-dot" id="obDot1"></div><div class="ob-dot" id="obDot2"></div></div>
 <button class="btn purple" id="obBtn" style="width:100%;margin-top:14px">Next →</button>
 </div>
 </div>
+
 <div class="app">
-<header class="top"><div class="brand">✨ Mindful Pets</div><div class="stats"><div class="pill">🔥 <b id="streak">0</b></div><div class="pill">⭐ <b id="stars">0</b></div><div class="pill">🪙 <b id="coins">0</b></div></div></header>
+<header class="top">
+<div class="brand">✨ Mindful Pets</div>
+<div class="stats">
+<div class="pill">🔥 <b id="streak">0</b></div>
+<div class="pill">⭐ <b id="stars">0</b></div>
+<div class="pill">🪙 <b id="coins">0</b></div>
+</div>
+</header>
+
 <main class="main">
-<section id="home" class="view active"><div id="focusBanner" class="focus-banner">Welcome back. The practice was paused while this app was not visible.</div><div id="welcomeBanner" class="welcome-banner" style="display:none"></div><div class="hero"><div id="petAvatar" class="pet">🐱</div><h1 id="petName">Whiskers</h1><p class="small" id="petLevel">Friendship level 1</p><div id="petMessage" class="pet-message">I'm happy you're here! Shall we practice or play?</div><div class="meters"><div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div><div class="meterline"><span>Happiness</span><div class="bar"><div id="happyFill" class="fill happy"></div></div><b id="happyN"></b></div><div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div></div></div><div class="grid3"><button class="btn blue" onclick="openPractice('breathing')">💨 Breathe</button><button class="btn green" onclick="openPractice('meditation')">🧘 Meditate</button><button class="btn teal" onclick="openPractice('bodyscan')">🧍 Body Scan</button></div><div class="grid2"><button class="btn gold" onclick="openFeed()">🍎 Feed</button><button class="btn purple" onclick="playPet()">💖 Play</button></div><div id="wishlistBar" class="wishlist-bar"></div><div id="charlieGoal" class="goal-card"></div><div class="section-title"><h2>Today's gentle mission</h2></div><div class="card" id="mission"></div><div class="special-reward">🎁 Practice for 10 minutes to earn a Calm Treasure. Complete 15 minutes for a Super Calm Treasure!</div></section>
-<section id="market" class="view"><div class="section-title"><h2>Marketplace</h2></div><div id="marketTabs" class="tabs"></div><div id="marketGrid" class="cards"></div></section>
-<section id="collection" class="view"><div class="section-title"><h2>My collection</h2></div><div id="petCollection" class="cards"></div><div class="section-title"><h2>Badges</h2></div><div id="badgeGrid" class="cards"></div></section>
-<section id="settings" class="view"><div class="section-title"><h2>Parent & settings</h2></div><div class="card" style="text-align:left"><div class="setup"><label>Child nickname<input id="childName" maxlength="18"></label><label>Age group<select id="ageGroup"><option value="5-7">5–7</option><option value="8-10">8–10</option><option value="11-12">11–12</option></select></label><label class="setting-item"><input id="buddyToggle" type="checkbox"><span class="setting-copy"><b>Practice with my pet</b><small>Show the selected pet quietly breathing or meditating alongside the child.</small></span></label><label class="setting-item"><input id="soundToggle" type="checkbox"><span class="setting-copy"><b>Game and reward sounds</b><small>Play cheerful sounds for rewards, games, feeding, purchases, and completed activities.</small></span></label><label class="setting-item"><input id="petSignalToggle" type="checkbox"><span class="setting-copy"><b>Pet completion sound</b><small>Let the pet bark, meow, chirp, or make its special sound when practice finishes.</small></span></label><label class="setting-item"><input id="hapticToggle" type="checkbox"><span class="setting-copy"><b>Gentle vibration</b><small>Use short vibrations for catches, treasures, and completed practices on supported devices.</small></span></label><label class="setting-item"><input id="motionToggle" type="checkbox"><span class="setting-copy"><b>Use fewer animations</b><small>Reduce pet movement, celebrations, and decorative motion for a calmer screen.</small></span></label><button class="btn purple" onclick="saveSettings()">Save settings</button><button class="btn soft" onclick="exportData()">Export offline backup</button><button class="btn soft" onclick="document.getElementById('importFile').click()">Import backup</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"><button class="btn soft" onclick="openPinSetup()">Set or change parent PIN</button><button class="btn danger" onclick="requestProtectedAction('reset')">Reset all progress</button></div></div><div class="section-title"><h2>This week</h2></div><div class="card weekly-grid" id="weeklySummary"></div><div class="section-title"><h2>Mood tracker</h2></div><div class="card" id="moodTracker"></div><div class="section-title"><h2>Practice calendar</h2></div><div class="card" id="streakCalendar"></div><div class="section-title"><h2>Recent practice record</h2></div><div class="card parent-log" id="parentLog"></div><div class="notice">Privacy: all progress stays in this browser unless a parent exports a backup. This app does not use the camera or microphone. Practice presence is estimated using app visibility and occasional mindful checks. It cannot confirm whether someone is truly meditating. All progress remains on this device unless a parent exports a backup. Pets can become gently tired, but never critically sick and never blame the child.</div></section>
-<section id="practice" class="view"><div class="practice"><h2 id="practiceTitle">Practice</h2><p id="practiceGuide" class="small"></p><div class="buddy-zone"><div id="buddyPet" class="buddy-pet">🐱</div><div id="buddyBubble" class="buddy-bubble">I will practice quietly with you.</div></div><div id="orb" class="orb">Ready</div><div id="bodyscanGuide" class="bodyscan-guide" style="display:none"></div><div id="timer" class="timer" role="timer" aria-label="Practice time remaining" aria-atomic="true">05:00</div><div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div><div class="participation"><b>Practice presence</b><div id="participationBar" class="participation-bar" role="progressbar" aria-label="Practice presence" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="participationFill" class="participation-fill"></div></div><div id="participationText" class="small">App visible • Practice running</div></div><div id="presenceCard" class="presence-card"><b id="presencePrompt">Quick mindful check</b><p id="presenceInstruction">Tap the matching symbol to continue.</p><div id="presenceChoices" class="check"></div></div><p id="integrityText" class="notice">This app can check attention and app visibility, but it cannot prove someone is meditating. If the app is hidden or a check is missed, the practice pauses.</p><div style="width:100%" class="grid2"><button class="btn soft" onclick="pauseResume()" id="pauseBtn">Pause</button><button class="btn danger" onclick="quitPractice()">End</button></div></div></section>
+
+<section id="home" class="view active">
+<div id="focusBanner" class="focus-banner">Welcome back. Practice paused while away.</div>
+<div id="welcomeBanner" class="welcome-banner" style="display:none"></div>
+<div class="hero">
+<div id="petAvatar" class="pet">🐱</div>
+<h1 id="petName">Whiskers</h1>
+<p class="small" id="petLevel">Friendship level 1</p>
+<div id="petMessage" class="pet-message">I'm happy you're here!</div>
+<div class="meters">
+<div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div>
+<div class="meterline"><span>Happiness</span><div class="bar"><div id="happyFill" class="fill happy"></div></div><b id="happyN"></b></div>
+<div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div>
+</div>
+</div>
+<div class="grid3">
+<button class="btn blue" id="btnBreathe">💨 Breathe</button>
+<button class="btn green" id="btnMeditate">🧘 Meditate</button>
+<button class="btn teal" id="btnBodyscan">🧍 Body Scan</button>
+</div>
+<div class="grid2">
+<button class="btn gold" id="btnFeed">🍎 Feed</button>
+<button class="btn purple" id="btnPlay">💖 Play</button>
+</div>
+<div id="wishlistBar" class="wishlist-bar"></div>
+<div id="charlieGoal" class="goal-card"></div>
+<div class="section-title"><h2>Today's gentle mission</h2></div>
+<div class="card" id="mission"></div>
+<div class="special-reward">🎁 Practice 10 min for a Calm Treasure. 15 min for a Super Calm Treasure!</div>
+</section>
+
+<section id="market" class="view">
+<div class="section-title"><h2>Marketplace</h2></div>
+<div id="marketTabs" class="tabs"></div>
+<div id="marketGrid" class="cards"></div>
+</section>
+
+<section id="collection" class="view">
+<div class="section-title"><h2>My collection</h2></div>
+<div id="petCollection" class="cards"></div>
+<div class="section-title"><h2>Badges</h2></div>
+<div id="badgeGrid" class="cards"></div>
+</section>
+
+<section id="settings" class="view">
+<div class="section-title"><h2>Parent &amp; settings</h2></div>
+<div class="card" style="text-align:left">
+<div class="setup">
+<label class="setting-item"><input id="buddyToggle" type="checkbox"><span class="setting-copy"><b>Practice with my pet</b><small>Show pet alongside during practice.</small></span></label>
+<label class="setting-item"><input id="soundToggle" type="checkbox"><span class="setting-copy"><b>Game and reward sounds</b><small>Play sounds for rewards and activities.</small></span></label>
+<label class="setting-item"><input id="petSignalToggle" type="checkbox"><span class="setting-copy"><b>Pet completion sound</b><small>Pet sound when practice finishes.</small></span></label>
+<label class="setting-item"><input id="hapticToggle" type="checkbox"><span class="setting-copy"><b>Gentle vibration</b><small>Vibrate for catches and completions.</small></span></label>
+<label class="setting-item"><input id="motionToggle" type="checkbox"><span class="setting-copy"><b>Use fewer animations</b><small>Reduce motion for a calmer screen.</small></span></label>
+<button class="btn purple" id="btnSaveChildSettings">Save my settings</button>
+</div>
+</div>
+<div class="section-title"><h2>Parent dashboard 🔒</h2></div>
+<div id="parentLockedCard" class="card" style="text-align:center;padding:20px">
+<b>🔒 Parent-only area</b>
+<p class="small">Records, mood, calendar, age, backup, and reset are protected.</p>
+<button class="btn purple" id="btnUnlockParent" style="margin-top:8px">🔓 Unlock</button>
+</div>
+<div id="parentUnlockedCard" style="display:none">
+<div class="card" style="text-align:left"><div class="setup">
+<label>Child nickname<input id="childName" maxlength="18"></label>
+<label>Age group<select id="ageGroup"><option value="5-7">5–7</option><option value="8-10">8–10</option><option value="11-12">11–12</option></select></label>
+<button class="btn purple" id="btnSaveParentSettings">Save parent settings</button>
+<button class="btn soft" id="btnExport">Export backup</button>
+<button class="btn soft" id="btnImport">Import backup</button>
+<input id="importFile" type="file" accept="application/json" hidden>
+<button class="btn soft" id="btnSetPin">Set or change PIN</button>
+<button class="btn danger" id="btnReset">Reset all progress</button>
+<button class="btn soft" id="btnLockParent">🔒 Lock dashboard</button>
+</div></div>
+<div class="section-title"><h2>This week</h2></div>
+<div class="card weekly-grid" id="weeklySummary"></div>
+<div class="section-title"><h2>Mood tracker</h2></div>
+<div class="card" id="moodTracker"></div>
+<div class="section-title"><h2>Practice calendar</h2></div>
+<div class="card" id="streakCalendar"></div>
+<div class="section-title"><h2>Recent record</h2></div>
+<div class="card parent-log" id="parentLog"></div>
+</div>
+<div class="notice">Privacy: all data stays in this browser. No camera, microphone, or network use. Presence is estimated from visibility and checks — it cannot prove meditation. Pets never blame the child.</div>
+</section>
+
+<section id="practice" class="view">
+<div class="practice">
+<h2 id="practiceTitle">Practice</h2>
+<p id="practiceGuide" class="small"></p>
+<div class="buddy-zone">
+<div id="buddyPet" class="buddy-pet">🐱</div>
+<div id="buddyBubble" class="buddy-bubble">I will practice quietly with you.</div>
+</div>
+<div id="orb" class="orb">Ready</div>
+<div id="bodyscanGuide" class="bodyscan-guide" style="display:none"></div>
+<div id="timer" class="timer" role="timer" aria-label="Time remaining">05:00</div>
+<div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<!-- Eyes-closed mode banner -->
+<div id="eyesClosedBanner" class="eyes-closed-banner" style="display:none">
+<b>🧘 Eyes-closed mode active</b>
+<div class="small">Screen can lock safely. Timer continues in the background. A gentle check will appear when you return.</div>
+<div id="wakelockStatus" class="wakelock-status wakelock-inactive">Wake lock: not active</div>
+</div>
+<!-- Return check (shown when user comes back from eyes-closed) -->
+<div id="returnCheck" class="presence-card" style="display:none">
+<div class="returncheck">
+<h3>Welcome back 🌿</h3>
+<p id="returnCheckText" class="small">You were away for 0 minutes. Tap the symbol to confirm you were practising.</p>
+<div id="returnCheckChoices" class="check"></div>
+</div>
+</div>
+<div class="participation">
+<b>Practice presence</b>
+<div id="participationBar" class="participation-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+<div id="participationFill" class="participation-fill"></div>
+</div>
+<div id="participationText" class="small">App visible</div>
+</div>
+<div id="presenceCard" class="presence-card">
+<b id="presencePrompt">Quick mindful check</b>
+<p id="presenceInstruction">Tap the matching symbol.</p>
+<div id="presenceChoices" class="check"></div>
+</div>
+<p class="notice">This app checks attention and visibility but cannot prove meditation. If hidden during breathing, it pauses. During meditation and body scan, it continues but asks a gentle check when you return.</p>
+<div style="width:100%" class="grid2">
+<button class="btn soft" id="btnPauseResume">Pause</button>
+<button class="btn danger" id="btnQuitPractice">End</button>
+</div>
+</div>
+</section>
+
 </main>
-<nav class="bottom"><button class="nav active" data-view="home"><span>🏡</span>Home</button><button class="nav" data-view="market"><span>🏪</span>Market</button><button class="nav" data-view="collection"><span>🎒</span>Collection</button><button class="nav" data-view="settings"><span>⚙️</span>Settings</button></nav>
-<div id="chooseModal" class="modal"><div class="sheet"><h2 id="chooseTitle">Choose a practice</h2><p id="chooseIntro" class="small">Your pet will practice with you. Choose the time that feels right today.</p><div id="breathPatternArea" style="display:none"><p class="small" style="margin:8px 0 4px;font-weight:900">Breathing pattern</p><div id="breathPatternTabs" class="tabs"></div></div><div id="practiceOptions" class="list"></div><div class="notice">🌱 Five minutes builds the habit. 🎁 Ten minutes unlocks a Calm Treasure. ✨ Fifteen minutes unlocks a Super Calm Treasure.</div><button class="btn soft" onclick="closeModal('chooseModal')">Close</button></div></div>
-<div id="feedModal" class="modal"><div class="sheet"><h2>Food pantry</h2><div id="pantrySort" class="tabs" style="margin-bottom:8px"></div><div id="pantry" class="list"></div><button class="btn soft" onclick="closeModal('feedModal')">Close</button></div></div>
-<div id="checkModal" class="modal"><div class="sheet"><h2>Nice work showing up! 🎉</h2><p>How do you feel now? Any answer is okay.</p><div class="check"><button class="btn soft" onclick="finishCheck('calm')">😌 Calm</button><button class="btn soft" onclick="finishCheck('happy')">😊 Happy</button><button class="btn soft" onclick="finishCheck('sleepy')">😴 Sleepy</button><button class="btn soft" onclick="finishCheck('same')">🙂 About the same</button></div></div></div>
-<div id="journalModal" class="modal"><div class="sheet"><h2>What did you notice? ✨</h2><p class="small">Optional — tap one or skip. No wrong answers.</p><div class="journal-grid"><button class="journal-btn" onclick="finishJournal('breath')"><span>🌬️</span>My breath</button><button class="journal-btn" onclick="finishJournal('thoughts')"><span>🦋</span>My thoughts</button><button class="journal-btn" onclick="finishJournal('sounds')"><span>🎵</span>Sounds</button><button class="journal-btn" onclick="finishJournal('stillness')"><span>💤</span>Stillness</button><button class="journal-btn" onclick="finishJournal('body')"><span>🧍</span>My body</button><button class="journal-btn" onclick="finishJournal('wandered')"><span>☁️</span>Mind wandered</button></div><button class="btn soft" onclick="finishJournal(null)" style="width:100%;margin-top:8px">Skip</button></div></div>
-<div id="rewardChoiceModal" class="modal"><div class="sheet"><h2>We earned this together! ✨</h2><p id="rewardChoiceText">Would you like to save for Charlie or visit the food market?</p><div class="choice-grid"><button class="btn purple" onclick="chooseAfterReward('save')">🐕 Save for Charlie</button><button class="btn gold" onclick="chooseAfterReward('food')">🍎 Shop for food</button></div><button class="btn soft" onclick="chooseAfterReward('home')">Maybe later</button></div></div>
-<div id="pinModal" class="modal"><div class="sheet"><h2 id="pinTitle">Parent PIN</h2><p id="pinText">Enter the four-digit PIN.</p><div class="pin-row"><input id="pinInput" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" aria-label="Four digit parent PIN"></div><button class="btn purple" onclick="submitPin()">Continue</button><button class="btn soft" onclick="closeModal('pinModal')">Cancel</button></div></div>
-<div id="playModal" class="modal"><div class="sheet"><h2>Pet Playground 🐾</h2><p id="playInstruction">Choose a game below.</p><div class="tabs"><button class="chip active" id="patTab" onclick="setPlayMode('pat')">🖐️ Pat & Tickle</button><button class="chip" id="ballTab" onclick="setPlayMode('ball')">🎾 Throw Ball</button></div><div class="play-area" id="playArea"><div id="gamePet" class="game-pet">🐱</div><div id="handHint" class="hand-hint">👇</div><div id="gameBall" class="game-ball" hidden>🎾</div><p id="playScore" style="font-weight:900;position:absolute;left:12px;top:10px">Joy 0 / 6</p></div><button class="btn soft" onclick="closePlay()">Finish playing</button></div></div>
+
+<nav class="bottom">
+<button class="nav active" data-view="home"><span>🏡</span>Home</button>
+<button class="nav" data-view="market"><span>🏪</span>Market</button>
+<button class="nav" data-view="collection"><span>🎒</span>Collection</button>
+<button class="nav" data-view="settings"><span>⚙️</span>Settings</button>
+</nav>
+
+<div id="chooseModal" class="modal"><div class="sheet">
+<h2 id="chooseTitle">Choose a practice</h2>
+<p id="chooseIntro" class="small"></p>
+<div id="breathPatternArea" style="display:none">
+<p class="small" style="margin:8px 0 4px;font-weight:900">Breathing pattern</p>
+<div id="breathPatternTabs" class="tabs"></div>
+</div>
+<div id="practiceOptions" class="list"></div>
+<div class="notice">🌱 5 min builds habit. 🎁 10 min = Calm Treasure. ✨ 15 min = Super Calm Treasure.</div>
+<button class="btn soft" data-close="chooseModal">Close</button>
+</div></div>
+
+<div id="feedModal" class="modal"><div class="sheet">
+<h2>Food pantry</h2>
+<div id="pantrySort" class="tabs" style="margin-bottom:8px"></div>
+<div id="pantry" class="list"></div>
+<button class="btn soft" data-close="feedModal">Close</button>
+</div></div>
+
+<div id="checkModal" class="modal"><div class="sheet">
+<h2>Nice work showing up! 🎉</h2>
+<p>How do you feel now? Any answer is okay.</p>
+<div class="check">
+<button class="btn soft" data-feeling="calm">😌 Calm</button>
+<button class="btn soft" data-feeling="happy">😊 Happy</button>
+<button class="btn soft" data-feeling="sleepy">😴 Sleepy</button>
+<button class="btn soft" data-feeling="same">🙂 About the same</button>
+</div>
+</div></div>
+
+<div id="journalModal" class="modal"><div class="sheet">
+<h2>What did you notice? ✨</h2>
+<p class="small">Optional — tap one or skip.</p>
+<div class="journal-grid">
+<button class="journal-btn" data-journal="breath"><span>🌬️</span>My breath</button>
+<button class="journal-btn" data-journal="thoughts"><span>🦋</span>Thoughts</button>
+<button class="journal-btn" data-journal="sounds"><span>🎵</span>Sounds</button>
+<button class="journal-btn" data-journal="stillness"><span>💤</span>Stillness</button>
+<button class="journal-btn" data-journal="body"><span>🧍</span>My body</button>
+<button class="journal-btn" data-journal="wandered"><span>☁️</span>Mind wandered</button>
+</div>
+<button class="btn soft" data-journal="__skip" style="width:100%;margin-top:8px">Skip</button>
+</div></div>
+
+<div id="rewardChoiceModal" class="modal"><div class="sheet">
+<h2>We earned this together! ✨</h2>
+<p id="rewardChoiceText"></p>
+<div class="choice-grid">
+<button class="btn purple" data-reward="save">🐕 Save for Charlie</button>
+<button class="btn gold" data-reward="food">🍎 Shop for food</button>
+</div>
+<button class="btn soft" data-reward="home" style="margin-top:8px;width:100%">Maybe later</button>
+</div></div>
+
+<div id="pinModal" class="modal"><div class="sheet">
+<h2 id="pinTitle">Parent PIN</h2>
+<p id="pinText" class="small"></p>
+<div id="pinCurrentRow" class="pin-row" style="display:none">
+<label for="pinCurrent">Current PIN</label>
+<input id="pinCurrent" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off">
+</div>
+<div id="pinNewRow" class="pin-row">
+<label for="pinInput" id="pinInputLabel">PIN</label>
+<input id="pinInput" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off">
+</div>
+<div id="pinConfirmRow" class="pin-row" style="display:none">
+<label for="pinConfirm">Confirm new PIN</label>
+<input id="pinConfirm" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off">
+</div>
+<button class="btn purple" id="btnSubmitPin" style="width:100%;margin-top:6px">Continue</button>
+<button class="btn soft" data-close="pinModal" style="width:100%;margin-top:6px">Cancel</button>
+</div></div>
+
+<div id="nicknameModal" class="modal"><div class="sheet">
+<h2>Give your pet a nickname</h2>
+<p class="small" id="nicknameSub">Max 12 characters.</p>
+<input id="nicknameInput" maxlength="12" style="width:100%;padding:12px;border:1px solid #dce2ec;border-radius:13px;margin:10px 0">
+<button class="btn purple" id="btnSaveNickname" style="width:100%">Save</button>
+<button class="btn soft" data-close="nicknameModal" style="width:100%;margin-top:6px">Cancel</button>
+</div></div>
+
+<div id="playModal" class="modal"><div class="sheet">
+<h2>Pet Playground 🐾</h2>
+<p id="playInstruction">Choose a game.</p>
+<div class="tabs">
+<button class="chip active" id="patTab">🖐️ Pat</button>
+<button class="chip" id="ballTab">🎾 Ball</button>
+</div>
+<div class="play-area" id="playArea">
+<div id="gamePet" class="game-pet">🐱</div>
+<div id="handHint" class="hand-hint">👇</div>
+<div id="gameBall" class="game-ball" hidden>🎾</div>
+<p id="playScore" style="font-weight:900;position:absolute;left:12px;top:10px">Joy 0 / 6</p>
+</div>
+<button class="btn soft" id="btnClosePlay">Finish playing</button>
+</div></div>
+
 <div id="milestoneModal" class="modal"><div class="sheet" id="milestoneContent"></div></div>
-<div id="toastbox" class="toastbox"></div></div>
+<div id="storyModal" class="modal"><div class="sheet" id="storyContent"></div></div>
+<div id="toastbox" class="toastbox"></div>
+</div>
+
 <script>
 'use strict';
-const KEY='mindfulPetsOneFileV3';
-const PETS=[{id:'cat',name:'Whiskers',icon:'🐱',cost:0},{id:'dog',name:'Buddy',icon:'🐶',cost:120},{id:'bunny',name:'Thumper',icon:'🐰',cost:180},{id:'panda',name:'Bao',icon:'🐼',cost:280},{id:'fox',name:'Ember',icon:'🦊',cost:360},{id:'dragon',name:'Sparky',icon:'🐲',cost:550},{id:'kingcharles',name:'Charlie the King Charles',icon:'🐕',cost:1200}];
-const ITEMS=[
-{id:'seeds',cat:'food',name:'Sunny Seeds',icon:'🌾',cost:8,energy:8,happy:1,rarity:'common'},
-{id:'strawberry',cat:'food',name:'Sweet Strawberry',icon:'🍓',cost:12,energy:12,happy:2,rarity:'common'},
-{id:'carrot',cat:'food',name:'Crunchy Carrot',icon:'🥕',cost:16,energy:16,happy:2,rarity:'common'},
-{id:'banana',cat:'food',name:'Happy Banana',icon:'🍌',cost:20,energy:20,happy:3,rarity:'common'},
-{id:'apple',cat:'food',name:'Shiny Apple',icon:'🍎',cost:26,energy:26,happy:4,rarity:'common'},
-{id:'fish',cat:'food',name:'Ocean Fish',icon:'🐟',cost:32,energy:30,happy:7,rarity:'special'},
-{id:'bone',cat:'food',name:'Hero Bone',icon:'🦴',cost:36,energy:32,happy:8,rarity:'special'},
-{id:'watermelon',cat:'food',name:'Watermelon Picnic',icon:'🍉',cost:40,energy:36,happy:6,rarity:'special'},
-{id:'berryBowl',cat:'food',name:'Magic Berry Bowl',icon:'🫐',cost:48,energy:40,happy:9,rarity:'special'},
-{id:'smoothie',cat:'food',name:'Rainbow Smoothie',icon:'🥤',cost:58,energy:46,happy:12,rarity:'premium'},
-{id:'cupcake',cat:'food',name:'Celebration Cupcake',icon:'🧁',cost:72,energy:48,happy:18,rarity:'premium'},
-{id:'moonCake',cat:'food',name:'Moon Cake',icon:'🥮',cost:86,energy:58,happy:20,rarity:'premium'},
-{id:'royalFeast',cat:'food',name:'Royal Friendship Feast',icon:'🍱',cost:125,energy:75,happy:25,friend:8,rarity:'royal'},
-{id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',icon:'🐉',cost:145,energy:82,happy:28,friend:10,rarity:'royal'},
-{id:'streakShield',cat:'item',name:'Streak Shield',icon:'🛡️',cost:50,rarity:'special'},
-{id:'flower',cat:'accessory',name:'Flower Crown',icon:'🌸',cost:90,rarity:'common'},
-{id:'scarf',cat:'accessory',name:'Cozy Scarf',icon:'🧣',cost:110,rarity:'common'},
-{id:'glasses',cat:'accessory',name:'Star Glasses',icon:'🤩',cost:135,rarity:'special'},
-{id:'backpack',cat:'accessory',name:'Explorer Backpack',icon:'🎒',cost:155,rarity:'special'},
-{id:'raincoat',cat:'accessory',name:'Sunny Raincoat',icon:'🧥',cost:175,rarity:'special'},
-{id:'cape',cat:'accessory',name:'Calm Hero Cape',icon:'🦸',cost:210,rarity:'premium'},
-{id:'wizard',cat:'accessory',name:'Dream Wizard Hat',icon:'🧙',cost:235,rarity:'premium'},
-{id:'headphones',cat:'accessory',name:'Cloud Headphones',icon:'🎧',cost:260,rarity:'premium'},
-{id:'crown',cat:'accessory',name:'Royal Pet Crown',icon:'👑',cost:390,rarity:'royal'},
-{id:'wings',cat:'accessory',name:'Rainbow Wings',icon:'🪽',cost:450,rarity:'royal'},
-{id:'forest',cat:'room',name:'Enchanted Forest',icon:'🌲',cost:150,theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',rarity:'common'},
-{id:'cloud',cat:'room',name:'Cloud Castle',icon:'☁️',cost:195,theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',rarity:'special'},
-{id:'ocean',cat:'room',name:'Ocean Sanctuary',icon:'🌊',cost:240,theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',rarity:'special'},
-{id:'garden',cat:'room',name:'Kindness Garden',icon:'🌷',cost:275,theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',rarity:'special'},
-{id:'candy',cat:'room',name:'Candy Dream Room',icon:'🍭',cost:310,theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',rarity:'premium'},
-{id:'space',cat:'room',name:'Galaxy Bedroom',icon:'🌌',cost:360,theme:'linear-gradient(145deg,#20204a,#553b83)',rarity:'premium'},
-{id:'castle',cat:'room',name:'Royal Castle Suite',icon:'🏰',cost:525,theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',rarity:'royal'},
-{id:'dragonCave',cat:'room',name:'Crystal Dragon Cave',icon:'💎',cost:650,theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',rarity:'royal'},
-{id:'goldenCrown',cat:'special',name:'Golden Calm Crown',icon:'👑',cost:0,rarity:'royal'},
-{id:'starCape',cat:'special',name:'Starlight Cape',icon:'🌟',cost:0,rarity:'royal'},
-{id:'moonRoom',cat:'special',name:'Moon Sanctuary',icon:'🌙',cost:0,rarity:'royal'},
-{id:'rainbowAura',cat:'special',name:'Rainbow Aura',icon:'🌈',cost:0,rarity:'royal'}];
-const PET_FAVORITES={cat:['fish','moonCake'],dog:['bone','royalFeast'],kingcharles:['royalFeast','cupcake'],bunny:['carrot','berryBowl'],bird:['seeds','strawberry'],frog:['berryBowl','watermelon'],fox:['fish','apple'],panda:['apple','berryBowl'],dragon:['dragonFruit','moonCake']};
-const PET_DIALOGUE={cat:{morning:["Good morning! I dreamed of fish. 🐟","Purr... let's start the day with calm."],afterPractice:["That felt so peaceful. Thank you. 💙","Purr... my favourite kind of quiet."],hungry:["My tummy is rumbly. Could we find a snack?","I smell something yummy nearby..."],playful:["I found a piece of string. Want to play?","Shall we chase some butterflies together?"]},dog:{morning:["Good morning! Tail wag! 🐾","Woof! I'm so happy to see you!"],afterPractice:["That was amazing! Can we do more?","I feel so calm and happy now."],hungry:["Is it snack time? I hope so!","My bowl is looking pretty empty..."],playful:["Throw the ball! Throw the ball!","Let's run around and play!"]},bunny:{morning:["Good morning! Hop hop! 🐰","I found a comfy spot for us today."],afterPractice:["So still and peaceful. I loved it.","My little nose feels so relaxed."],hungry:["Do you have a crunchy carrot?","Something fresh would be lovely..."],playful:["Want to hop around together?","I bet I can jump higher than you!"]},panda:{morning:["Yawn... good morning, friend. 🎋","Time for bamboo and breathing."],afterPractice:["That was wonderfully calm.","I feel as peaceful as a mountain."],hungry:["Bamboo time? Or maybe something sweet?","My tummy is making rumbly sounds..."],playful:["Let's roll around in the grass!","I know a fun tumbling game."]},fox:{morning:["Good morning, clever friend! 🦊","The forest is quiet today. Perfect."],afterPractice:["My ears are so relaxed now.","That was a truly foxy meditation."],hungry:["I could use a berry or an apple!","Something from the forest, please?"],playful:["Want to play hide and seek?","I'm feeling sneaky and fun today!"]},dragon:{morning:["Morning, brave one! 🔥","Even dragons need their calm time."],afterPractice:["My fire feels warm and gentle now.","That was powerful and peaceful."],hungry:["A dragon needs fuel! Feed me!","Got any magical dragon fruit?"],playful:["Shall we soar through the clouds?","I promise I won't breathe fire... much."]},kingcharles:{morning:["Good morning, your majesty! 👑","Regal tail wag for a regal day."],afterPractice:["A royal moment of peace. Lovely.","Charlie feels calm and grateful."],hungry:["The royal tummy requests a feast!","Something fit for a king, please?"],playful:["A gentle game of fetch, perhaps?","Even royals love to play!"]}};
-function getPetDialogue(context){const id=state.activePetId,lines=PET_DIALOGUE[id]?.[context]||PET_DIALOGUE.cat[context]||[];return lines.length?lines[Math.floor(Math.random()*lines.length)]:''}
-function isFavoriteFood(foodId){return (PET_FAVORITES[state.activePetId]||[]).includes(foodId)}
-const BADGES=[{id:'first',icon:'🌱',name:'First Calm Minute',test:s=>s.progress.sessions>=1},{id:'five',icon:'⭐',name:'Five Practices',test:s=>s.progress.sessions>=5},{id:'variety',icon:'🌈',name:'Calm Explorer',test:s=>s.progress.breathing>=1&&s.progress.meditation>=1},{id:'tenmin',icon:'🧘',name:'Ten Mindful Minutes',test:s=>s.progress.totalSeconds>=600},{id:'streak3',icon:'🔥',name:'Three Gentle Days',test:s=>s.player.bestStreak>=3},{id:'bodyscan1',icon:'🧍',name:'Body Explorer',test:s=>s.progress.bodyscan>=1},{id:'streak7',icon:'💎',name:'Seven Day Journey',test:s=>s.player.bestStreak>=7},{id:'twenty',icon:'🏆',name:'Twenty Practices',test:s=>s.progress.sessions>=20}];
-const BREATH_PATTERNS=[
-{id:'balloon',name:'Balloon Breath',ages:['5-7','8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'exhale',d:5000,t:'Breathe out'}]},
-{id:'box',name:'Box Breathing',ages:['8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:4000,t:'Hold gently'},{p:'exhale',d:4000,t:'Breathe out'},{p:'hold-out',d:4000,t:'Hold gently'}]},
-{id:'478',name:'4-7-8 Calm',ages:['11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:7000,t:'Hold gently'},{p:'exhale',d:8000,t:'Breathe out'}]},
-{id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:1200,t:'Sniff'},{p:'inhale',d:1200,t:'Sniff'},{p:'inhale',d:1200,t:'Sniff'},{p:'exhale',d:4000,t:'Long breathe out'}]}
+
+/* ═══ CONSTANTS ═══ */
+const KEY = 'mindfulPetsOneFileV3';
+const PETS = [
+  {id:'cat',name:'Whiskers',icon:'🐱',cost:0},{id:'dog',name:'Buddy',icon:'🐶',cost:120},
+  {id:'bunny',name:'Thumper',icon:'🐰',cost:180},{id:'panda',name:'Bao',icon:'🐼',cost:280},
+  {id:'fox',name:'Ember',icon:'🦊',cost:360},{id:'dragon',name:'Sparky',icon:'🐲',cost:550},
+  {id:'kingcharles',name:'Charlie the King Charles',icon:'🐕',cost:1200}
 ];
-const BODYSCAN_SCRIPTS={'5-7':[{t:'Notice your feet on the ground',d:12},{t:'Wiggle your toes gently',d:10},{t:'Feel your tummy breathing',d:12},{t:'Relax your shoulders down',d:10},{t:'Notice sounds around you',d:12}],'8-10':[{t:'Feel your feet touching the floor',d:10},{t:'Notice your legs — are they heavy or light?',d:10},{t:'Pay attention to your tummy rising and falling',d:12},{t:'Feel your hands — are they warm or cool?',d:10},{t:'Notice your shoulders. Let them drop.',d:10},{t:'Feel your face. Relax your jaw.',d:10},{t:'Listen to the quietest sound you can find',d:12}],'11-12':[{t:'Bring your attention to the soles of your feet',d:10},{t:'Notice any sensations in your ankles and calves',d:10},{t:'Feel the weight of your legs on the chair or floor',d:10},{t:'Notice your abdomen expanding and contracting',d:12},{t:'Become aware of your hands and fingers',d:10},{t:'Notice the rise and fall of your chest',d:10},{t:'Relax the muscles around your eyes and forehead',d:10},{t:'Let your jaw soften and your tongue rest',d:10}]};
-function petProfile(){return{health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null}}
-function defaults(){return{version:3,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,onboardingDone:false}}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.version===3){x.settings=x.settings||{};if(x.settings.buddy===undefined)x.settings.buddy=true;if(x.settings.petSignal===undefined)x.settings.petSignal=true;if(x.settings.haptic===undefined)x.settings.haptic=true;if(x.settings.pinHash===undefined)x.settings.pinHash=null;if(x.settings.breathPattern===undefined)x.settings.breathPattern='balloon';if(x.progress.bodyscan===undefined)x.progress.bodyscan=0;if(x.player.streakShields===undefined)x.player.streakShields=0;if(x.wishlist===undefined)x.wishlist=null;if(x.onboardingDone===undefined)x.onboardingDone=false;Object.values(x.pets).forEach(p=>{if(p.nickname===undefined)p.nickname=null;if(p.fedToday===undefined)p.fedToday=false;if(p.fedDate===undefined)p.fedDate=null});return x}return defaults()}catch{return defaults()}}
-let state=load(),marketCat='food',session=null,tick=null,breathPhaseTimer=null,breathRAF=null,attentionTick=null,feedLocked=false,completionLocked=false,pendingProtectedAction=null,lastPatAt=0,bodyscanTimer=null,bodyscanIdx=0,selectedBreathPattern='balloon',pantrySort='energy',lastCheckFeeling=null;
-let audioCtx=null;
-function tone(freq,duration=.13,type='sine',volume=.12,delay=0){if(!state.settings.sound)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(volume,t+.015);g.gain.exponentialRampToValueAtTime(0.001,t+duration);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+duration+.03)}catch(e){}}
-function playSound(kind){if(kind==='coin'){tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)}else if(kind==='complete'){tone(523,.2,'sine',.12);tone(659,.22,'sine',.12,.18);tone(784,.35,'sine',.13,.38)}else if(kind==='treasure'){tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)}else if(kind==='attention'){tone(740,.16,'sine',.08);tone(740,.16,'sine',.08,.22)}else if(kind==='buy'){tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)}else if(kind==='tap'){tone(520,.08,'sine',.05)}else if(kind==='levelup'){tone(523,.15,'sine',.11);tone(659,.15,'sine',.11,.14);tone(784,.15,'sine',.11,.28);tone(1047,.3,'sine',.12,.42)}}
-function haptic(pattern){if(state.settings.haptic&&navigator.vibrate)try{navigator.vibrate(pattern)}catch(e){}}
-function petCompletionSignal(){if(!state.settings.sound||!state.settings.petSignal)return;const id=state.activePetId;if(['dog','kingcharles'].includes(id)){tone(185,.13,'sawtooth',.09);tone(125,.19,'sawtooth',.08,.12)}else if(id==='cat'){tone(520,.16,'sine',.08);tone(680,.23,'sine',.07,.13)}else if(id==='dragon'){tone(95,.28,'sawtooth',.07);tone(190,.18,'triangle',.06,.24)}else{tone(460,.12,'triangle',.07);tone(620,.16,'triangle',.07,.13)}}
-function buddyMessage(text){buddyBubble.textContent=text}
-function prepareBuddy(type){const pet=PETS.find(x=>x.id===state.activePetId);buddyPet.textContent=pet.icon;buddyPet.style.display=state.settings.buddy?'block':'none';buddyBubble.style.display=state.settings.buddy?'block':'none';buddyPet.className='buddy-pet '+(type==='meditation'||type==='bodyscan'?'resting':'');const msgs={breathing:'I will follow the gentle breathing circle with you.',meditation:'I will sit quietly with you. We can notice the calm together.',bodyscan:'I will relax each part of my body with you.'};buddyMessage(msgs[type]||msgs.breathing)}
-function celebrateBuddy(){if(!state.settings.buddy)return;buddyPet.className='buddy-pet celebrate';buddyMessage(getPetDialogue('afterPractice'))}
-function showConfetti(){if(state.settings.reducedMotion)return;const c=document.createElement('div');c.className='confetti';const colors=['#6d5dfc','#2f9cf4','#22b884','#ffb728','#ec6470','#ff9e3d'];for(let i=0;i<30;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=colors[i%colors.length];p.style.animationDelay=Math.random()*.6+'s';p.style.width=(6+Math.random()*8)+'px';p.style.height=(6+Math.random()*8)+'px';c.appendChild(p)}document.body.appendChild(c);setTimeout(()=>c.remove(),2500)}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){if(e.name==='QuotaExceededError'){state.progress.checkIns=state.progress.checkIns.slice(-20);try{localStorage.setItem(KEY,JSON.stringify(state))}catch{toast('Storage full. Export a backup.')}}}}
-function clamp(n){return Math.max(0,Math.min(100,n))}
-function activePet(){return state.pets[state.activePetId]}
-function localDate(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
-function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)}
-function checkDaily(){const d=localDate();if(state.daily.date!==d){state.daily={date:d,earned:0,missionCount:0};Object.values(state.pets).forEach(p=>{p.fedToday=false;p.fedDate=d})}}
-function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;toastbox.append(e);setTimeout(()=>e.remove(),3500)}
-function ensurePetCareData(p){const now=Date.now();if(!p.lastCareAt)p.lastCareAt=now;if(!p.lastDecayAt)p.lastDecayAt=now}
-function applyGentleCareDecay(){const now=Date.now(),day=86400000;Object.values(state.pets).forEach(p=>{ensurePetCareData(p);const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day})}
-function getPetEmotionState(){const p=activePet(),h=new Date().getHours();if(p.health<50)return'exhausted';if(state.daily.missionCount>=3)return'excited';if(h>=21||h<6)return'sleepy';if(p.happiness>85)return'playful';return''}
-function updatePetMessage(){const p=activePet(),name=PETS.find(x=>x.id===state.activePetId).name,nick=p.nickname||name,emotion=getPetEmotionState();let msg='',care=false;const h=new Date().getHours();
-if(p.health<50){msg=`${nick} is exhausted and resting. Let's practice together, earn some coins, and choose a healthy snack. 🍎`;care=true}
-else if(p.happiness<50){msg=`${nick} missed spending time together. Gentle pats or a game would feel lovely. 💛`;care=true}
-else if(p.health<=65){msg=getPetDialogue('hungry')||'I used some energy today. Shall we earn and choose a healthy snack? 🥕';care=true}
-else if(p.happiness<=60){msg='Can we play together after today\'s calm practice? 🌿';care=true}
-else if(emotion==='excited')msg=getPetDialogue('playful')||`${nick} is so excited — all missions complete today!`;
-else if(emotion==='sleepy')msg=`${nick} is getting sleepy. A gentle practice before bed? 🌙`;
-else if(emotion==='playful')msg=getPetDialogue('playful')||`${nick} is feeling playful and happy!`;
-else if(h<12)msg=getPetDialogue('morning')||'I\'m happy you\'re here! Shall we practice or play?';
-else msg='I\'m happy you\'re here! Shall we practice or play?';
-petMessage.textContent=msg;petMessage.classList.toggle('needs-care',care)}
-function getWelcomeMessage(){const h=new Date().getHours(),name=PETS.find(x=>x.id===state.activePetId).name,nick=activePet().nickname||name,practiced=state.player.lastPracticeDate===localDate();if(practiced)return null;if(h<12)return `Good morning! ${nick} is waiting for you. Ready for today's calm minute? 🌅`;if(h<17)return `Good afternoon! ${nick} would love to practice with you. 🌿`;return `Good evening! A gentle practice before bed with ${nick}? 🌙`}
-function renderWelcomeBanner(){const msg=getWelcomeMessage(),el=document.getElementById('welcomeBanner');if(!msg){el.style.display='none';return}el.style.display='block';el.innerHTML=`<div class="pet" style="font-size:52px;animation:none;margin:2px 0">${PETS.find(x=>x.id===state.activePetId).icon}</div><p style="margin:6px 0 0;font-weight:800;font-size:14px">${msg}</p>`}
-function render(){checkDaily();applyGentleCareDecay();const p=PETS.find(x=>x.id===state.activePetId),ps=activePet();petAvatar.textContent=p.icon+(ps.accessory?' '+ITEMS.find(x=>x.id===ps.accessory)?.icon:'');const roomItem=ITEMS.find(x=>x.id===ps.room&&x.cat==='room');document.querySelector('.hero').style.background=roomItem?.theme||'linear-gradient(145deg,#fff9,#ffffffd9)';const emotion=getPetEmotionState();petAvatar.className='pet'+(emotion?' '+emotion:'');const displayName=ps.nickname?`${ps.nickname} (${p.name})`:p.name;petName.textContent=displayName;petLevel.textContent=`Friendship level ${ps.level} • ${ps.room} room`;updatePetMessage();renderWelcomeBanner();for(const [id,n] of [['health',ps.health],['happy',ps.happiness],['friend',ps.friendXP%100]]){document.getElementById(id+'Fill').style.width=n+'%';document.getElementById(id+'N').textContent=Math.round(n)}streak.textContent=state.player.streak+(state.player.streakShields>0?' 🛡️'+state.player.streakShields:'');stars.textContent=state.player.stars;coins.textContent=state.player.coins;mission.innerHTML=`<b>Complete ${Math.min(3,state.daily.missionCount+1)} of 3 calm activities</b><p class="small">${state.daily.missionCount}/3 today • Bonus 30 coins at 3</p>`;renderCharlieGoal();renderWishlist();renderMarket();renderCollection();childName.value=state.player.name;ageGroup.value=state.player.age;soundToggle.checked=state.settings.sound;motionToggle.checked=state.settings.reducedMotion;buddyToggle.checked=state.settings.buddy;petSignalToggle.checked=state.settings.petSignal;hapticToggle.checked=state.settings.haptic;document.body.classList.toggle('reduce',state.settings.reducedMotion);renderParentLog();renderWeeklySummary();renderMoodTracker();renderStreakCalendar();save()}
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===id));document.querySelector('.bottom').style.display=id==='practice'?'none':'grid'}
-document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>showView(n.dataset.view));
-// --- Onboarding ---
-function showOnboarding(){if(state.onboardingDone)return;const ob=document.getElementById('onboarding');ob.classList.remove('hidden');let step=0;const steps=[{pet:'🐱',title:'Meet Whiskers!',text:'I will practice calm with you. Together we will breathe, meditate, and play!',btn:'Next →'},{pet:'🪙',title:'Earn & Grow',text:'Each practice earns coins and makes me happy. Save up for new pets, rooms, and treats!',btn:'Next →'},{pet:'🔒',title:'Safe & Private',text:'Your parent can check your progress and keep things safe. Everything stays on this device.',btn:'Let\'s begin! 🎉'}];function renderStep(){document.getElementById('obPet').textContent=steps[step].pet;document.getElementById('obTitle').textContent=steps[step].title;document.getElementById('obText').textContent=steps[step].text;document.getElementById('obBtn').textContent=steps[step].btn;for(let i=0;i<3;i++)document.getElementById('obDot'+i).classList.toggle('active',i===step)}renderStep();document.getElementById('obBtn').onclick=()=>{step++;if(step>=steps.length){state.onboardingDone=true;save();ob.classList.add('hidden')}else renderStep()}}
-// --- Wishlist ---
-function renderWishlist(){const bar=document.getElementById('wishlistBar');if(!state.wishlist){bar.classList.remove('show');return}const item=ITEMS.find(i=>i.id===state.wishlist);if(!item||state.ownedItems.includes(item.id)){state.wishlist=null;bar.classList.remove('show');return}bar.classList.add('show');const pct=Math.min(100,Math.round(state.player.coins/item.cost*100));bar.innerHTML=`<b>${item.icon} Saving for: ${item.name}</b><div class="small">🪙 ${state.player.coins} / ${item.cost} coins</div><div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div><button class="btn soft" style="margin-top:6px;padding:8px 10px;font-size:11px" onclick="state.wishlist=null;save();render()">Remove wishlist</button>`}
-function setWishlist(id){state.wishlist=id;save();render();toast('Wishlist set! Every coin counts.')}
-// --- Charlie Goal ---
-function renderCharlieGoal(){const charlie=PETS.find(p=>p.id==='kingcharles'),owned=!!state.pets.kingcharles;if(owned){charlieGoal.innerHTML='<div class="goal-row"><div class="goal-icon">🐕</div><div><b>Charlie joined the family!</b><div class="small">You reached the royal dream-pet goal through patient saving.</div></div></div>';return}const pct=Math.min(100,Math.round(state.player.coins/charlie.cost*100));charlieGoal.innerHTML=`<div class="goal-row"><div class="goal-icon">🐕</div><div style="flex:1"><b>Saving for Charlie</b><div class="small">${state.player.coins} / ${charlie.cost} coins • ${charlie.cost-state.player.coins} to go</div><div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div></div></div>`}
-// --- Market ---
-function renderMarket(){marketTabs.innerHTML=['food','pet','accessory','room','item'].map(c=>`<button class="chip ${marketCat===c?'active':''}" onclick="setMarket('${c}')">${{food:'Food',pet:'Pets',accessory:'Accessories',room:'Rooms',item:'Items'}[c]}</button>`).join('');let data;if(marketCat==='pet')data=PETS;else if(marketCat==='item')data=ITEMS.filter(x=>x.cat==='item');else data=ITEMS.filter(x=>x.cat===marketCat);const ps=activePet();const notes={food:`💖 ${PETS.find(p=>p.id===state.activePetId).name}'s favorite foods give 50% more energy and happiness.`,accessory:'🎀 Accessories are owned by the family but equipped separately for each pet.',room:'🏡 Every pet can use a different room. Purchased rooms can be reused by all pets.',pet:'🐾 Every adopted pet keeps separate energy, happiness, friendship, room, and accessory data.',item:'🛡️ Special items with unique effects.'};
-marketGrid.innerHTML=`<div class="market-note" style="grid-column:1/-1">${notes[marketCat]||''}</div>`+data.map(i=>{const owned=marketCat==='pet'?!!state.pets[i.id]:i.cat==='item'?false:(i.cat!=='food'&&state.ownedItems.includes(i.id));const qty=i.cat==='food'?(state.inventory[i.id]||0):'';const equipped=i.cat==='accessory'&&ps.accessory===i.id||i.cat==='room'&&ps.room===i.id;const fav=i.cat==='food'&&isFavoriteFood(i.id);let desc='';if(i.id==='kingcharles')desc='Royal dream pet • Special goal';else if(i.id==='streakShield')desc=`Protects streak if you miss a day. Owned: ${state.player.streakShields}`;else if(i.cat==='food')desc=`+${i.energy} energy • +${i.happy} joy • ${qty} owned`;else if(i.cat==='accessory')desc='Dress your active pet';else if(i.cat==='room')desc='Reusable pet room';else desc=owned?'Owned':'Collectible';
-let action='';if(marketCat==='pet')action=owned?`<button class="btn ${state.activePetId===i.id?'soft':'purple'}" onclick="selectPet('${i.id}')">${state.activePetId===i.id?'Selected':'Select'}</button>`:`<button class="btn purple" onclick="buy('pet','${i.id}')">Buy</button>`;else if(i.cat==='food'||i.cat==='item')action=`<button class="btn purple" onclick="buy('${i.cat}','${i.id}')">Buy</button>`;else if(!owned)action=`<button class="btn purple" onclick="buy('${i.cat}','${i.id}')">Buy</button>`;else action=`<button class="btn ${equipped?'soft':'green'}" onclick="equipItem('${i.cat}','${i.id}')">${equipped?'Equipped':i.cat==='room'?'Use Room':'Equip'}</button>`;
-const wishBtn=i.cat!=='food'&&i.cat!=='item'&&i.cat!=='pet'&&!owned?`<button class="btn soft" style="margin-top:4px;padding:6px 8px;font-size:11px" onclick="setWishlist('${i.id}')">💝 Wishlist</button>`:'';
-const preview=i.cat==='room'?`<div class="room-preview" style="background:${i.theme}">${i.icon}</div>`:`<div class="icon">${i.icon}</div>`;return `<div class="card ${equipped?'equipped':''}">${preview}<b>${i.name}</b><div><span class="rarity rarity-${i.rarity||'common'}">${(i.rarity||'common').toUpperCase()}</span>${fav?'<span class="rarity favorite">PET FAVORITE</span>':''}</div><div class="small">${desc}</div><div class="price">🪙 ${i.cost}</div>${action}${wishBtn}</div>`}).join('')}
-function setMarket(c){marketCat=c;renderMarket()}
-function buy(cat,id){const obj=cat==='pet'?PETS.find(x=>x.id===id):ITEMS.find(x=>x.id===id);if(!obj)return toast('Item not found.');if(cat==='pet'&&state.pets[id])return toast(`${obj.name} is already part of your family.`);if(cat!=='food'&&cat!=='item'&&state.ownedItems.includes(id))return toast(`${obj.name} is already in your collection.`);if(state.player.coins<obj.cost)return toast('Complete practices to earn more coins.');state.player.coins-=obj.cost;if(cat==='pet')state.pets[id]=petProfile();else if(cat==='food')state.inventory[id]=(state.inventory[id]||0)+1;else if(cat==='item'&&id==='streakShield'){state.player.streakShields=Math.min(3,(state.player.streakShields||0)+1)}else{state.ownedItems.push(id);if(cat==='accessory')activePet().accessory=id;if(cat==='room')activePet().room=id}save();render();playSound('buy');toast(`${obj.name} ${cat==='accessory'?'equipped!':cat==='room'?'is now your pet room!':'added!'}`)}
-function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();renderMarket();playSound('tap');toast(cat==='room'?'Room changed for this pet.':p.accessory?'Accessory equipped for this pet.':'Accessory removed.')}
-function renderCollection(){petCollection.innerHTML=PETS.filter(p=>state.pets[p.id]).map(p=>{const pp=state.pets[p.id],nick=pp.nickname?`${pp.nickname} (${p.name})`:p.name;return `<div class="card"><div class="icon">${p.icon}</div><b>${nick}</b><div class="small">Level ${pp.level}</div><button class="btn ${state.activePetId===p.id?'soft':'purple'}" onclick="selectPet('${p.id}')">${state.activePetId===p.id?'Selected':'Select'}</button><button class="btn soft" style="margin-top:4px;padding:6px 8px;font-size:11px" onclick="renamePet('${p.id}')">✏️ Nickname</button></div>`}).join('');
-state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);badgeGrid.innerHTML=BADGES.map(b=>`<div class="card ${state.progress.badges.includes(b.id)?'':'locked'}"><div class="icon">${b.icon}</div><b>${b.name}</b></div>`).join('')+ITEMS.filter(i=>i.cat==='special').map(i=>`<div class="card ${state.ownedItems.includes(i.id)?'':'locked'}"><div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${state.ownedItems.includes(i.id)?'Long-practice treasure':'Complete 10+ minutes'}</div></div>`).join('')}
-function renamePet(id){const name=prompt('Give your pet a nickname (max 12 characters):');if(name===null)return;const clean=name.replace(/[<>]/g,'').trim().slice(0,12);state.pets[id].nickname=clean||null;save();render();toast(clean?`Nicknamed: ${clean}`:'Nickname removed.')}
-function selectPet(id){state.activePetId=id;save();render();showView('home');toast('Pet selected. Its progress is separate.')}
-// --- Feed ---
-function openFeed(){renderPantry();feedModal.classList.add('show')}
-function renderPantry(){const foods=ITEMS.filter(i=>i.cat==='food'&&(state.inventory[i.id]||0)>0);const sorted=[...foods].sort((a,b)=>{if(pantrySort==='favorite'){const af=isFavoriteFood(a.id)?1:0,bf=isFavoriteFood(b.id)?1:0;if(af!==bf)return bf-af}if(pantrySort==='rarity'){const order={royal:4,premium:3,special:2,common:1};return(order[b.rarity]||0)-(order[a.rarity]||0)}return(b[pantrySort]||0)-(a[pantrySort]||0)});
-document.getElementById('pantrySort').innerHTML=['energy','happy','favorite','rarity'].map(s=>`<button class="chip ${pantrySort===s?'active':''}" onclick="pantrySort='${s}';renderPantry()">${{energy:'⚡ Energy',happy:'😊 Joy',favorite:'💖 Favorite',rarity:'✨ Rarity'}[s]}</button>`).join('');
-pantry.innerHTML=sorted.length?sorted.map(i=>`<div class="row"><span><b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br><span class="small">+${i.energy} energy • +${i.happy} joy ${isFavoriteFood(i.id)?'• 💖 Favorite bonus':''}</span></span><button class="btn green" onclick="feed('${i.id}')">Feed</button></div>`).join(''):'<p>Your pantry is empty. Visit the market.</p>'}
-function feed(id){if(feedLocked)return;feedLocked=true;setTimeout(()=>feedLocked=false,600);const i=ITEMS.find(x=>x.id===id),p=activePet();if(!i||(state.inventory[id]||0)<=0){feedLocked=false;return toast('That food is no longer available.')}if(p.health>=100&&p.happiness>=100)return toast('Your pet is full and happy. Save this food for later.');state.inventory[id]=Math.max(0,(state.inventory[id]||0)-1);const favorite=isFavoriteFood(id),mult=favorite?1.5:1;p.health=clamp(p.health+Math.round(i.energy*mult));p.happiness=clamp(p.happiness+Math.round(i.happy*mult));if(i.friend)p.friendXP+=Math.round(i.friend*mult);p.lastCareAt=Date.now();p.lastDecayAt=Date.now();
-const wasFirstFeed=!p.fedToday;p.fedToday=true;p.fedDate=localDate();
-levelPet(p);save();closeModal('feedModal');render();playSound(favorite?'treasure':'tap');
-if(wasFirstFeed){petAvatar.classList.remove('grateful');void petAvatar.offsetWidth;petAvatar.classList.add('grateful');setTimeout(()=>petAvatar.classList.remove('grateful'),2000);toast(favorite?`${i.icon} Favorite food! ${activePet().nickname||PETS.find(x=>x.id===state.activePetId).name} is grateful! 💖`:`${i.icon} First feed today! Thank you for caring!`)}else{toast(favorite?`${i.icon} Favorite food! Extra energy and joy!`:`${i.icon} Energy restored! Thank you for caring for me.`)}}
-// --- Play ---
+const ITEMS = [
+  {id:'seeds',cat:'food',name:'Sunny Seeds',icon:'🌾',cost:8,energy:8,happy:1,rarity:'common'},
+  {id:'strawberry',cat:'food',name:'Sweet Strawberry',icon:'🍓',cost:12,energy:12,happy:2,rarity:'common'},
+  {id:'carrot',cat:'food',name:'Crunchy Carrot',icon:'🥕',cost:16,energy:16,happy:2,rarity:'common'},
+  {id:'banana',cat:'food',name:'Happy Banana',icon:'🍌',cost:20,energy:20,happy:3,rarity:'common'},
+  {id:'apple',cat:'food',name:'Shiny Apple',icon:'🍎',cost:26,energy:26,happy:4,rarity:'common'},
+  {id:'fish',cat:'food',name:'Ocean Fish',icon:'🐟',cost:32,energy:30,happy:7,rarity:'special'},
+  {id:'bone',cat:'food',name:'Hero Bone',icon:'🦴',cost:36,energy:32,happy:8,rarity:'special'},
+  {id:'watermelon',cat:'food',name:'Watermelon Picnic',icon:'🍉',cost:40,energy:36,happy:6,rarity:'special'},
+  {id:'berryBowl',cat:'food',name:'Magic Berry Bowl',icon:'🫐',cost:48,energy:40,happy:9,rarity:'special'},
+  {id:'smoothie',cat:'food',name:'Rainbow Smoothie',icon:'🥤',cost:58,energy:46,happy:12,rarity:'premium'},
+  {id:'cupcake',cat:'food',name:'Celebration Cupcake',icon:'🧁',cost:72,energy:48,happy:18,rarity:'premium'},
+  {id:'moonCake',cat:'food',name:'Moon Cake',icon:'🥮',cost:86,energy:58,happy:20,rarity:'premium'},
+  {id:'royalFeast',cat:'food',name:'Royal Friendship Feast',icon:'🍱',cost:125,energy:75,happy:25,friend:8,rarity:'royal'},
+  {id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',icon:'🐉',cost:145,energy:82,happy:28,friend:10,rarity:'royal'},
+  {id:'streakShield',cat:'item',name:'Streak Shield',icon:'🛡️',cost:50,rarity:'special'},
+  {id:'flower',cat:'accessory',name:'Flower Crown',icon:'🌸',cost:90,rarity:'common'},
+  {id:'scarf',cat:'accessory',name:'Cozy Scarf',icon:'🧣',cost:110,rarity:'common'},
+  {id:'glasses',cat:'accessory',name:'Star Glasses',icon:'🤩',cost:135,rarity:'special'},
+  {id:'backpack',cat:'accessory',name:'Explorer Backpack',icon:'🎒',cost:155,rarity:'special'},
+  {id:'raincoat',cat:'accessory',name:'Sunny Raincoat',icon:'🧥',cost:175,rarity:'special'},
+  {id:'cape',cat:'accessory',name:'Calm Hero Cape',icon:'🦸',cost:210,rarity:'premium'},
+  {id:'wizard',cat:'accessory',name:'Dream Wizard Hat',icon:'🧙',cost:235,rarity:'premium'},
+  {id:'headphones',cat:'accessory',name:'Cloud Headphones',icon:'🎧',cost:260,rarity:'premium'},
+  {id:'crown',cat:'accessory',name:'Royal Pet Crown',icon:'👑',cost:390,rarity:'royal'},
+  {id:'wings',cat:'accessory',name:'Rainbow Wings',icon:'🪽',cost:450,rarity:'royal'},
+  {id:'forest',cat:'room',name:'Enchanted Forest',icon:'🌲',cost:150,theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',rarity:'common'},
+  {id:'cloud',cat:'room',name:'Cloud Castle',icon:'☁️',cost:195,theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',rarity:'special'},
+  {id:'ocean',cat:'room',name:'Ocean Sanctuary',icon:'🌊',cost:240,theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',rarity:'special'},
+  {id:'garden',cat:'room',name:'Kindness Garden',icon:'🌷',cost:275,theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',rarity:'special'},
+  {id:'candy',cat:'room',name:'Candy Dream Room',icon:'🍭',cost:310,theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',rarity:'premium'},
+  {id:'space',cat:'room',name:'Galaxy Bedroom',icon:'🌌',cost:360,theme:'linear-gradient(145deg,#20204a,#553b83)',rarity:'premium'},
+  {id:'castle',cat:'room',name:'Royal Castle Suite',icon:'🏰',cost:525,theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',rarity:'royal'},
+  {id:'dragonCave',cat:'room',name:'Crystal Dragon Cave',icon:'💎',cost:650,theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',rarity:'royal'},
+  {id:'goldenCrown',cat:'special',name:'Golden Calm Crown',icon:'👑',cost:0,rarity:'royal'},
+  {id:'starCape',cat:'special',name:'Starlight Cape',icon:'🌟',cost:0,rarity:'royal'},
+  {id:'moonRoom',cat:'special',name:'Moon Sanctuary',icon:'🌙',cost:0,rarity:'royal'},
+  {id:'rainbowAura',cat:'special',name:'Rainbow Aura',icon:'🌈',cost:0,rarity:'royal'}
+];
+const PET_FAVORITES = {cat:['fish','moonCake'],dog:['bone','royalFeast'],kingcharles:['royalFeast','cupcake'],bunny:['carrot','berryBowl'],fox:['fish','apple'],panda:['apple','berryBowl'],dragon:['dragonFruit','moonCake']};
+const BADGES = [
+  {id:'first',icon:'🌱',name:'First Calm Minute',test:s=>s.progress.sessions>=1},
+  {id:'five',icon:'⭐',name:'Five Practices',test:s=>s.progress.sessions>=5},
+  {id:'variety',icon:'🌈',name:'Calm Explorer',test:s=>s.progress.breathing>=1&&s.progress.meditation>=1},
+  {id:'tenmin',icon:'🧘',name:'Ten Mindful Minutes',test:s=>s.progress.totalSeconds>=600},
+  {id:'streak3',icon:'🔥',name:'Three Gentle Days',test:s=>s.player.bestStreak>=3},
+  {id:'bodyscan1',icon:'🧍',name:'Body Explorer',test:s=>s.progress.bodyscan>=1},
+  {id:'streak7',icon:'💎',name:'Seven Day Journey',test:s=>s.player.bestStreak>=7},
+  {id:'twenty',icon:'🏆',name:'Twenty Practices',test:s=>s.progress.sessions>=20}
+];
+const BREATH_PATTERNS = [
+  {id:'balloon',name:'Balloon Breath',ages:['5-7','8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'exhale',d:5000,t:'Breathe out'}]},
+  {id:'box',name:'Box Breathing',ages:['8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:4000,t:'Hold gently'},{p:'exhale',d:4000,t:'Breathe out'},{p:'hold-out',d:4000,t:'Hold gently'}]},
+  {id:'478',name:'4-7-8 Calm',ages:['11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:7000,t:'Hold gently'},{p:'exhale',d:8000,t:'Breathe out'}]},
+  {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:1200,t:'Sniff'},{p:'inhale',d:1200,t:'Sniff'},{p:'inhale',d:1200,t:'Sniff'},{p:'exhale',d:4000,t:'Long breathe out'}]}
+];
+const BODYSCAN_SCRIPTS = {
+  '5-7':[{t:'Notice your feet on the ground',d:12},{t:'Wiggle your toes gently',d:10},{t:'Feel your tummy breathing',d:12},{t:'Relax your shoulders down',d:10},{t:'Notice sounds around you',d:12}],
+  '8-10':[{t:'Feel your feet touching the floor',d:10},{t:'Notice your legs',d:10},{t:'Pay attention to your tummy rising and falling',d:12},{t:'Feel your hands',d:10},{t:'Notice your shoulders. Let them drop.',d:10},{t:'Feel your face. Relax your jaw.',d:10},{t:'Listen to the quietest sound',d:12}],
+  '11-12':[{t:'Bring attention to the soles of your feet',d:10},{t:'Notice sensations in ankles and calves',d:10},{t:'Feel the weight of your legs',d:10},{t:'Notice your abdomen expanding',d:12},{t:'Become aware of your hands and fingers',d:10},{t:'Notice the rise and fall of your chest',d:10},{t:'Relax muscles around your eyes',d:10},{t:'Let your jaw soften',d:10}]
+};
+const EX = {
+  breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],
+  meditation:[['Kindness Garden',300],['Moonlight Calm',600],['Peaceful Explorer',900]],
+  bodyscan:[['Quick Body Check',180],['Body Explorer',300],['Deep Body Scan',600]]
+};
+const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
+
+function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
+function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
+function defaults(){ return {version:3,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,onboardingDone:false}; }
+
+/* ═══ STATE ═══ */
+function loadState(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY));
+    if(!x||x.version!==3)return defaults();
+    x.settings=x.settings||{};
+    const sd={buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon',sound:true,reducedMotion:false};
+    for(const[k,v]of Object.entries(sd))if(x.settings[k]===undefined)x.settings[k]=v;
+    if(x.progress.bodyscan===undefined)x.progress.bodyscan=0;
+    if(x.player.streakShields===undefined)x.player.streakShields=0;
+    if(x.wishlist===undefined)x.wishlist=null;
+    if(x.onboardingDone===undefined)x.onboardingDone=false;
+    Object.values(x.pets).forEach(p=>{
+      if(p.nickname===undefined)p.nickname=null;
+      if(p.fedToday===undefined)p.fedToday=false;
+      if(p.fedDate===undefined)p.fedDate=null;
+      if(!Array.isArray(p.milestones))p.milestones=[];
+    });
+    return x;
+  }catch{return defaults();}
+}
+
+let state = loadState();
+let session = null;
+let tick = null;
+let breathPhaseTimer = null;
+let breathRAF = null;
+let attentionTick = null;
+let bodyscanTimer = null;
+let feedLocked = false;
+let completionLocked = false;
+let pendingProtectedAction = null;
+let lastPatAt = 0;
+let selectedBreathPattern = 'balloon';
+let pantrySort = 'energy';
+let lastCheckFeeling = null;
+let parentUnlocked = false;
+let parentUnlockedUntil = 0;
+let pinMode = 'verify';
+let renamingPetId = null;
+let marketCat = 'food';
+// Wake Lock
+let wakeLockSentinel = null;
+// Eyes-closed mode
+let eyesClosedMode = false;
+let hiddenAt = 0;       // timestamp when screen went off during eyes-closed
+let hiddenSeconds = 0;  // accumulated hidden seconds during eyes-closed
+let returnCheckPending = false;
+
+/* ═══ DOM CACHE ═══ */
+const $ = id => document.getElementById(id);
+const activePet = () => state.pets[state.activePetId];
+const activePetDef = () => PETS.find(p=>p.id===state.activePetId);
+
+/* ═══ AUDIO ═══ */
+let audioCtx = null;
+function tone(freq,dur=.13,type='sine',vol=.12,del=0){
+  if(!state.settings.sound)return;
+  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+del;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur+.03);}catch(e){}
+}
+function playSound(k){
+  const m={coin:()=>{tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)},complete:()=>{tone(523,.2,'sine',.12);tone(659,.22,'sine',.12,.18);tone(784,.35,'sine',.13,.38)},treasure:()=>{tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)},attention:()=>{tone(740,.16,'sine',.08);tone(740,.16,'sine',.08,.22)},buy:()=>{tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)},tap:()=>{tone(520,.08,'sine',.05)},levelup:()=>{tone(523,.15,'sine',.11);tone(659,.15,'sine',.11,.14);tone(784,.15,'sine',.11,.28);tone(1047,.3,'sine',.12,.42)},error:()=>{tone(300,.18,'square',.06)}};
+  if(m[k])m[k]();
+}
+function haptic(p){if(state.settings.haptic&&navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
+function petCompletionSignal(){
+  if(!state.settings.sound||!state.settings.petSignal)return;
+  const id=state.activePetId;
+  if(['dog','kingcharles'].includes(id)){tone(185,.13,'sawtooth',.09);tone(125,.19,'sawtooth',.08,.12);}
+  else if(id==='cat'){tone(520,.16,'sine',.08);tone(680,.23,'sine',.07,.13);}
+  else if(id==='dragon'){tone(95,.28,'sawtooth',.07);tone(190,.18,'triangle',.06,.24);}
+  else{tone(460,.12,'triangle',.07);tone(620,.16,'triangle',.07,.13);}
+}
+
+/* ═══ UTILITY ═══ */
+function clamp(n){return Math.max(0,Math.min(100,n));}
+function localDate(d=new Date()){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isoToLocalDate(s){const d=new Date(s);return isNaN(d.getTime())?'':localDate(d);}
+function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);}
+function checkDaily(){const d=localDate();if(state.daily.date!==d){state.daily={date:d,earned:0,missionCount:0};Object.values(state.pets).forEach(p=>{p.fedToday=false;p.fedDate=d;});}}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;$('toastbox').appendChild(e);setTimeout(()=>e.remove(),3500);}
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function format(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+function showConfetti(){if(state.settings.reducedMotion)return;const c=document.createElement('div');c.className='confetti';const cols=['#6d5dfc','#2f9cf4','#22b884','#ffb728','#ec6470','#ff9e3d'];for(let i=0;i<30;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=cols[i%cols.length];p.style.animationDelay=Math.random()*.6+'s';p.style.width=(6+Math.random()*8)+'px';p.style.height=(6+Math.random()*8)+'px';c.appendChild(p);}document.body.appendChild(c);setTimeout(()=>c.remove(),2500);}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){if(e.name==='QuotaExceededError'){state.progress.checkIns=state.progress.checkIns.slice(-20);try{localStorage.setItem(KEY,JSON.stringify(state));}catch{toast('Storage full.');}}}}
+function applyGentleCareDecay(){const now=Date.now(),day=864e5;Object.values(state.pets).forEach(p=>{if(!p.lastDecayAt)p.lastDecayAt=now;if(!p.lastCareAt)p.lastCareAt=now;const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day;});}
+
+/* ═══ WAKE LOCK ═══ */
+// Keeps screen on during meditation and body scan so the timer doesn't pause.
+// Falls back to eyes-closed mode if Wake Lock is unsupported.
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator))return false;
+  try{
+    wakeLockSentinel=await navigator.wakeLock.request('screen');
+    wakeLockSentinel.addEventListener('release',()=>{wakeLockSentinel=null;updateWakeLockUI();});
+    updateWakeLockUI();
+    return true;
+  }catch(e){
+    wakeLockSentinel=null;
+    updateWakeLockUI();
+    return false;
+  }
+}
+async function releaseWakeLock(){
+  if(wakeLockSentinel){try{await wakeLockSentinel.release();}catch(e){}wakeLockSentinel=null;}
+  updateWakeLockUI();
+}
+function updateWakeLockUI(){
+  const el=$('wakelockStatus');
+  if(!el)return;
+  if(wakeLockSentinel){
+    el.className='wakelock-status wakelock-active';
+    el.textContent='🟢 Screen will stay on';
+  }else{
+    el.className='wakelock-status wakelock-inactive';
+    el.textContent='Screen may dim — timer continues if it does';
+  }
+}
+// Re-acquire wake lock when tab becomes visible again (browser releases it on hide)
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&session&&eyesClosedMode&&!wakeLockSentinel){
+    requestWakeLock();
+  }
+});
+
+/* ═══ EYES-CLOSED MODE ═══ */
+// For meditation and body scan: the timer CONTINUES when the screen locks.
+// When the user returns, a gentle "return check" verifies they were practising.
+// For breathing: screen-off = pause (child needs to watch the orb).
+
+function isEyesClosedType(){
+  return session && (session.type==='meditation'||session.type==='bodyscan');
+}
+
+function enterEyesClosedMode(){
+  if(!session)return;
+  eyesClosedMode=true;
+  hiddenSeconds=0;
+  hiddenAt=0;
+  returnCheckPending=false;
+  $('eyesClosedBanner').style.display='block';
+  // Request wake lock to try keeping screen on
+  requestWakeLock();
+  updateWakeLockUI();
+}
+
+function exitEyesClosedMode(){
+  eyesClosedMode=false;
+  $('eyesClosedBanner').style.display='none';
+  releaseWakeLock();
+}
+
+// Called when the app goes hidden during an eyes-closed session
+function handleEyesClosedHide(){
+  if(!session||!eyesClosedMode||!session.running)return;
+  hiddenAt=Date.now();
+  // DON'T pause the session — the timer keeps counting via endAt.
+  // Body scan timer will stop advancing prompts (that's fine, eyes closed).
+  clearTimeout(bodyscanTimer);
+  // Breathing is not in eyes-closed mode, so this shouldn't happen, but guard:
+  stopBreathLoop();
+}
+
+// Called when the app returns from being hidden during eyes-closed
+function handleEyesClosedReturn(){
+  if(!session||!eyesClosedMode)return;
+  // Calculate how long we were hidden
+  const awayMs = hiddenAt > 0 ? (Date.now() - hiddenAt) : 0;
+  const awaySec = Math.floor(awayMs / 1000);
+  hiddenSeconds += awaySec;
+  hiddenAt = 0;
+
+  // If the session already ended while hidden
+  if(Date.now() >= session.endAt){
+    session.remaining = 0;
+    // Credit the hidden time as visible (they were meditating)
+    session.eyesClosedSeconds = (session.eyesClosedSeconds||0) + awaySec;
+    completePractice();
+    return;
+  }
+
+  // Update remaining time (endAt-based, so it auto-advances even when hidden)
+  session.remaining = Math.max(0, Math.ceil((session.endAt - Date.now())/1000));
+  session.eyesClosedSeconds = (session.eyesClosedSeconds||0) + awaySec;
+
+  // If away for more than 10 seconds, show a gentle return check
+  if(awaySec >= 10){
+    showReturnCheck(awaySec);
+  }else{
+    // Short absence — just resume body scan prompts
+    if(session.type==='bodyscan')resumeBodyScan();
+  }
+
+  // Re-acquire wake lock
+  requestWakeLock();
+}
+
+function showReturnCheck(awaySec){
+  returnCheckPending=true;
+  const mins=Math.round(awaySec/60);
+  const timeText=mins>=1?`${mins} minute${mins>1?'s':''}`:`${awaySec} seconds`;
+  $('returnCheckText').textContent=`You were away for ${timeText}. Tap the matching symbol to confirm you were practising.`;
+  const answer=PRESENCE_SYMBOLS[Math.floor(Math.random()*PRESENCE_SYMBOLS.length)];
+  session.returnAnswer=answer;
+  $('returnCheckText').textContent+=` Tap ${answer}.`;
+  const choices=$('returnCheckChoices');
+  choices.innerHTML='';
+  shuffle(PRESENCE_SYMBOLS).forEach(sym=>{
+    const btn=document.createElement('button');
+    btn.className='btn soft';
+    btn.textContent=sym;
+    btn.addEventListener('click',()=>answerReturnCheck(sym));
+    choices.appendChild(btn);
+  });
+  $('returnCheck').style.display='block';
+}
+
+function answerReturnCheck(sym){
+  if(!session||!returnCheckPending)return;
+  if(sym!==session.returnAnswer){
+    playSound('error');
+    toast('Look for the correct symbol.');
+    return;
+  }
+  returnCheckPending=false;
+  $('returnCheck').style.display='none';
+  session.returnAnswer=null;
+  session.attentionPassed++;
+  // Resume body scan if applicable
+  if(session.type==='bodyscan')resumeBodyScan();
+  updateParticipation();
+  toast('Welcome back. Practice continues. 🌿');
+}
+
+/* ═══ VISIBILITY HANDLER (redesigned) ═══ */
+document.addEventListener('visibilitychange',()=>{
+  if(!session)return;
+
+  if(document.hidden){
+    // Screen went off or tab hidden
+    if(isEyesClosedType()&&eyesClosedMode&&session.running){
+      // Meditation/body scan in eyes-closed mode: DON'T pause
+      handleEyesClosedHide();
+    }else if(session.running){
+      // Breathing or non-eyes-closed: pause
+      session.hiddenPauses++;
+      $('focusBanner').classList.add('show');
+      setSessionRunning(false);
+    }
+  }else{
+    // Screen came back
+    if(isEyesClosedType()&&eyesClosedMode){
+      handleEyesClosedReturn();
+    }else if(!session.running&&!session.attentionDue){
+      session.last=Date.now();
+      toast('Practice paused. Tap ▶ Resume to continue.');
+    }
+  }
+});
+
+/* ═══ RENDER ═══ */
+function getPetEmotionState(){
+  const p=activePet(),h=new Date().getHours();
+  if(p.health<50)return'exhausted';
+  if(p.level>=10&&p.milestones.includes(10))return'master';
+  if(p.level>=5&&p.milestones.includes(5))return'sparkle';
+  if(state.daily.missionCount>=3)return'excited';
+  if(h>=21||h<6)return'sleepy';
+  if(p.happiness>85)return'playful';
+  return'';
+}
+
+function updatePetMessage(){
+  const p=activePet(),nick=p.nickname||activePetDef().name,h=new Date().getHours();
+  let msg='I\'m happy you\'re here!',care=false;
+  if(p.health<50){msg=`${nick} is resting. Practice and choose a healthy snack! 🍎`;care=true;}
+  else if(p.happiness<50){msg=`${nick} missed you. Gentle pats would feel lovely. 💛`;care=true;}
+  else if(p.health<=65){msg='I used energy today. Shall we earn a healthy snack? 🥕';care=true;}
+  else if(p.happiness<=60){msg='Can we play after calm practice? 🌿';care=true;}
+  else if(h<12)msg='Good morning! Shall we practice together?';
+  $('petMessage').textContent=msg;
+  $('petMessage').classList.toggle('needs-care',care);
+}
+
+function render(){
+  checkDaily();applyGentleCareDecay();
+  if(parentUnlocked&&parentUnlockedUntil>0&&Date.now()>parentUnlockedUntil){parentUnlocked=false;parentUnlockedUntil=0;}
+  const petDef=activePetDef(),ps=activePet();
+  $('petAvatar').textContent=petDef.icon+(ps.accessory?' '+(ITEMS.find(x=>x.id===ps.accessory)?.icon||''):'');
+  const roomItem=ITEMS.find(x=>x.id===ps.room&&x.cat==='room');
+  document.querySelector('.hero').style.background=roomItem?.theme||'linear-gradient(145deg,#fff9,#ffffffd9)';
+  const emotion=getPetEmotionState();
+  $('petAvatar').className='pet'+(emotion?' '+emotion:'');
+  $('petName').textContent=ps.nickname?`${ps.nickname} (${petDef.name})`:petDef.name;
+  $('petLevel').textContent=`Friendship level ${ps.level}`;
+  updatePetMessage();
+  // Welcome banner
+  const wb=$('welcomeBanner');
+  const practiced=state.player.lastPracticeDate===localDate();
+  if(practiced){wb.style.display='none';}else{wb.style.display='block';const h=new Date().getHours();wb.textContent=h<12?`Good morning! ${ps.nickname||petDef.name} is waiting. 🌅`:h<17?`Good afternoon! Time for calm practice. 🌿`:`Good evening! Gentle practice before bed? 🌙`;}
+  // Meters
+  $('healthFill').style.width=ps.health+'%';$('healthN').textContent=Math.round(ps.health);
+  $('happyFill').style.width=ps.happiness+'%';$('happyN').textContent=Math.round(ps.happiness);
+  $('friendFill').style.width=(ps.friendXP%100)+'%';$('friendN').textContent=Math.round(ps.friendXP%100);
+  $('streak').textContent=state.player.streak+(state.player.streakShields>0?' 🛡️'+state.player.streakShields:'');
+  $('stars').textContent=state.player.stars;$('coins').textContent=state.player.coins;
+  $('mission').innerHTML=`<b>Complete ${Math.min(3,state.daily.missionCount+1)} of 3 activities</b><p class="small">${state.daily.missionCount}/3 today</p>`;
+  renderCharlieGoal();renderWishlist();renderMarket();renderCollection();renderParentArea();
+  $('soundToggle').checked=state.settings.sound;$('motionToggle').checked=state.settings.reducedMotion;
+  $('buddyToggle').checked=state.settings.buddy;$('petSignalToggle').checked=state.settings.petSignal;
+  $('hapticToggle').checked=state.settings.haptic;
+  document.body.classList.toggle('reduce',state.settings.reducedMotion);
+  save();
+}
+
+function renderParentArea(){
+  $('parentLockedCard').style.display=parentUnlocked?'none':'block';
+  $('parentUnlockedCard').style.display=parentUnlocked?'block':'none';
+  if(parentUnlocked){
+    $('childName').value=state.player.name;$('ageGroup').value=state.player.age;
+    renderParentLog();renderWeeklySummary();renderMoodTracker();renderStreakCalendar();
+  }
+}
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===id));
+  document.querySelector('.bottom').style.display=id==='practice'?'none':'grid';
+  if(id==='settings')renderParentArea();
+}
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>showView(n.dataset.view)));
+
+function renderCharlieGoal(){
+  const c=PETS.find(p=>p.id==='kingcharles'),owned=!!state.pets.kingcharles,el=$('charlieGoal');
+  if(owned){el.innerHTML='<div class="goal-row"><div class="goal-icon">🐕</div><div><b>Charlie joined the family!</b></div></div>';return;}
+  const pct=Math.min(100,Math.round(state.player.coins/c.cost*100));
+  el.innerHTML=`<div class="goal-row"><div class="goal-icon">🐕</div><div style="flex:1"><b>Saving for Charlie</b><div class="small">${state.player.coins}/${c.cost} coins</div><div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div></div></div>`;
+}
+
+function renderWishlist(){
+  const bar=$('wishlistBar');
+  if(!state.wishlist){bar.classList.remove('show');return;}
+  const item=ITEMS.find(i=>i.id===state.wishlist);
+  if(!item||state.ownedItems.includes(item.id)){state.wishlist=null;bar.classList.remove('show');return;}
+  bar.classList.add('show');bar.innerHTML='';
+  const pct=Math.min(100,Math.round(state.player.coins/item.cost*100));
+  bar.innerHTML=`<b>${item.icon} Saving: ${item.name}</b><div class="small">🪙 ${state.player.coins}/${item.cost}</div><div class="goalbar"><div class="goalfill" style="width:${pct}%"></div></div>`;
+  const btn=document.createElement('button');btn.className='btn soft';btn.style.cssText='margin-top:6px;padding:6px 8px;font-size:11px';btn.textContent='Remove wishlist';
+  btn.addEventListener('click',()=>{state.wishlist=null;save();render();});bar.appendChild(btn);
+}
+
+/* ═══ MARKET ═══ */
+function setMarket(c){marketCat=c;renderMarket();}
+function renderMarket(){
+  const tabs=$('marketTabs'),grid=$('marketGrid');
+  tabs.innerHTML='';
+  ['food','pet','accessory','room','item'].forEach(c=>{
+    const ch=document.createElement('button');ch.className='chip'+(marketCat===c?' active':'');
+    ch.textContent={food:'Food',pet:'Pets',accessory:'Accessories',room:'Rooms',item:'Items'}[c];
+    ch.addEventListener('click',()=>setMarket(c));tabs.appendChild(ch);
+  });
+  const data=marketCat==='pet'?PETS:ITEMS.filter(x=>x.cat===marketCat),ps=activePet();
+  grid.innerHTML=`<div class="market-note" style="grid-column:1/-1">${{food:`💖 ${activePetDef().name}'s favorites give 50% bonus.`,pet:'🐾 Each pet has independent data.',accessory:'🎀 Equipped per pet.',room:'🏡 Reusable across pets.',item:'🛡️ Special items.'}[marketCat]||''}</div>`;
+  data.forEach(i=>{
+    const isPet=marketCat==='pet',owned=isPet?!!state.pets[i.id]:i.cat==='item'?false:(i.cat!=='food'&&state.ownedItems.includes(i.id));
+    const qty=i.cat==='food'?(state.inventory[i.id]||0):'';
+    const equipped=(i.cat==='accessory'&&ps.accessory===i.id)||(i.cat==='room'&&ps.room===i.id);
+    const fav=i.cat==='food'&&isFavoriteFood(i.id);
+    let desc=i.id==='streakShield'?`Shield x${state.player.streakShields}/3`:i.cat==='food'?`+${i.energy}⚡ +${i.happy}😊 ${qty}`:i.id==='kingcharles'?'Royal dream pet':'';
+    const card=document.createElement('div');card.className='card'+(equipped?' equipped':'');
+    if(i.cat==='room'){const rv=document.createElement('div');rv.className='room-preview';rv.style.background=i.theme;rv.textContent=i.icon;card.appendChild(rv);}
+    else{const ic=document.createElement('div');ic.className='icon';ic.textContent=i.icon;card.appendChild(ic);}
+    const nm=document.createElement('b');nm.textContent=i.name;card.appendChild(nm);
+    const rd=document.createElement('div');rd.innerHTML=`<span class="rarity rarity-${i.rarity||'common'}">${(i.rarity||'common').toUpperCase()}</span>${fav?'<span class="rarity favorite">FAVORITE</span>':''}`;card.appendChild(rd);
+    if(desc){const dd=document.createElement('div');dd.className='small';dd.textContent=desc;card.appendChild(dd);}
+    const pr=document.createElement('div');pr.className='price';pr.textContent='🪙 '+i.cost;card.appendChild(pr);
+    const ab=document.createElement('button');ab.className='btn';
+    if(isPet){if(owned){ab.className+=' '+(state.activePetId===i.id?'soft':'purple');ab.textContent=state.activePetId===i.id?'Selected':'Select';ab.addEventListener('click',()=>selectPet(i.id));}else{ab.className+=' purple';ab.textContent='Buy';ab.addEventListener('click',()=>buy('pet',i.id));}}
+    else if(i.cat==='food'||i.cat==='item'){ab.className+=' purple';if(i.cat==='item'&&i.id==='streakShield'&&state.player.streakShields>=3){ab.textContent='Max';ab.disabled=true;}else{ab.textContent='Buy';ab.addEventListener('click',()=>buy(i.cat,i.id));}}
+    else if(!owned){ab.className+=' purple';ab.textContent='Buy';ab.addEventListener('click',()=>buy(i.cat,i.id));}
+    else{ab.className+=' '+(equipped?'soft':'green');ab.textContent=equipped?'Equipped':(i.cat==='room'?'Use':'Equip');ab.addEventListener('click',()=>equipItem(i.cat,i.id));}
+    card.appendChild(ab);
+    grid.appendChild(card);
+  });
+}
+function buy(cat,id){
+  const obj=cat==='pet'?PETS.find(x=>x.id===id):ITEMS.find(x=>x.id===id);
+  if(!obj)return;
+  if(cat==='pet'&&state.pets[id])return toast('Already owned.');
+  if(cat!=='food'&&cat!=='item'&&state.ownedItems.includes(id))return toast('Already owned.');
+  if(cat==='item'&&id==='streakShield'&&state.player.streakShields>=3)return toast('Max 3 shields.');
+  if(state.player.coins<obj.cost)return toast('Need more coins.');
+  state.player.coins-=obj.cost;
+  if(cat==='pet')state.pets[id]=petProfile();
+  else if(cat==='food')state.inventory[id]=(state.inventory[id]||0)+1;
+  else if(cat==='item'&&id==='streakShield')state.player.streakShields=Math.min(3,(state.player.streakShields||0)+1);
+  else{state.ownedItems.push(id);if(cat==='accessory')activePet().accessory=id;if(cat==='room')activePet().room=id;}
+  save();render();playSound('buy');toast(`${obj.name} added!`);
+}
+function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();playSound('tap');}
+function selectPet(id){state.activePetId=id;save();render();showView('home');toast('Pet selected.');}
+
+/* ═══ COLLECTION ═══ */
+function renderCollection(){
+  const pc=$('petCollection'),bg=$('badgeGrid');pc.innerHTML='';bg.innerHTML='';
+  PETS.filter(p=>state.pets[p.id]).forEach(p=>{
+    const pp=state.pets[p.id],nick=pp.nickname?`${pp.nickname} (${p.name})`:p.name;
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`<div class="icon">${p.icon}</div><b>${nick}</b><div class="small">Level ${pp.level}</div>`;
+    const sb=document.createElement('button');sb.className='btn '+(state.activePetId===p.id?'soft':'purple');sb.textContent=state.activePetId===p.id?'Selected':'Select';sb.addEventListener('click',()=>selectPet(p.id));card.appendChild(sb);
+    const nb=document.createElement('button');nb.className='btn soft';nb.style.cssText='margin-top:4px;padding:6px;font-size:11px';nb.textContent='✏️ Nickname';nb.addEventListener('click',()=>openNicknameModal(p.id));card.appendChild(nb);
+    if(pp.level>=7&&pp.milestones.includes(7)){const stb=document.createElement('button');stb.className='btn soft';stb.style.cssText='margin-top:4px;padding:6px;font-size:11px';stb.textContent='📖 Story';stb.addEventListener('click',()=>{$('storyContent').innerHTML=`<div style="text-align:center;font-size:60px">${p.icon}</div><h3>${p.name}'s Story</h3><p style="line-height:1.6">Long ago, ${p.name} discovered the power of stillness...</p><button class="btn purple" style="width:100%;margin-top:10px" data-close="storyModal">Close</button>`;$('storyContent').querySelector('[data-close]').addEventListener('click',()=>closeModal('storyModal'));openModal('storyModal');});card.appendChild(stb);}
+    pc.appendChild(card);
+  });
+  state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);
+  BADGES.forEach(b=>{const c=document.createElement('div');c.className='card'+(state.progress.badges.includes(b.id)?'':' locked');c.innerHTML=`<div class="icon">${b.icon}</div><b>${b.name}</b>`;bg.appendChild(c);});
+  ITEMS.filter(i=>i.cat==='special').forEach(i=>{const c=document.createElement('div');c.className='card'+(state.ownedItems.includes(i.id)?'':' locked');c.innerHTML=`<div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${state.ownedItems.includes(i.id)?'Treasure':'Complete 10+ min'}</div>`;bg.appendChild(c);});
+}
+
+function openNicknameModal(pid){renamingPetId=pid;$('nicknameInput').value=state.pets[pid].nickname||'';openModal('nicknameModal');}
+
+/* ═══ FEED ═══ */
+function openFeed(){renderPantry();openModal('feedModal');}
+function renderPantry(){
+  const foods=ITEMS.filter(i=>i.cat==='food'&&(state.inventory[i.id]||0)>0);
+  const sorted=[...foods].sort((a,b)=>{if(pantrySort==='favorite')return(isFavoriteFood(b.id)?1:0)-(isFavoriteFood(a.id)?1:0);if(pantrySort==='rarity'){const o={royal:4,premium:3,special:2,common:1};return(o[b.rarity]||0)-(o[a.rarity]||0);}return(b[pantrySort]||0)-(a[pantrySort]||0);});
+  $('pantrySort').innerHTML='';
+  [['energy','⚡ Energy'],['happy','😊 Joy'],['favorite','💖 Fav'],['rarity','✨ Rare']].forEach(([k,l])=>{const c=document.createElement('button');c.className='chip'+(pantrySort===k?' active':'');c.textContent=l;c.addEventListener('click',()=>{pantrySort=k;renderPantry();});$('pantrySort').appendChild(c);});
+  $('pantry').innerHTML='';
+  if(!sorted.length){$('pantry').innerHTML='<p>Pantry empty. Visit market.</p>';return;}
+  sorted.forEach(i=>{const row=document.createElement('div');row.className='row';row.innerHTML=`<span><b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br><span class="small">+${i.energy}⚡ +${i.happy}😊${isFavoriteFood(i.id)?' 💖':''}</span></span>`;const btn=document.createElement('button');btn.className='btn green';btn.textContent='Feed';btn.addEventListener('click',()=>feed(i.id));row.appendChild(btn);$('pantry').appendChild(row);});
+}
+function feed(id){
+  if(feedLocked)return;feedLocked=true;setTimeout(()=>feedLocked=false,600);
+  const i=ITEMS.find(x=>x.id===id),p=activePet();
+  if(!i||(state.inventory[id]||0)<=0)return toast('No food left.');
+  if(p.health>=100&&p.happiness>=100)return toast('Pet is full!');
+  state.inventory[id]=Math.max(0,(state.inventory[id]||0)-1);
+  const fav=isFavoriteFood(id),mult=fav?1.5:1;
+  p.health=clamp(p.health+Math.round(i.energy*mult));p.happiness=clamp(p.happiness+Math.round(i.happy*mult));
+  if(i.friend)p.friendXP+=Math.round(i.friend*mult);
+  p.lastCareAt=Date.now();p.lastDecayAt=Date.now();
+  const firstFeed=p.fedDate!==localDate()||!p.fedToday;p.fedToday=true;p.fedDate=localDate();
+  levelPet(p);save();closeModal('feedModal');render();playSound(fav?'treasure':'tap');
+  toast(fav?`${i.icon} Favorite food! 💖`:`${i.icon} Yum!`);
+}
+
+/* ═══ PLAY ═══ */
 let playRewardReady=false,playMode='pat',patCount=0,ballThrows=0,dragging=false;
-function playPet(){const p=activePet(),now=Date.now();patCount=0;ballThrows=0;playRewardReady=now-p.lastPlay>=3600000;const pet=PETS.find(x=>x.id===state.activePetId);gamePet.textContent=pet.icon;gamePet.classList.toggle('exhausted',p.health<50);playScore.textContent='Joy 0 / 6';playModal.classList.add('show');requestAnimationFrame(()=>requestAnimationFrame(()=>setPlayMode('pat')));playSound('tap')}
-function setPlayMode(mode){if(mode==='ball'&&activePet().health<50){playMode='pat';patTab.classList.add('active');ballTab.classList.remove('active');gameBall.hidden=true;handHint.hidden=false;playInstruction.textContent='Your pet is exhausted, so the ball game can wait. Gentle pats are welcome. Feed your pet to restore energy.';placeHandHint();return}playMode=mode;patTab.classList.toggle('active',mode==='pat');ballTab.classList.toggle('active',mode==='ball');gameBall.hidden=mode!=='ball';handHint.hidden=mode!=='pat';playInstruction.textContent=mode==='pat'?'Gently tap or rub your pet. Find the spots that make it giggle!':'Drag the ball upward and release. Your pet will run and catch it!';if(mode==='pat')placeHandHint();else resetBall()}
-function placeHandHint(){requestAnimationFrame(()=>{const r=playArea.getBoundingClientRect();handHint.style.left=Math.max(10,r.width*.48)+'px';handHint.style.top=Math.max(50,r.height*.34)+'px'})}
-function joyPop(icon,x,y){const e=document.createElement('div');e.className='joy-pop';e.textContent=icon;e.style.left=x+'px';e.style.top=y+'px';playArea.appendChild(e);setTimeout(()=>e.remove(),900)}
-function patPet(e){if(playMode!=='pat')return;const now=performance.now();if(now-lastPatAt<280)return;lastPatAt=now;patCount=Math.min(6,patCount+1);const r=playArea.getBoundingClientRect();joyPop(patCount%3===0?'😂':'💖',e.clientX-r.left,e.clientY-r.top);gamePet.classList.remove('giggle');void gamePet.offsetWidth;gamePet.classList.add('giggle');playScore.textContent=`Joy ${patCount} / 6`;playSound('tap');if(patCount===6)completePlayReward('Your pet giggled and loved the gentle pats!')}
-function resetBall(){gameBall.style.transition='none';gameBall.style.left='25px';gameBall.style.bottom='25px';gameBall.style.transform='rotate(0deg)';gameBall.classList.remove('flying')}
-function ballDown(e){if(playMode!=='ball')return;dragging=true;gameBall.setPointerCapture?.(e.pointerId);e.preventDefault()}
-function ballMove(e){if(!dragging)return;e.preventDefault();const r=playArea.getBoundingClientRect();gameBall.style.left=Math.max(5,Math.min(r.width-55,e.clientX-r.left-25))+'px';gameBall.style.bottom=Math.max(10,Math.min(r.height-60,r.bottom-e.clientY-25))+'px'}
-function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;throwBall()}
-function throwBall(){const r=playArea.getBoundingClientRect();if(r.width<100)return;const aW=r.width;const tX=Math.max(10,Math.min(aW-58,aW*.68)),tB=Math.max(10,Math.min(r.height-58,r.height*.42));ballThrows++;gameBall.classList.add('flying');gameBall.style.left=tX+'px';gameBall.style.bottom=tB+'px';gameBall.style.transform=`rotate(${ballThrows*420}deg)`;gamePet.style.left=Math.min(78,Math.max(50,tX/aW*100))+'%';gamePet.classList.add('catch');playSound('tap');haptic(25);setTimeout(()=>{gameBall.style.left=(tX+10)+'px';gameBall.style.bottom=Math.max(10,tB-40)+'px';joyPop('✨',tX,tB);playScore.textContent=`Catches ${Math.min(ballThrows,3)} / 3`;if(ballThrows>=3)completePlayReward('Amazing! Your pet caught the ball three times!');else setTimeout(()=>{gamePet.style.left='50%';gamePet.classList.remove('catch');resetBall()},650)},650)}
-function completePlayReward(message){playInstruction.textContent=message;const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.happiness=clamp(p.happiness+8);p.friendXP+=5;levelPet(p);save();render();playSound('coin');setTimeout(()=>toast('Happiness +8 • Friendship +5'),300)}else toast('Play reward is recharging, but the game remains open for fun.')}
-function closePlay(){playModal.classList.remove('show');gamePet.style.left='50%';resetBall()}
-gamePet.addEventListener('pointerdown',patPet);gameBall.addEventListener('pointerdown',ballDown);gameBall.addEventListener('pointermove',ballMove);gameBall.addEventListener('pointerup',ballUp);gameBall.addEventListener('pointercancel',ballUp);
-// --- Level with milestone check ---
-function levelPet(p){const oldLevel=p.level;while(p.friendXP>=p.level*100){p.friendXP-=p.level*100;p.level++;state.player.stars+=1}if(p.level>oldLevel)checkMilestone(p,oldLevel)}
-function checkMilestone(p,oldLevel){const milestones={3:{title:'New Trick Learned!',desc:'Your pet learned to do a little spin!',icon:'🎪'},5:{title:'Sparkle Power!',desc:'Your pet now has a permanent sparkle!',icon:'✨'},7:{title:'Pet Story Unlocked!',desc:'Tap your pet to read their origin story!',icon:'📖'},10:{title:'Master Companion!',desc:'Your pet has reached the highest friendship level!',icon:'🏆'}};for(let l=oldLevel+1;l<=p.level;l++){const m=milestones[l];if(m){setTimeout(()=>{playSound('levelup');haptic([40,50,40,50,100]);showConfetti();const el=document.getElementById('milestoneContent');el.innerHTML=`<div style="text-align:center"><div class="icon" style="font-size:72px">${m.icon}</div><h2>Level ${l}: ${m.title}</h2><p>${m.desc}</p><button class="btn purple" style="width:100%" onclick="closeModal('milestoneModal')">Amazing! 🎉</button></div>`;milestoneModal.classList.add('show')},600);break}}}
-// --- Practice ---
-const EX={breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],meditation:[['Kindness Garden',300],['Moonlight Calm',600],['Peaceful Explorer',900]],bodyscan:[['Quick Body Check',180],['Body Explorer',300],['Deep Body Scan',600]]};
-function getAgeExercises(type){const age=state.player.age;const base=EX[type]||[];if(type==='breathing'||type==='meditation'){if(age==='5-7')return[[base[0][0],180],[base[0][0]+' Plus',300],[base[1][0],420]];if(age==='11-12')return[...base,['Extended '+base[2][0],1200]]}return base}
-function openPractice(type){chooseTitle.textContent={breathing:'Choose a breathing adventure',meditation:'Choose a meditation adventure',bodyscan:'Choose a body scan adventure'}[type]||'Choose a practice';chooseIntro.textContent={breathing:'Your pet will follow the calm circle with you. Breathe comfortably, never force the breath.',meditation:'Your pet will sit quietly beside you. No special breathing pattern is needed.',bodyscan:'Your pet will relax each part of its body with you. Follow the gentle prompts.'}[type]||'';
-const bpArea=document.getElementById('breathPatternArea');if(type==='breathing'){bpArea.style.display='block';const available=BREATH_PATTERNS.filter(bp=>bp.ages.includes(state.player.age));selectedBreathPattern=available.find(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:available[0].id;document.getElementById('breathPatternTabs').innerHTML=available.map(bp=>`<button class="chip ${selectedBreathPattern===bp.id?'active':''}" onclick="selectedBreathPattern='${bp.id}';state.settings.breathPattern='${bp.id}';save();document.querySelectorAll('#breathPatternTabs .chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">${bp.name}</button>`).join('')}else bpArea.style.display='none';
-const exercises=getAgeExercises(type);practiceOptions.replaceChildren();exercises.forEach(([name,sec])=>{const reward=sec>=900?'✨ Super Calm Treasure':sec>=600?'🎁 Calm Treasure':'🌱 Habit Builder';const btn=document.createElement('button');btn.className=`btn ${type==='breathing'?'blue':type==='bodyscan'?'teal':'green'}`;btn.innerHTML=`<span>${name} • ${Math.floor(sec/60)} min<br><small style="opacity:.9">${reward}</small></span>`;btn.addEventListener('click',()=>startPractice(type,name,sec));practiceOptions.append(btn)});chooseModal.classList.add('show')}
-function startPractice(type,name,seconds){playSound('tap');closeModal('chooseModal');completionLocked=false;bodyscanIdx=0;session={id:(crypto.randomUUID?.()||String(Date.now())),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),endAt:Date.now()+seconds*1000,breathPhase:'inhale',breathPhaseIdx:0,hiddenPauses:0,attentionPassed:0,attentionMissed:0,attentionDue:false,visibleSeconds:0,pausedSeconds:0};practiceTitle.textContent=name;practiceGuide.textContent={breathing:'Follow the expanding circle gently. Return to normal breathing if uncomfortable.',meditation:'Sit or lie comfortably. Notice sounds, body sensations, or the quiet around you.',bodyscan:'Sit or lie comfortably. Follow the body prompts and notice each area gently.'}[type]||'';
-const bsg=document.getElementById('bodyscanGuide');if(type==='bodyscan'){orb.className='orb bodyscan';orb.textContent='Notice';bsg.style.display='block';startBodyScan()}else{bsg.style.display='';if(type==='meditation'){orb.className='orb meditation';orb.textContent='Be still'}else{orb.className='orb';orb.textContent='Get ready'}}
-prepareBuddy(type);pauseBtn.textContent='⏸ Pause';showView('practice');timerLoop();if(type==='breathing')breathLoop();scheduleAttention()}
-// --- Body Scan ---
-function startBodyScan(){clearTimeout(bodyscanTimer);bodyscanIdx=0;const script=BODYSCAN_SCRIPTS[state.player.age]||BODYSCAN_SCRIPTS['8-10'];advanceBodyScan(script)}
-function advanceBodyScan(script){if(!session||!session.running||session.type!=='bodyscan')return;const bsg=document.getElementById('bodyscanGuide');if(bodyscanIdx>=script.length){bsg.textContent='Now rest and notice your whole body together...';return}const step=script[bodyscanIdx];bsg.textContent=step.t;bsg.style.opacity='0';requestAnimationFrame(()=>{bsg.style.opacity='1'});bodyscanIdx++;bodyscanTimer=setTimeout(()=>advanceBodyScan(script),step.d*1000)}
-function stopBodyScan(){clearTimeout(bodyscanTimer)}
-// --- Timer ---
-function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!session)return;const now=Date.now();if(session.running&&!document.hidden){session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.visibleSeconds=Math.min(session.planned,session.planned-session.remaining)}else session.pausedSeconds+=.25;timer.textContent=format(session.remaining);if(session.remaining>0&&session.remaining%60===0&&session.lastAnnounced!==session.remaining){session.lastAnnounced=session.remaining;a11yAnnounce.textContent=`${session.remaining/60} minutes remaining`}updateParticipation();if(session.remaining<=0)completePractice()},250)}
-// --- Breathing ---
-function stopBreathLoop(){clearTimeout(breathPhaseTimer);cancelAnimationFrame(breathRAF);breathPhaseTimer=null;breathRAF=null}
-function breathLoop(phaseIdx){stopBreathLoop();if(!session||session.type!=='breathing'||!session.running)return;const pattern=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern)||BREATH_PATTERNS[0];const idx=(phaseIdx!==undefined?phaseIdx:session.breathPhaseIdx||0)%pattern.phases.length;session.breathPhaseIdx=idx;const phase=pattern.phases[idx];orb.className='orb '+phase.p;orb.textContent=phase.t;
-if(state.settings.reducedMotion){orb.className='orb';const started=performance.now();const frame=now=>{if(!session||!session.running)return;const pct=Math.min(1,(now-started)/phase.d);orb.style.background=`conic-gradient(${phase.p.includes('inhale')?'#2f9cf4':'#22b884'} ${pct*360}deg,#ddebfa 0)`;if(pct<1)breathRAF=requestAnimationFrame(frame)};breathRAF=requestAnimationFrame(frame)}
-breathPhaseTimer=setTimeout(()=>breathLoop(idx+1),phase.d)}
-// --- Attention ---
-function scheduleAttention(){clearTimeout(attentionTick);if(!session||session.remaining<75||session.attentionDue)return;const token=session.id;const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue)showPresenceCheck()},wait+Math.random()*30000)}
-function showPresenceCheck(){if(!session||!session.running||session.attentionDue)return;clearTimeout(attentionTick);session.running=false;session.attentionDue=true;playSound('attention');const symbols=['⭐','🌿','☁️','🌙'],answer=symbols[Math.floor(Math.random()*symbols.length)];session.presenceAnswer=answer;buddyMessage('A tiny check, then we will continue together.');presencePrompt.textContent=session.type==='breathing'?'Breathing buddy check':session.type==='bodyscan'?'Body scan buddy check':'Mindful listening check';presenceInstruction.textContent=`Tap ${answer} to continue.`;presenceChoices.innerHTML=shuffle([...symbols]).map(x=>`<button class="btn soft" onclick="answerPresence('${x}')">${x}</button>`).join('');presenceCard.classList.add('show');pauseBtn.textContent='▶ Resume after check';session.checkDeadline=setTimeout(()=>{if(session&&session.attentionDue){session.attentionMissed++;presenceInstruction.textContent='The check was missed. Choose the correct symbol when ready.';updateParticipation()}},20000)}
-function answerPresence(x){if(!session||!session.attentionDue||!session.presenceAnswer)return;if(x!==session.presenceAnswer){playSound('attention');toast('Look again for the matching symbol.');return}clearTimeout(session.checkDeadline);session.attentionPassed++;session.attentionDue=false;session.presenceAnswer=null;presenceCard.classList.remove('show');setSessionRunning(true,'Check complete. Practice resumed.');buddyMessage(session.type==='meditation'?'Back to quiet time together.':'Let us continue together.');scheduleAttention();updateParticipation()}
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function updateParticipation(){if(!session)return;const expected=Math.max(1,session.planned-session.remaining),visible=Math.min(100,Math.round(session.visibleSeconds/expected*100)),penalty=session.hiddenPauses*12+session.attentionMissed*18,score=Math.max(0,Math.min(100,visible-penalty));participationFill.style.width=score+'%';participationBar.setAttribute('aria-valuenow',score);participationText.textContent=`${score}% presence • ${session.attentionPassed} checks completed • ${session.hiddenPauses} app exits`;session.presenceScore=score}
-function setSessionRunning(shouldRun,message=''){if(!session||session.running===shouldRun)return;const now=Date.now();if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;pauseBtn.textContent='⏸ Pause';if(session.type==='meditation'){orb.className='orb meditation';orb.textContent='Be still'}else if(session.type==='bodyscan'){orb.className='orb bodyscan';orb.textContent='Notice';const script=BODYSCAN_SCRIPTS[state.player.age]||BODYSCAN_SCRIPTS['8-10'];advanceBodyScan(script)}else breathLoop(session.breathPhaseIdx||0);a11yAnnounce.textContent='Practice resumed'}else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;stopBreathLoop();stopBodyScan();pauseBtn.textContent='▶ Resume';orb.textContent='Paused';a11yAnnounce.textContent='Practice paused'}if(message)toast(message)}
-function pauseResume(){if(!session)return;if(session.attentionDue)return toast('Complete the mindful check first.');setSessionRunning(!session.running,session.running?'Practice paused. Tap Resume when ready.':'Practice resumed.')}
-function quitPractice(){cleanup();showView('home');toast('Practice ended. No penalty.')}
-function cleanup(){clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);if(session)clearTimeout(session.checkDeadline);presenceCard.classList.remove('show');session=null;orb.className='orb';document.getElementById('bodyscanGuide').style.display='none';pauseBtn.textContent='Pause'}
-function completePractice(){if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);a11yAnnounce.textContent='Practice complete';celebrateBuddy();setTimeout(petCompletionSignal,850);const done={...session};clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);session=null;setTimeout(()=>{checkModal.classList.add('show');checkModal.dataset.claimed='0';checkModal.dataset.done=JSON.stringify(done)},1250)}
-function finishCheck(feeling){if(checkModal.dataset.claimed==='1')return;checkModal.dataset.claimed='1';lastCheckFeeling=feeling;const s=JSON.parse(checkModal.dataset.done);checkModal.classList.remove('show');
-// Show journal modal
-setTimeout(()=>journalModal.classList.add('show'),300);checkModal.dataset.savedDone=checkModal.dataset.done}
-function finishJournal(notice){journalModal.classList.remove('show');const s=JSON.parse(checkModal.dataset.savedDone||checkModal.dataset.done);const feeling=lastCheckFeeling||'same';checkDaily();
-const actual=s.planned-s.remaining;const presence=s.presenceScore||100;let reward=Math.max(20,Math.round(actual/15));if(presence<60)reward=Math.max(20,Math.round(reward*.5));
-let specialMessage='';if(actual>=900){reward+=40;specialMessage=unlockSpecial(2,'Super Calm Treasure')}else if(actual>=600){reward+=20;specialMessage=unlockSpecial(1,'Calm Treasure')}
-const capLeft=Math.max(0,220-state.daily.earned);reward=Math.min(reward,capLeft);state.daily.earned+=reward;state.daily.missionCount++;
-if(state.daily.missionCount===3){state.player.coins+=30;toast('Daily mission complete! Bonus 30 coins.')}
-state.player.coins+=reward;state.player.stars+=actual>=600?3:1;state.progress.sessions++;const typeKey=s.type||'breathing';state.progress[typeKey]=(state.progress[typeKey]||0)+1;state.progress.totalSeconds+=actual;
-const checkIn={feeling,notice:notice||null,type:typeKey,seconds:actual,at:new Date().toISOString(),hiddenPauses:s.hiddenPauses,attentionPassed:s.attentionPassed,attentionMissed:s.attentionMissed,presenceScore:s.presenceScore||100,visibleSeconds:s.visibleSeconds};state.progress.checkIns.push(checkIn);
-updateStreak();const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);
-// Check for new badges and confetti
-const oldBadges=[...state.progress.badges];state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);const newBadges=state.progress.badges.filter(b=>!oldBadges.includes(b));if(newBadges.length>0){showConfetti();const badge=BADGES.find(b=>b.id===newBadges[0]);setTimeout(()=>toast(`🏅 New badge: ${badge.icon} ${badge.name}!`),800)}
-save();render();showView('home');playSound(specialMessage?'treasure':'coin');toast(`Earned ${reward} coins and ${actual>=600?3:1} star${actual>=600?'s':''}!`);if(specialMessage)setTimeout(()=>toast(specialMessage),500);rewardChoiceText.textContent=`You earned ${reward} coins. Save toward Charlie, or use some coins to care for your pet?`;setTimeout(()=>rewardChoiceModal.classList.add('show'),900)}
-function unlockSpecial(count,label){const pool=ITEMS.filter(i=>i.cat==='special'&&!state.ownedItems.includes(i.id));const won=pool.slice(0,count);won.forEach(i=>state.ownedItems.push(i.id));if(won.length)return `${label} unlocked: ${won.map(i=>i.icon+' '+i.name).join(' and ')}`;state.player.coins+=count*50;return `${label}: collection complete, so you received ${count*50} bonus coins!`}
-function chooseAfterReward(choice){rewardChoiceModal.classList.remove('show');if(choice==='food'){marketCat='food';showView('market');renderMarket();toast('Choose food thoughtfully. You can save the rest for Charlie.')}else{showView('home');if(choice==='save')toast('Great saving choice! Every practice brings Charlie closer.')}}
-function updateStreak(){const today=localDate(),last=state.player.lastPracticeDate;if(!last)state.player.streak=1;else{const d=dayDiff(last,today);if(d===0){}else if(d===1)state.player.streak++;else if(d>1){if(state.player.streakShields>0){state.player.streakShields--;toast('🛡️ Streak Shield used! Streak protected.');state.player.streak++}else state.player.streak=1}}state.player.lastPracticeDate=today;state.player.bestStreak=Math.max(state.player.bestStreak,state.player.streak)}
-document.addEventListener('visibilitychange',()=>{if(!session)return;if(document.hidden&&session.running){session.hiddenPauses++;focusBanner.classList.add('show');setSessionRunning(false)}else if(!document.hidden&&!session.running){session.last=Date.now();toast('Practice is paused. Tap the ▶ Resume button to continue.')}});
-// --- Parent ---
-function renderParentLog(){const rows=[...state.progress.checkIns].slice(-8).reverse();parentLog.innerHTML=rows.length?rows.map(r=>{const d=new Date(r.at);return `<div class="row"><span><b>${r.type}</b>${r.notice?' • '+r.notice:''}<br>${Math.round(r.seconds/60)} min • ${d.toLocaleDateString()}</span><span>${r.presenceScore??'—'}% presence<br>${r.attentionPassed||0} checks • ${r.hiddenPauses||0} exits</span></div>`}).join(''):'No completed practices yet.'}
-function renderMoodTracker(){const el=document.getElementById('moodTracker');if(!el)return;const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const now=new Date();const cells=[];const moodMap={calm:'😌',happy:'😊',sleepy:'😴',same:'🙂'};for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const ds=localDateFrom(d);const dayCheckins=state.progress.checkIns.filter(c=>{const cd=c.at.slice(0,10);return cd===ds});const feeling=dayCheckins.length>0?dayCheckins[dayCheckins.length-1].feeling:null;cells.push({day:days[d.getDay()],emoji:feeling?moodMap[feeling]||'🙂':'—',date:d.getDate()})}el.innerHTML='<div class="mood-grid">'+cells.map(c=>`<div class="mood-cell"><span class="mood-emoji">${c.emoji}</span><span class="mood-day">${c.day}</span></div>`).join('')+'</div>'}
-function localDateFrom(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
-function renderStreakCalendar(){const el=document.getElementById('streakCalendar');if(!el)return;const now=new Date(),today=localDate();const practiceDates=new Set(state.progress.checkIns.map(c=>c.at.slice(0,10)));const cells=[];for(let i=27;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const ds=localDateFrom(d);const done=practiceDates.has(ds);const isToday=ds===today;cells.push(`<div class="cal-cell ${done?'cal-done':'cal-miss'} ${isToday?'cal-today':''}">${done?'🟢':'⬜'}</div>`)}el.innerHTML='<p class="small" style="margin:0 0 6px">Last 28 days</p><div class="streak-calendar">'+cells.join('')+'</div>'}
-function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*86400000),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),avg=week.length?Math.round(week.reduce((a,r)=>a+(Number(r.presenceScore)||0),0)/week.length):0;document.getElementById('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Mindful minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Average presence</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`}
-function saveSettings(){state.player.name=childName.value.trim()||'Explorer';state.player.age=ageGroup.value;state.settings.sound=soundToggle.checked;state.settings.reducedMotion=motionToggle.checked;state.settings.buddy=buddyToggle.checked;state.settings.petSignal=petSignalToggle.checked;state.settings.haptic=hapticToggle.checked;save();render();toast('Settings saved.')}
-function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mindful-pets-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function validateBackup(x){if(!x||typeof x!=='object'||x.version!==3||!x.player||!Number.isFinite(x.player.coins)||x.player.coins<0||!Number.isFinite(x.player.stars)||x.player.stars<0||!PETS.some(p=>p.id===x.activePetId)||!x.pets||!x.pets[x.activePetId]||!x.inventory||!x.progress||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems)||!x.settings||!x.daily)return false;for(const [id,n] of Object.entries(x.inventory))if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false;for(const [id,p] of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!p||![p.health,p.happiness,p.friendXP,p.level].every(Number.isFinite))return false;p.health=clamp(p.health);p.happiness=clamp(p.happiness)}x.player.name=String(x.player.name||'Explorer').replace(/[<>]/g,'').slice(0,18);x.ownedItems=x.ownedItems.filter(id=>ITEMS.some(i=>i.id===id));x.progress.checkIns=x.progress.checkIns.slice(-500);return true}
-function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000){e.target.value='';return toast('Backup is too large.')}const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=x;save();render();toast('Backup restored.')}catch{toast('That backup is not valid.')}finally{e.target.value=''}};r.readAsText(f)}
-async function hashPin(pin){const data=new TextEncoder().encode('mindful-pets:'+pin);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-function openPinSetup(nextAction='setup'){pendingProtectedAction=nextAction;pinTitle.textContent=state.settings.pinHash?'Change parent PIN':'Create parent PIN';pinText.textContent='Enter a new four-digit PIN.';pinInput.value='';pinModal.classList.add('show');setTimeout(()=>pinInput.focus(),50)}
-function requestProtectedAction(action){pendingProtectedAction=action;if(!state.settings.pinHash)return openPinSetup(action);pinTitle.textContent='Parent PIN';pinText.textContent='Enter the four-digit parent PIN.';pinInput.value='';pinModal.classList.add('show');setTimeout(()=>pinInput.focus(),50)}
-async function submitPin(){const pin=pinInput.value;if(!/^\d{4}$/.test(pin))return toast('Enter exactly four digits.');const h=await hashPin(pin);if(!state.settings.pinHash||pinTitle.textContent.includes('Create')||pinTitle.textContent.includes('Change')){state.settings.pinHash=h;save();const action=pendingProtectedAction;closeModal('pinModal');toast('Parent PIN saved.');if(action==='reset')setTimeout(()=>requestProtectedAction('reset'),250);return}if(h!==state.settings.pinHash)return toast('Incorrect PIN.');const action=pendingProtectedAction;closeModal('pinModal');if(action==='reset')parentReset()}
-function parentReset(){state=defaults();save();render();showView('home');toast('Progress reset. Set a new parent PIN when ready.')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-document.querySelectorAll('.modal').forEach(m=>{m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');new MutationObserver(()=>{if(m.classList.contains('show'))setTimeout(()=>m.querySelector('button,input,select,[tabindex]')?.focus(),30)}).observe(m,{attributes:true,attributeFilter:['class']});m.addEventListener('keydown',e=>{if(e.key==='Escape'){m.classList.remove('show');return}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]')];if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}})});
-function format(s){return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
-// --- Animated coin counter ---
-function animateStat(elId,from,to){if(state.settings.reducedMotion||from===to){document.getElementById(elId).textContent=to;return}const el=document.getElementById(elId),start=performance.now(),dur=800;const step=now=>{const t=Math.min(1,(now-start)/dur);el.textContent=Math.round(from+(to-from)*t);if(t<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
-// --- Init ---
-render();showOnboarding();
-</script></body></html>
+function playPet(){
+  const p=activePet();patCount=0;ballThrows=0;playRewardReady=Date.now()-p.lastPlay>=3600000;
+  $('gamePet').textContent=activePetDef().icon;$('playScore').textContent='Joy 0/6';
+  openModal('playModal');requestAnimationFrame(()=>requestAnimationFrame(()=>setPlayMode('pat')));playSound('tap');
+}
+function setPlayMode(m){
+  if(m==='ball'&&activePet().health<50){toast('Too tired for ball.');m='pat';}
+  playMode=m;$('patTab').classList.toggle('active',m==='pat');$('ballTab').classList.toggle('active',m==='ball');
+  $('gameBall').hidden=m!=='ball';$('handHint').hidden=m!=='pat';
+  $('playInstruction').textContent=m==='pat'?'Tap your pet!':'Drag ball and release!';
+  if(m==='pat')requestAnimationFrame(()=>{const r=$('playArea').getBoundingClientRect();$('handHint').style.left=Math.max(10,r.width*.48)+'px';$('handHint').style.top=Math.max(50,r.height*.34)+'px';});
+  else{$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');}
+}
+function patPet(e){if(playMode!=='pat')return;const now=performance.now();if(now-lastPatAt<280)return;lastPatAt=now;patCount=Math.min(6,patCount+1);const r=$('playArea').getBoundingClientRect();const jp=document.createElement('div');jp.className='joy-pop';jp.textContent=patCount%3===0?'😂':'💖';jp.style.left=(e.clientX-r.left)+'px';jp.style.top=(e.clientY-r.top)+'px';$('playArea').appendChild(jp);setTimeout(()=>jp.remove(),900);$('gamePet').classList.remove('giggle');void $('gamePet').offsetWidth;$('gamePet').classList.add('giggle');$('playScore').textContent=`Joy ${patCount}/6`;playSound('tap');if(patCount===6)completePlayReward();}
+function ballDown(e){if(playMode!=='ball')return;dragging=true;try{$('gameBall').setPointerCapture(e.pointerId);}catch(er){}e.preventDefault();}
+function ballMove(e){if(!dragging)return;e.preventDefault();const r=$('playArea').getBoundingClientRect();$('gameBall').style.left=Math.max(5,Math.min(r.width-55,e.clientX-r.left-25))+'px';$('gameBall').style.bottom=Math.max(10,Math.min(r.height-60,r.bottom-e.clientY-25))+'px';}
+function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;const r=$('playArea').getBoundingClientRect(),aW=r.width,tX=Math.max(10,aW*.68);ballThrows++;$('gameBall').classList.add('flying');$('gameBall').style.left=tX+'px';$('gameBall').style.bottom=Math.max(10,r.height*.42)+'px';$('gameBall').style.transform=`rotate(${ballThrows*420}deg)`;$('gamePet').style.left='72%';$('gamePet').classList.add('catch');playSound('tap');haptic(25);setTimeout(()=>{$('playScore').textContent=`Catches ${Math.min(ballThrows,3)}/3`;if(ballThrows>=3)completePlayReward();else setTimeout(()=>{$('gamePet').style.left='50%';$('gamePet').classList.remove('catch');$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');},650);},650);}
+function completePlayReward(){
+  $('playInstruction').textContent='Great playing! 🎉';
+  const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.happiness=clamp(p.happiness+8);p.friendXP+=5;levelPet(p);save();render();playSound('coin');setTimeout(()=>toast('Happiness +8 • Friendship +5'),300);}else toast('Play reward recharging.');
+}
+$('gamePet').addEventListener('pointerdown',patPet);$('gameBall').addEventListener('pointerdown',ballDown);$('gameBall').addEventListener('pointermove',ballMove);$('gameBall').addEventListener('pointerup',ballUp);$('gameBall').addEventListener('pointercancel',ballUp);
+
+/* ═══ LEVELLING & MILESTONES ═══ */
+function levelPet(p){const old=p.level;while(p.friendXP>=p.level*100){p.friendXP-=p.level*100;p.level++;state.player.stars++;}if(p.level>old)checkMilestone(p,old);}
+const MILESTONES={3:{icon:'🎪',title:'New Trick!',desc:'Pet learned a spin! Tap it on home.'},5:{icon:'✨',title:'Sparkle Power!',desc:'Permanent golden glow.'},7:{icon:'📖',title:'Story Unlocked!',desc:'Read origin story in Collection.'},10:{icon:'🏆',title:'Master Companion!',desc:'Rainbow master aura!'}};
+function checkMilestone(p,old){for(let l=old+1;l<=p.level;l++){const m=MILESTONES[l];if(!m||p.milestones.includes(l))continue;p.milestones.push(l);setTimeout(()=>{playSound('levelup');haptic([40,50,40,50,100]);showConfetti();$('milestoneContent').innerHTML=`<div style="text-align:center"><div style="font-size:72px">${m.icon}</div><h2>Level ${l}: ${m.title}</h2><p>${m.desc}</p></div>`;const cb=document.createElement('button');cb.className='btn purple';cb.style.width='100%';cb.textContent='Amazing! 🎉';cb.addEventListener('click',()=>closeModal('milestoneModal'));$('milestoneContent').appendChild(cb);openModal('milestoneModal');},600);break;}}
+
+/* ═══ PRACTICE ═══ */
+function getAgeExercises(type){
+  const age=state.player.age,base=EX[type]||[];
+  if(type==='breathing'||type==='meditation'){
+    if(age==='5-7')return[[base[0][0],180],[base[0][0]+' Plus',300],[base[1][0],420]];
+    if(age==='11-12')return[...base,['Extended '+base[2][0],1200]];
+  }return base;
+}
+
+function openPractice(type){
+  $('chooseTitle').textContent={breathing:'Breathing Adventure',meditation:'Meditation Adventure',bodyscan:'Body Scan Adventure'}[type]||'Practice';
+  $('chooseIntro').textContent={breathing:'Follow the calm circle. Never force the breath.',meditation:'Sit quietly. No special breathing needed. You can close your eyes — the timer continues even if the screen dims.',bodyscan:'Follow gentle body prompts. You can close your eyes — the timer continues.'}[type]||'';
+  if(type==='breathing'){
+    $('breathPatternArea').style.display='block';
+    const avail=BREATH_PATTERNS.filter(bp=>bp.ages.includes(state.player.age));
+    selectedBreathPattern=avail.find(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:avail[0].id;
+    $('breathPatternTabs').innerHTML='';
+    avail.forEach(bp=>{const c=document.createElement('button');c.className='chip'+(selectedBreathPattern===bp.id?' active':'');c.textContent=bp.name;c.addEventListener('click',()=>{selectedBreathPattern=bp.id;state.settings.breathPattern=bp.id;save();$('breathPatternTabs').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});$('breathPatternTabs').appendChild(c);});
+  }else $('breathPatternArea').style.display='none';
+  const exs=getAgeExercises(type);$('practiceOptions').replaceChildren();
+  exs.forEach(([name,sec])=>{const reward=sec>=900?'✨ Super Treasure':sec>=600?'🎁 Treasure':'🌱 Habit';const btn=document.createElement('button');btn.className='btn '+(type==='breathing'?'blue':type==='bodyscan'?'teal':'green');btn.innerHTML=`<span>${name} • ${Math.floor(sec/60)} min<br><small style="opacity:.9">${reward}</small></span>`;btn.addEventListener('click',()=>startPractice(type,name,sec));$('practiceOptions').appendChild(btn);});
+  openModal('chooseModal');
+}
+
+function startPractice(type,name,seconds){
+  playSound('tap');closeModal('chooseModal');completionLocked=false;
+  eyesClosedMode=false;hiddenAt=0;hiddenSeconds=0;returnCheckPending=false;
+  $('returnCheck').style.display='none';
+  session={id:(crypto.randomUUID?.()||String(Date.now())),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),endAt:Date.now()+seconds*1000,breathPhaseIdx:0,breathPhaseElapsed:0,breathPhaseStartAt:0,bodyscanIdx:0,bodyscanStepElapsed:0,bodyscanStepStartAt:0,hiddenPauses:0,attentionPassed:0,attentionMissed:0,attentionDue:false,visibleSeconds:0,pausedSeconds:0,eyesClosedSeconds:0,lastAnnounced:null,presenceAnswer:null,presenceScore:100,returnAnswer:null};
+  $('practiceTitle').textContent=name;
+  $('practiceGuide').textContent={breathing:'Follow the expanding circle.',meditation:'Sit comfortably. Close your eyes when ready.',bodyscan:'Follow the body prompts. Close your eyes when ready.'}[type]||'';
+  // Eyes-closed mode for meditation and body scan
+  if(type==='meditation'||type==='bodyscan'){
+    enterEyesClosedMode();
+    if(type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';$('bodyscanGuide').style.display='block';startBodyScan(true);}
+    else{$('bodyscanGuide').style.display='none';$('orb').className='orb meditation';$('orb').textContent='Be still';}
+  }else{
+    $('bodyscanGuide').style.display='none';$('eyesClosedBanner').style.display='none';
+    $('orb').className='orb';$('orb').textContent='Get ready';
+  }
+  // Buddy
+  const pet=activePetDef();$('buddyPet').textContent=pet.icon;
+  $('buddyPet').style.display=state.settings.buddy?'block':'none';
+  $('buddyBubble').style.display=state.settings.buddy?'block':'none';
+  $('buddyPet').className='buddy-pet'+((type==='meditation'||type==='bodyscan')?' resting':'');
+  $('buddyBubble').textContent={breathing:'I will follow the circle with you.',meditation:'I will sit quietly with you. Close your eyes when ready.',bodyscan:'I will relax my body with you.'}[type]||'';
+  $('btnPauseResume').textContent='⏸ Pause';showView('practice');
+  timerLoop();if(type==='breathing')breathLoop(true);scheduleAttention();
+}
+
+/* ─── Body scan ─── */
+function startBodyScan(reset){clearTimeout(bodyscanTimer);if(reset&&session){session.bodyscanIdx=0;session.bodyscanStepElapsed=0;}advanceBodyScan();}
+function advanceBodyScan(){if(!session||!session.running||session.type!=='bodyscan')return;const script=BODYSCAN_SCRIPTS[state.player.age]||BODYSCAN_SCRIPTS['8-10'];if(session.bodyscanIdx>=script.length){$('bodyscanGuide').textContent='Rest and notice your whole body...';return;}const step=script[session.bodyscanIdx];$('bodyscanGuide').textContent=step.t;$('bodyscanGuide').style.opacity='0';requestAnimationFrame(()=>$('bodyscanGuide').style.opacity='1');const rem=Math.max(500,step.d*1000-(session.bodyscanStepElapsed||0));session.bodyscanStepStartAt=Date.now();bodyscanTimer=setTimeout(()=>{if(!session)return;session.bodyscanIdx++;session.bodyscanStepElapsed=0;advanceBodyScan();},rem);}
+function pauseBodyScan(){if(!session||session.type!=='bodyscan')return;clearTimeout(bodyscanTimer);if(session.bodyscanStepStartAt)session.bodyscanStepElapsed=(session.bodyscanStepElapsed||0)+(Date.now()-session.bodyscanStepStartAt);session.bodyscanStepStartAt=0;}
+function resumeBodyScan(){if(!session||session.type!=='bodyscan'||!session.running)return;advanceBodyScan();}
+function stopBodyScan(){clearTimeout(bodyscanTimer);}
+
+/* ─── Timer ─── */
+function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!session)return;const now=Date.now();
+  if(session.running){
+    // endAt-based: time advances even if screen is off (eyes-closed mode)
+    session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));
+    // Visible seconds only count when app is actually visible
+    if(!document.hidden)session.visibleSeconds=Math.min(session.planned,session.planned-session.remaining);
+  }else session.pausedSeconds+=.25;
+  $('timer').textContent=format(session.remaining);
+  if(session.remaining>0&&session.remaining%60===0&&session.lastAnnounced!==session.remaining){session.lastAnnounced=session.remaining;$('a11yAnnounce').textContent=`${session.remaining/60} min left`;}
+  updateParticipation();if(session.remaining<=0)completePractice();
+},250);}
+
+/* ─── Breathing ─── */
+function stopBreathLoop(){clearTimeout(breathPhaseTimer);cancelAnimationFrame(breathRAF);breathPhaseTimer=null;breathRAF=null;}
+function pauseBreathLoop(){if(!session||session.type!=='breathing')return;stopBreathLoop();if(session.breathPhaseStartAt)session.breathPhaseElapsed=(session.breathPhaseElapsed||0)+(Date.now()-session.breathPhaseStartAt);session.breathPhaseStartAt=0;}
+function breathLoop(reset){
+  stopBreathLoop();if(!session||session.type!=='breathing'||!session.running)return;
+  const pattern=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern)||BREATH_PATTERNS[0];
+  if(reset){session.breathPhaseIdx=0;session.breathPhaseElapsed=0;}
+  const idx=session.breathPhaseIdx%pattern.phases.length;const phase=pattern.phases[idx];
+  $('orb').className='orb '+phase.p;$('orb').textContent=phase.t;
+  const elapsed=session.breathPhaseElapsed||0;const rem=Math.max(300,phase.d-elapsed);
+  if(state.settings.reducedMotion){$('orb').className='orb';const st=performance.now();const fr=now=>{if(!session||!session.running)return;const pct=Math.min(1,(elapsed+(now-st))/phase.d);$('orb').style.background=`conic-gradient(${phase.p.includes('inhale')?'#2f9cf4':'#22b884'} ${pct*360}deg,#ddebfa 0)`;if(pct<1)breathRAF=requestAnimationFrame(fr);};breathRAF=requestAnimationFrame(fr);}
+  session.breathPhaseStartAt=Date.now();breathPhaseTimer=setTimeout(()=>{if(!session||!session.running)return;session.breathPhaseElapsed=0;session.breathPhaseIdx=(session.breathPhaseIdx+1)%pattern.phases.length;breathLoop(false);},rem);
+}
+
+/* ─── Presence checks ─── */
+function scheduleAttention(){clearTimeout(attentionTick);if(!session||session.remaining<75||session.attentionDue)return;const token=session.id;const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue&&!returnCheckPending)showPresenceCheck();},wait+Math.random()*30000);}
+function showPresenceCheck(){
+  if(!session||!session.running||session.attentionDue)return;clearTimeout(attentionTick);
+  session.running=false;session.attentionDue=true;pauseBreathLoop();pauseBodyScan();playSound('attention');
+  const answer=PRESENCE_SYMBOLS[Math.floor(Math.random()*PRESENCE_SYMBOLS.length)];session.presenceAnswer=answer;
+  $('presencePrompt').textContent='Quick mindful check';$('presenceInstruction').textContent=`Tap ${answer} to continue.`;
+  $('presenceChoices').innerHTML='';shuffle(PRESENCE_SYMBOLS).forEach(x=>{const b=document.createElement('button');b.className='btn soft';b.textContent=x;b.addEventListener('click',()=>answerPresence(x));$('presenceChoices').appendChild(b);});
+  $('presenceCard').classList.add('show');$('btnPauseResume').textContent='▶ Resume after check';
+  session.checkDeadline=setTimeout(()=>{if(session&&session.attentionDue){session.attentionMissed++;$('presenceInstruction').textContent='Check missed. Choose the correct symbol.';updateParticipation();}},20000);
+}
+function answerPresence(x){if(!session||!session.attentionDue||!session.presenceAnswer)return;if(x!==session.presenceAnswer){playSound('error');toast('Look for the correct symbol.');return;}clearTimeout(session.checkDeadline);session.attentionPassed++;session.attentionDue=false;session.presenceAnswer=null;$('presenceCard').classList.remove('show');setSessionRunning(true,'Check complete.');$('buddyBubble').textContent='Back to practice together.';scheduleAttention();updateParticipation();}
+
+function updateParticipation(){
+  if(!session)return;
+  // For eyes-closed types, credit hidden seconds too
+  const totalActive=session.visibleSeconds+(session.eyesClosedSeconds||0);
+  const visible=Math.min(100,Math.round(totalActive/Math.max(1,session.planned)*100));
+  const penalty=session.hiddenPauses*12+session.attentionMissed*18;
+  const score=Math.max(0,Math.min(100,visible-penalty));
+  $('participationFill').style.width=score+'%';$('participationBar').setAttribute('aria-valuenow',score);
+  let statusText=`${score}% presence • ${session.attentionPassed} checks`;
+  if(session.eyesClosedSeconds>0)statusText+=` • ${Math.round(session.eyesClosedSeconds/60)}m eyes-closed`;
+  if(session.hiddenPauses>0)statusText+=` • ${session.hiddenPauses} pauses`;
+  $('participationText').textContent=statusText;
+  session.presenceScore=score;
+}
+
+function setSessionRunning(shouldRun,message=''){
+  if(!session||session.running===shouldRun)return;const now=Date.now();
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);$('a11yAnnounce').textContent='Resumed';}
+  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
+  if(message)toast(message);
+}
+function pauseResume(){if(!session)return;if(session.attentionDue)return toast('Complete check first.');if(returnCheckPending)return toast('Complete the return check first.');setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
+function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
+function cleanupPractice(){clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);if(session&&session.checkDeadline)clearTimeout(session.checkDeadline);$('presenceCard').classList.remove('show');$('returnCheck').style.display='none';exitEyesClosedMode();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
+
+function completePractice(){
+  if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);
+  $('a11yAnnounce').textContent='Practice complete';
+  if(state.settings.buddy){$('buddyPet').className='buddy-pet celebrate';$('buddyBubble').textContent='We finished together! 🎉';}
+  setTimeout(petCompletionSignal,850);
+  const done={...session};clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);exitEyesClosedMode();session=null;
+  setTimeout(()=>{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(done);openModal('checkModal');},1250);
+}
+
+function finishCheck(feeling){
+  if($('checkModal').dataset.claimed==='1')return;$('checkModal').dataset.claimed='1';lastCheckFeeling=feeling;
+  $('checkModal').dataset.savedDone=$('checkModal').dataset.done;closeModal('checkModal');
+  setTimeout(()=>openModal('journalModal'),300);
+}
+
+function finishJournal(notice){
+  closeModal('journalModal');
+  const s=JSON.parse($('checkModal').dataset.savedDone||$('checkModal').dataset.done||'{}');
+  const feeling=lastCheckFeeling||'same';checkDaily();
+  const actual=s.planned-(s.remaining||0);const presence=s.presenceScore||100;
+  let reward=Math.max(20,Math.round(actual/15));if(presence<60)reward=Math.max(20,Math.round(reward*.5));
+  let specialMessage='';
+  if(actual>=900){reward+=40;specialMessage=unlockSpecial(2,'Super Calm Treasure');}
+  else if(actual>=600){reward+=20;specialMessage=unlockSpecial(1,'Calm Treasure');}
+  const capLeft=Math.max(0,220-state.daily.earned);reward=Math.min(reward,capLeft);state.daily.earned+=reward;state.daily.missionCount++;
+  if(state.daily.missionCount===3){const bonus=Math.min(30,Math.max(0,220-state.daily.earned));state.player.coins+=bonus;state.daily.earned+=bonus;if(bonus>0)toast('Mission complete! +30 coins.');}
+  state.player.coins+=reward;state.player.stars+=actual>=600?3:1;state.progress.sessions++;
+  const typeKey=s.type||'breathing';state.progress[typeKey]=(state.progress[typeKey]||0)+1;state.progress.totalSeconds+=actual;
+  state.progress.checkIns.push({feeling,notice:notice==='__skip'?null:(notice||null),type:typeKey,seconds:actual,at:new Date().toISOString(),hiddenPauses:s.hiddenPauses,attentionPassed:s.attentionPassed,attentionMissed:s.attentionMissed,presenceScore:s.presenceScore||100,visibleSeconds:s.visibleSeconds,eyesClosedSeconds:s.eyesClosedSeconds||0});
+  updateStreak();const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);
+  const oldBadges=[...state.progress.badges];state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);const newBadges=state.progress.badges.filter(b=>!oldBadges.includes(b));if(newBadges.length){showConfetti();const badge=BADGES.find(b=>b.id===newBadges[0]);setTimeout(()=>toast(`🏅 ${badge.icon} ${badge.name}!`),800);}
+  save();render();showView('home');playSound(specialMessage?'treasure':'coin');
+  toast(`+${reward} coins, +${actual>=600?3:1} star${actual>=600?'s':''}!`);
+  if(specialMessage)setTimeout(()=>toast(specialMessage),500);
+  $('rewardChoiceText').textContent=`Earned ${reward} coins. Save or spend?`;
+  setTimeout(()=>openModal('rewardChoiceModal'),900);
+}
+function unlockSpecial(count,label){const pool=ITEMS.filter(i=>i.cat==='special'&&!state.ownedItems.includes(i.id));const won=pool.slice(0,count);won.forEach(i=>state.ownedItems.push(i.id));if(won.length)return`${label}: ${won.map(i=>i.icon+' '+i.name).join(', ')}`;state.player.coins+=count*50;state.daily.earned+=count*50;return`${label}: +${count*50} coins!`;}
+function chooseAfterReward(c){closeModal('rewardChoiceModal');if(c==='food'){marketCat='food';showView('market');renderMarket();}else showView('home');}
+
+/* ═══ STREAK (corrected shield algorithm) ═══ */
+function updateStreak(){
+  const today=localDate(),last=state.player.lastPracticeDate;
+  if(!last){state.player.streak=1;}
+  else{
+    const d=dayDiff(last,today);
+    if(d===0){/* same day */}
+    else if(d===1){state.player.streak++;}
+    else if(d>1){
+      const missed=d-1;const shields=state.player.streakShields||0;const used=Math.min(shields,missed);
+      state.player.streakShields=shields-used;
+      if(used>=missed){state.player.streak++;if(used>0)toast(`🛡️ ${used} shield${used>1?'s':''} used!`);}
+      else{state.player.streak=1;if(used>0)toast(`🛡️ ${used} shield${used>1?'s':''} used but ${missed-used} day${missed-used>1?'s':''} missed.`);}
+    }
+  }
+  state.player.lastPracticeDate=today;state.player.bestStreak=Math.max(state.player.bestStreak,state.player.streak);
+}
+
+/* ═══ PARENT LOG & CHARTS ═══ */
+function renderParentLog(){const rows=[...state.progress.checkIns].slice(-8).reverse();$('parentLog').innerHTML='';if(!rows.length){$('parentLog').textContent='No practices yet.';return;}rows.forEach(r=>{const d=new Date(r.at);const row=document.createElement('div');row.className='row';let info=`${r.presenceScore??'—'}% • ${r.attentionPassed||0}✓`;if(r.eyesClosedSeconds>0)info+=` • ${Math.round(r.eyesClosedSeconds/60)}m eyes-closed`;row.innerHTML=`<span><b>${r.type}</b>${r.notice?' • '+r.notice:''}<br>${Math.round(r.seconds/60)} min • ${d.toLocaleDateString()}</span><span>${info}</span>`;$('parentLog').appendChild(row);});}
+function renderMoodTracker(){const el=$('moodTracker');if(!el)return;const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],moodMap={calm:'😌',happy:'😊',sleepy:'😴',same:'🙂'};el.innerHTML='';const grid=document.createElement('div');grid.className='mood-grid';for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const ci=state.progress.checkIns.filter(c=>isoToLocalDate(c.at)===ds);const f=ci.length?ci[ci.length-1].feeling:null;const cell=document.createElement('div');cell.className='mood-cell';cell.innerHTML=`<span class="mood-emoji">${f?(moodMap[f]||'🙂'):'—'}</span><span class="mood-day">${days[d.getDay()]}</span>`;grid.appendChild(cell);}el.appendChild(grid);}
+function renderStreakCalendar(){const el=$('streakCalendar');if(!el)return;const today=localDate(),dates=new Set(state.progress.checkIns.map(c=>isoToLocalDate(c.at)));el.innerHTML='<p class="small" style="margin:0 0 6px">Last 28 days</p>';const grid=document.createElement('div');grid.className='streak-calendar';for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const done=dates.has(ds);const cell=document.createElement('div');cell.className='cal-cell '+(done?'cal-done':'cal-miss')+(ds===today?' cal-today':'');cell.textContent=done?'🟢':'⬜';grid.appendChild(cell);}el.appendChild(grid);}
+function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*864e5),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),avg=week.length?Math.round(week.reduce((a,r)=>a+(Number(r.presenceScore)||0),0)/week.length):0;$('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Presence</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;}
+
+/* ═══ SETTINGS ═══ */
+$('btnSaveChildSettings').addEventListener('click',()=>{state.settings.sound=$('soundToggle').checked;state.settings.reducedMotion=$('motionToggle').checked;state.settings.buddy=$('buddyToggle').checked;state.settings.petSignal=$('petSignalToggle').checked;state.settings.haptic=$('hapticToggle').checked;save();render();toast('Saved.');});
+
+/* ═══ EXPORT / IMPORT ═══ */
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mindful-pets-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function validateBackup(x){if(!x||typeof x!=='object'||x.version!==3||!x.player||!Number.isFinite(x.player.coins)||x.player.coins<0||!x.pets||!x.pets[x.activePetId]||!x.inventory||!x.progress||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems)||!x.settings||!x.daily)return false;for(const[id,n]of Object.entries(x.inventory))if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false;for(const[id,p]of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!p||![p.health,p.happiness,p.friendXP,p.level].every(Number.isFinite))return false;p.health=clamp(p.health);p.happiness=clamp(p.happiness);if(!Array.isArray(p.milestones))p.milestones=[];}x.player.name=String(x.player.name||'Explorer').replace(/[<>]/g,'').slice(0,18);x.ownedItems=x.ownedItems.filter(id=>ITEMS.some(i=>i.id===id));x.progress.checkIns=x.progress.checkIns.slice(-500);return true;}
+function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000){e.target.value='';return toast('Too large.');}const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=x;save();render();toast('Restored.');}catch{toast('Invalid backup.');}finally{e.target.value='';}};r.readAsText(f);}
+
+/* ═══ PARENT PIN ═══ */
+let pinMode2='verify';
+async function hashPin(pin){const d=new TextEncoder().encode('mindful-pets:'+pin);const h=await crypto.subtle.digest('SHA-256',d);return[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+function openPinModal(mode,action){
+  pinMode2=mode;pendingProtectedAction=action;$('pinInput').value='';$('pinConfirm').value='';$('pinCurrent').value='';
+  if(mode==='verify'){$('pinTitle').textContent='Parent PIN';$('pinText').textContent='Enter your 4-digit PIN.';$('pinCurrentRow').style.display='none';$('pinNewRow').style.display='block';$('pinInputLabel').textContent='PIN';$('pinConfirmRow').style.display='none';}
+  else if(mode==='create'){$('pinTitle').textContent='Create PIN';$('pinText').textContent='Choose and confirm a 4-digit PIN.';$('pinCurrentRow').style.display='none';$('pinNewRow').style.display='block';$('pinInputLabel').textContent='New PIN';$('pinConfirmRow').style.display='block';}
+  else{$('pinTitle').textContent='Change PIN';$('pinText').textContent='Enter current PIN, then new PIN.';$('pinCurrentRow').style.display='block';$('pinNewRow').style.display='block';$('pinInputLabel').textContent='New PIN';$('pinConfirmRow').style.display='block';}
+  openModal('pinModal');setTimeout(()=>(mode==='change'?$('pinCurrent'):$('pinInput')).focus(),60);
+}
+async function submitPin(){
+  const newPin=$('pinInput').value;
+  if(pinMode2==='verify'){if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');const h=await hashPin(newPin);if(h!==state.settings.pinHash){playSound('error');return toast('Wrong PIN.');}parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;closeModal('pinModal');executeProtectedAction(pendingProtectedAction);pendingProtectedAction=null;return;}
+  if(pinMode2==='create'){const conf=$('pinConfirm').value;if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');if(newPin!==conf){playSound('error');return toast('PINs don\'t match.');}state.settings.pinHash=await hashPin(newPin);save();parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;closeModal('pinModal');toast('PIN saved.');const a=pendingProtectedAction;pendingProtectedAction=null;if(a&&a!=='createPin'&&a!=='unlockAfterCreate')executeProtectedAction(a);render();return;}
+  if(pinMode2==='change'){const cur=$('pinCurrent').value,conf=$('pinConfirm').value;if(!/^\d{4}$/.test(cur))return toast('Enter current PIN.');if(!/^\d{4}$/.test(newPin))return toast('Enter new PIN.');if(newPin!==conf){playSound('error');return toast('New PINs don\'t match.');}const ch=await hashPin(cur);if(ch!==state.settings.pinHash){playSound('error');return toast('Current PIN wrong.');}state.settings.pinHash=await hashPin(newPin);save();closeModal('pinModal');toast('PIN changed.');pendingProtectedAction=null;render();}
+}
+function unlockParent(){if(!state.settings.pinHash)openPinModal('create','unlockAfterCreate');else openPinModal('verify','unlockParent');}
+function requestProtectedAction(action){if(!state.settings.pinHash)openPinModal('create',action);else if(parentUnlocked)executeProtectedAction(action);else openPinModal('verify',action);}
+function executeProtectedAction(action){
+  if(action==='unlockParent'||action==='unlockAfterCreate'){render();toast('🔓 Unlocked 15 min.');}
+  else if(action==='reset'){state=defaults();parentUnlocked=false;parentUnlockedUntil=0;save();render();showView('home');toast('Reset complete.');}
+  else if(action==='export')exportData();
+  else if(action==='import')$('importFile').click();
+  else if(action==='saveParentSettings'){state.player.name=$('childName').value.trim()||'Explorer';state.player.age=$('ageGroup').value;save();render();toast('Saved.');}
+  render();
+}
+
+/* ═══ MODALS ═══ */
+function openModal(id){$(id).classList.add('show');}
+function closeModal(id){$(id).classList.remove('show');}
+document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
+document.querySelectorAll('.modal').forEach(m=>{
+  m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+  new MutationObserver(()=>{if(m.classList.contains('show'))setTimeout(()=>{const f=m.querySelector('button:not([disabled]),input:not([disabled])');if(f)f.focus();},30);}).observe(m,{attributes:true,attributeFilter:['class']});
+  m.addEventListener('keydown',e=>{if(e.key==='Escape'){m.classList.remove('show');return;}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled])')];if(!f.length)return;if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}});
+});
+
+/* ═══ ONBOARDING ═══ */
+function showOnboarding(){if(state.onboardingDone)return;$('onboarding').classList.remove('hidden');let step=0;const steps=[{pet:'🐱',title:'Meet Whiskers!',text:'I will practice calm with you. Breathe, meditate, and play!',btn:'Next →'},{pet:'🪙',title:'Earn & Grow',text:'Each practice earns coins. Save for new pets and treats!',btn:'Next →'},{pet:'🔒',title:'Safe & Private',text:'Everything stays on this device. Your parent can check your progress.',btn:'Let\'s begin! 🎉'}];function renderStep(){$('obPet').textContent=steps[step].pet;$('obTitle').textContent=steps[step].title;$('obText').textContent=steps[step].text;$('obBtn').textContent=steps[step].btn;for(let i=0;i<3;i++)$('obDot'+i).classList.toggle('active',i===step);}renderStep();$('obBtn').onclick=()=>{step++;if(step>=steps.length){state.onboardingDone=true;save();$('onboarding').classList.add('hidden');}else renderStep();};}
+
+/* ═══ EVENT WIRING ═══ */
+$('btnBreathe').addEventListener('click',()=>openPractice('breathing'));
+$('btnMeditate').addEventListener('click',()=>openPractice('meditation'));
+$('btnBodyscan').addEventListener('click',()=>openPractice('bodyscan'));
+$('btnFeed').addEventListener('click',openFeed);
+$('btnPlay').addEventListener('click',playPet);
+$('petAvatar').addEventListener('click',()=>{const p=activePet();if(p.level>=3&&p.milestones.includes(3)){$('petAvatar').style.transition='transform .8s';$('petAvatar').style.transform='rotate(360deg) scale(1.1)';playSound('tap');setTimeout(()=>{$('petAvatar').style.transition='';$('petAvatar').style.transform='';},850);}});
+$('btnPauseResume').addEventListener('click',pauseResume);
+$('btnQuitPractice').addEventListener('click',quitPractice);
+$('patTab').addEventListener('click',()=>setPlayMode('pat'));
+$('ballTab').addEventListener('click',()=>setPlayMode('ball'));
+$('btnClosePlay').addEventListener('click',()=>{closeModal('playModal');$('gamePet').style.left='50%';$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').classList.remove('flying');});
+$('btnUnlockParent').addEventListener('click',unlockParent);
+$('btnLockParent').addEventListener('click',()=>{parentUnlocked=false;parentUnlockedUntil=0;render();toast('🔒 Locked.');});
+$('btnSaveParentSettings').addEventListener('click',()=>requestProtectedAction('saveParentSettings'));
+$('btnExport').addEventListener('click',()=>requestProtectedAction('export'));
+$('btnImport').addEventListener('click',()=>requestProtectedAction('import'));
+$('importFile').addEventListener('change',importData);
+$('btnSetPin').addEventListener('click',()=>{if(state.settings.pinHash)openPinModal('change','changePin');else openPinModal('create','createPin');});
+$('btnReset').addEventListener('click',()=>requestProtectedAction('reset'));
+$('btnSubmitPin').addEventListener('click',submitPin);
+$('btnSaveNickname').addEventListener('click',()=>{if(!renamingPetId)return;const raw=$('nicknameInput').value.replace(/[<>]/g,'').trim().slice(0,12);state.pets[renamingPetId].nickname=raw||null;save();render();closeModal('nicknameModal');toast(raw?`Named: ${raw}`:'Nickname removed.');renamingPetId=null;});
+$('checkModal').querySelectorAll('[data-feeling]').forEach(b=>b.addEventListener('click',()=>finishCheck(b.dataset.feeling)));
+$('journalModal').querySelectorAll('[data-journal]').forEach(b=>b.addEventListener('click',()=>finishJournal(b.dataset.journal)));
+$('rewardChoiceModal').querySelectorAll('[data-reward]').forEach(b=>b.addEventListener('click',()=>chooseAfterReward(b.dataset.reward)));
+
+/* ═══ INIT ═══ */
+render();
+showOnboarding();
+</script>
+</body>
+</html>
