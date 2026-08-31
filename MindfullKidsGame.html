@@ -201,6 +201,9 @@ h2{font-weight:800;letter-spacing:-.3px}
 .goalfill{height:100%;background:linear-gradient(90deg,var(--iosOrange),var(--iosPurple));transition:width .4s}
 .special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);border:2px solid #fff;border-radius:18px;padding:12px;margin:10px 0;font-weight:800;color:#59429b}
 .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.today-card{background:linear-gradient(135deg,#ffffffed,#eef8ff);border:1px solid #fff;border-radius:21px;padding:14px 15px;margin:13px 0 0;box-shadow:0 8px 20px #65719a16}
+.today-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.today-title{font-size:16px;font-weight:900}.today-goal{font-size:12px;font-weight:900;color:#5b6a80}.today-bar{height:12px;background:#e9edf5;border-radius:99px;overflow:hidden;margin:9px 0 6px}.today-fill{height:100%;width:0;background:linear-gradient(90deg,var(--iosGreen),var(--iosBlue));transition:width .4s ease}.today-meta{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);font-weight:800}.today-status{margin-top:7px;font-size:12px;font-weight:800;color:#45604f}.home-primary{box-shadow:0 8px 18px rgba(52,199,89,.18)}
+@media(max-width:380px){.today-meta{font-size:11px}.today-title{font-size:15px}}
 body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{animation:none!important;transform:none!important}body.reduce .orb{transform:scale(1)!important}body.age-young .small{font-size:14px}body.age-young .btn{font-size:16px;min-height:48px}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
@@ -248,7 +251,8 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 </div>
 </div>
 <div id="bedtimeTopSlot"></div>
-<button class="btn green" id="btnMeditate" style="width:100%;margin-top:13px;font-size:17px">🧘 Meditate</button>
+<div id="todayCalmCard" class="today-card" aria-label="Today's calm progress"></div>
+<button class="btn green home-primary" id="btnMeditate" style="width:100%;margin-top:13px;font-size:17px">🧘 Meditate</button>
 <div class="grid2"><button class="btn blue" id="btnBreathe">💨 Breathe</button><button class="btn teal" id="btnBodyscan">🧍 Body Scan</button></div>
 <div class="grid2" id="restActivityRow"><button class="btn purple" id="btnSleepStory">🌙 Available at 8 PM</button><button class="btn purple" id="btnPlay">💖 Play</button></div>
 <button class="btn gold" id="btnFeed" style="width:100%;margin-top:11px">🍎 Feed</button>
@@ -645,16 +649,31 @@ function migrate(x){
   PETS.forEach(def=>{if(src[def.id]&&typeof src[def.id]==='object'){
     merged.pets[def.id]={...petProfile(),...src[def.id]};
     if(!Array.isArray(merged.pets[def.id].milestones))merged.pets[def.id].milestones=[];
-    merged.pets[def.id].health=Math.max(0,Math.min(100,Number(merged.pets[def.id].health)??60));
-    merged.pets[def.id].happiness=Math.max(0,Math.min(100,Number(merged.pets[def.id].happiness)??60));
+    merged.pets[def.id].health=finiteInt(merged.pets[def.id].health,0,100,60);
+    merged.pets[def.id].happiness=finiteInt(merged.pets[def.id].happiness,0,100,60);
+    merged.pets[def.id].friendXP=finiteInt(merged.pets[def.id].friendXP,0,999999,0);
+    merged.pets[def.id].level=finiteInt(merged.pets[def.id].level,1,999,1);
+    merged.pets[def.id].nickname=merged.pets[def.id].nickname?cleanUserText(merged.pets[def.id].nickname,12):null;
   }});
   if(!Object.keys(merged.pets).length)merged.pets.cat=petProfile();
   merged.activePetId=(x.activePetId&&PETS.some(p=>p.id===x.activePetId)&&merged.pets[x.activePetId])?x.activePetId:'cat';
   if(!merged.pets[merged.activePetId]){merged.pets.cat=merged.pets.cat||petProfile();merged.activePetId='cat';}
   if(!Array.isArray(merged.progress.checkIns)) merged.progress.checkIns=[];
   if(!Array.isArray(merged.progress.badges)) merged.progress.badges=[];
-  merged.player.coins = Math.max(0,Math.min(999999,Math.floor(merged.player.coins||0)));
-  merged.player.stars = Math.max(0,Math.floor(merged.player.stars||0));
+  merged.player.coins = finiteInt(merged.player.coins,0,999999,0);
+  merged.player.stars = finiteInt(merged.player.stars,0,999999,0);
+  merged.player.streak = finiteInt(merged.player.streak,0,999999,0);
+  merged.player.bestStreak = Math.max(merged.player.streak,finiteInt(merged.player.bestStreak,0,999999,0));
+  merged.settings.sound=!!merged.settings.sound;
+  merged.settings.reducedMotion=!!merged.settings.reducedMotion;
+  merged.settings.buddy=!!merged.settings.buddy;
+  merged.settings.petSignal=!!merged.settings.petSignal;
+  merged.settings.haptic=!!merged.settings.haptic;
+  const allowedBreath=BREATH_PATTERNS.map(x=>x.id);
+  if(!allowedBreath.includes(merged.settings.breathPattern))merged.settings.breathPattern='balloon';
+  merged.daily.date=typeof merged.daily.date==='string'?merged.daily.date:'';
+  merged.daily.earned=finiteInt(merged.daily.earned,0,999999,0);
+  merged.daily.missionCount=finiteInt(merged.daily.missionCount,0,999,0);
   merged.schemaVersion = 5;
   return merged;
 }
@@ -857,7 +876,7 @@ function getNextBadgeHint(){
   if(!candidates.length)return null;
   const scored=candidates.map(b=>{
     let current=0;
-    if(b.cat==='streak')current=state.player.streak;
+    if(b.cat==='streak')current=state.player.bestStreak;
     if(b.cat==='sessions')current=state.progress.sessions;
     if(b.cat==='minutes')current=state.progress.totalSeconds;
     const remain=Math.max(0,b.target-current);
@@ -885,8 +904,27 @@ function updateHomeActions(){
   if(night){top.appendChild(sleep);sleep.textContent='🌙 Bedtime Story';sleep.style.cssText='width:100%;margin-top:13px;font-size:17px';row.style.gridTemplateColumns='1fr'}
   else{row.insertBefore(sleep,play);sleep.textContent='🌙 Available at 8 PM';sleep.style.cssText='';row.style.gridTemplateColumns='1fr 1fr'}
 }
+function renderTodayCalm(){
+  const el=$('todayCalmCard');
+  if(!el)return;
+  const today=localDate();
+  const seconds=state.progress.checkIns.filter(c=>isoToLocalDate(c.at)===today).reduce((sum,c)=>sum+(Number(c.seconds)||0),0);
+  const goal=600, pct=Math.min(100,Math.round(seconds/goal*100)), mins=Math.floor(seconds/60), secs=seconds%60;
+  const remaining=Math.max(0,goal-seconds);
+  const status=remaining>0?`${Math.ceil(remaining/60)} more minute${Math.ceil(remaining/60)===1?'':'s'} to reach today's calm goal.`:'🎁 Calm goal reached — beautifully done!';
+  el.innerHTML=`<div class="today-head"><div class="today-title">🌿 Today's calm</div><div class="today-goal">10 min goal</div></div><div class="today-bar" role="progressbar" aria-valuemin="0" aria-valuemax="600" aria-valuenow="${Math.min(seconds,goal)}"><div class="today-fill" style="width:${pct}%"></div></div><div class="today-meta"><span>${mins}m ${String(secs).padStart(2,'0')}s practiced</span><span>${pct}%</span></div><div class="today-status">${status}</div>`;
+}
+function updatePrimaryMeditationCTA(){
+  const b=$('btnMeditate');
+  if(!b)return;
+  const h=new Date().getHours();
+  const practiced=state.player.lastPracticeDate===localDate();
+  if(h<12)b.textContent=practiced?'🧘 Practice again':'☀️ Start morning calm';
+  else if(h<18)b.textContent=practiced?'🧘 Practice again':'🌿 Take a calm moment';
+  else b.textContent=practiced?'🧘 One more calm moment':'🌙 Wind down gently';
+}
 function render(){
-  checkDaily();applyGentleCareDecay();updateHomeActions();
+  checkDaily();applyGentleCareDecay();updateHomeActions();renderTodayCalm();updatePrimaryMeditationCTA();
   if(parentUnlocked&&parentUnlockedUntil>0&&Date.now()>parentUnlockedUntil){parentUnlocked=false;parentUnlockedUntil=0;}
   const petDef=activePetDef(),ps=activePet();
   $('petAvatar').textContent=petDef.icon+(ps.accessory?' '+(ITEMS.find(x=>x.id===ps.accessory)?.icon||''):'');
@@ -1483,7 +1521,7 @@ function updateStreak(){
 function renderParentLog(){const rows=[...state.progress.checkIns].slice(-8).reverse();$('parentLog').innerHTML='';if(!rows.length){$('parentLog').textContent='No practices yet.';return;}rows.forEach(r=>{const d=new Date(r.at);const row=document.createElement('div');row.className='row';const info=`${r.presenceScore??'—'}% • ${r.attentionPassed||0}✓`;row.innerHTML=`<span><b>${r.type}</b>${r.notice?' • '+r.notice:''}<br>${Math.round(r.seconds/60)} min • ${d.toLocaleDateString()}</span><span>${info}</span>`;$('parentLog').appendChild(row);});}
 function renderMoodTracker(){const el=$('moodTracker');if(!el)return;const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],moodMap={calm:'😌',happy:'😊',sleepy:'😴',same:'🙂'};el.innerHTML='';const grid=document.createElement('div');grid.className='mood-grid';for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const ci=state.progress.checkIns.filter(c=>isoToLocalDate(c.at)===ds);const f=ci.length?ci[ci.length-1].feeling:null;const cell=document.createElement('div');cell.className='mood-cell';cell.innerHTML=`<span class="mood-emoji">${f?(moodMap[f]||'🙂'):'—'}</span><span class="mood-day">${days[d.getDay()]}</span>`;grid.appendChild(cell);}el.appendChild(grid);}
 function renderStreakCalendar(){const el=$('streakCalendar');if(!el)return;const today=localDate(),dates=new Set(state.progress.checkIns.map(c=>isoToLocalDate(c.at)));el.innerHTML='<p class="small" style="margin:0 0 6px">Last 28 days</p>';const grid=document.createElement('div');grid.className='streak-calendar';for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const done=dates.has(ds);const cell=document.createElement('div');cell.className='cal-cell '+(done?'cal-done':'cal-miss')+(ds===today?' cal-today':'');cell.textContent=done?'🟢':'⬜';grid.appendChild(cell);}el.appendChild(grid);}
-function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*864e5),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),avg=week.length?Math.round(week.reduce((a,r)=>a+(Number(r.presenceScore)||0),0)/week.length):0;$('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Check-ins</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;}
+function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*864e5),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),checked=week.filter(r=>Number.isFinite(Number(r.presenceScore))),avg=checked.length?Math.round(checked.reduce((a,r)=>a+Number(r.presenceScore),0)/checked.length):0;$('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Check-ins</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;}
 
 /* ═══ SETTINGS ═══ */
 $('btnSaveChildSettings').addEventListener('click',()=>{state.settings.sound=$('soundToggle').checked;state.settings.reducedMotion=$('motionToggle').checked;state.settings.buddy=$('buddyToggle').checked;state.settings.petSignal=$('petSignalToggle').checked;state.settings.haptic=$('hapticToggle').checked;save();render();toast('Saved.');});
@@ -1603,7 +1641,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 /* ═══ INIT ═══ */
 render();runDataSelfTests();showOnboarding();setTimeout(restorePendingReward,150);
 </script>
