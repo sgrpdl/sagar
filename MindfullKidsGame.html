@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments</title>
+<title>Mindful Moments V18.2</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -114,16 +114,12 @@ h2{font-weight:800;letter-spacing:-.3px}
 .orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:20px;font-weight:800;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform .2s ease,box-shadow .2s;position:relative;z-index:2}
 .orb.inhale{background:radial-gradient(circle at 35% 30%,#9ef0c4,#4db8ff 60%,#4872ec)}
 .orb.exhale{background:radial-gradient(circle at 35% 30%,#b9f0ff,#34b6a7 60%,#287c9e)}
-.orb.hold-in{background:radial-gradient(circle at 35% 30%,#ffe38a,#ff9a3d 60%,#e07a1f);animation:holdIn 4s ease-in-out forwards}
-.orb.hold-out{background:radial-gradient(circle at 35% 30%,#d8d0ff,#8b7dff 60%,#5f4bc9);animation:holdOut 4s ease-in-out forwards}
+.orb.hold-in{background:radial-gradient(circle at 35% 30%,#ffe8a3,#ffb347 62%,#d98524)}
+.orb.hold-out{background:radial-gradient(circle at 35% 30%,#ddd8ff,#9387ff 62%,#6255c7)}
 .orb.meditation{background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);animation:meditateGlow 5s ease-in-out infinite}
 .orb.bodyscan{background:radial-gradient(circle at 35% 30%,#f0d9ff,#9b6dfc 65%,#6a4bb9);animation:bodyscanGlow 6s ease-in-out infinite}
-@keyframes holdIn{from,to{transform:scale(1.4)}}
-@keyframes holdOut{from,to{transform:scale(.92)}}
 @keyframes meditateGlow{50%{transform:scale(1.08);box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}
 @keyframes bodyscanGlow{50%{transform:scale(1.05);box-shadow:0 0 0 22px #a06dfc22,0 18px 50px #7b5dcc40}}
-@keyframes inhale{to{transform:scale(1.4)}}
-@keyframes exhale{from{transform:scale(1.4)}to{transform:scale(.92)}}
 .buddy-zone{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:105px;margin:4px 0 10px}
 .buddy-pet{font-size:76px;filter:drop-shadow(0 10px 8px #53607b33);animation:buddyBreathe 5s ease-in-out infinite}
 .buddy-pet.resting{animation:buddyRest 4s ease-in-out infinite}
@@ -381,6 +377,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="breathPatternArea" style="display:none">
 <p class="small" style="margin:8px 0 4px;font-weight:900">Breathing pattern</p>
 <div id="breathPatternTabs" class="tabs"></div>
+<div id="breathSafety" class="notice" style="display:none;margin-top:4px">Keep every breath comfortable. Never force a deep breath. Skip the pauses if they feel uncomfortable.</div>
 </div>
 <div id="ambientArea" style="display:none;margin:8px 0">
 <p class="small" style="font-weight:900">Calm sound</p>
@@ -461,6 +458,15 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" data-close="pinModal" style="width:100%;margin-top:6px">Cancel</button>
 </div></div>
 
+<div id="resetModal" class="modal" data-escape="confirm"><div class="sheet">
+<h2>Reset all progress?</h2>
+<p>This permanently removes pets, coins, stars, practices, badges, settings, and local records from this browser.</p>
+<div class="notice">This cannot be undone. Export a backup first if you may want to restore the data.</div>
+<div class="grid2">
+<button class="btn soft" data-close="resetModal">Cancel</button>
+<button class="btn danger" id="btnConfirmReset">Reset everything</button>
+</div>
+</div></div>
 <div id="nicknameModal" class="modal"><div class="sheet">
 <h2>Give your pet a nickname</h2>
 <p class="small" id="nicknameSub">Max 12 characters.</p>
@@ -602,22 +608,138 @@ const STREAK_MILESTONES = {
 };
 
 const AGE_GROUPS=['5-7','8-10','11-12','13-15','16-19','20-29','30-40','41+'];
+
 const BREATH_PATTERNS = [
-  {id:'balloon',name:'Balloon Breath',ages:AGE_GROUPS,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'exhale',d:5000,t:'Breathe out slowly'}]},
-  {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
-  {id:'ocean',name:'Ocean Wave',ages:['8-10','11-12','13-15','16-19','20-29','30-40','41+'],phases:[{p:'inhale',d:4000,t:'Wave rises — breathe in'},{p:'exhale',d:6000,t:'Wave settles — breathe out'}]},
-  {id:'star',name:'Star Breathing',ages:['8-10','11-12','13-15'],phases:[{p:'inhale',d:4000,t:'Trace up — breathe in'},{p:'exhale',d:5000,t:'Trace down — breathe out'}]},
-  {id:'steady',name:'Steady Exhale',ages:['16-19','20-29','30-40','41+'],phases:[{p:'inhale',d:4000,t:'Breathe in naturally'},{p:'exhale',d:6000,t:'Let the breath out slowly'}]}
+  {id:'balloon',name:'Balloon Breath',ages:AGE_GROUPS,hasHolds:false,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'exhale',d:5000,t:'Breathe out slowly'}]},
+  {id:'bunny',name:'Bunny Breath',ages:['5-7'],hasHolds:false,phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
+  {id:'ocean',name:'Ocean Wave',ages:['8-10','11-12','13-15','16-19','20-29','30-40','41+'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Wave rises — breathe in'},{p:'exhale',d:6000,t:'Wave settles — breathe out'}]},
+  {id:'star',name:'Star Breathing',ages:['8-10','11-12','13-15'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Trace up — breathe in'},{p:'exhale',d:5000,t:'Trace down — breathe out'}]},
+  {id:'steady',name:'Steady Exhale',ages:['16-19','20-29','30-40','41+'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Breathe in naturally'},{p:'exhale',d:6000,t:'Let the breath out slowly'}]},
+  {id:'easyBox',name:'Easy Box Breath',ages:['8-10'],hasHolds:true,phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'hold-in',d:2000,t:'Pause gently — or breathe normally'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
+  {id:'gentleBox',name:'Gentle Box Breathing',ages:['11-12','13-15'],hasHolds:true,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'hold-in',d:3000,t:'Hold gently — never strain'},{p:'exhale',d:4000,t:'Breathe out slowly'},{p:'hold-out',d:2000,t:'Rest gently — breathe if needed'}]},
+  {id:'classicBox',name:'Box Breathing 4-4-4-4',ages:['16-19','20-29','30-40','41+'],hasHolds:true,phases:[{p:'inhale',d:4000,t:'Breathe in for four'},{p:'hold-in',d:4000,t:'Hold gently for four'},{p:'exhale',d:4000,t:'Breathe out for four'},{p:'hold-out',d:4000,t:'Hold gently for four'}]}
 ];
 const BODYSCAN_SCRIPTS = {
-  '5-7':[{t:'Notice your feet on the ground',d:12},{t:'Wiggle your toes gently',d:10},{t:'Feel your tummy breathing',d:12},{t:'Relax your shoulders down',d:10},{t:'Notice sounds around you',d:12}],
-  '8-10':[{t:'Feel your feet touching the floor',d:10},{t:'Notice your legs',d:10},{t:'Pay attention to your tummy rising and falling',d:12},{t:'Feel your hands',d:10},{t:'Notice your shoulders. Let them drop.',d:10},{t:'Feel your face. Relax your jaw.',d:10},{t:'Listen to the quietest sound',d:12}],
-  '11-12':[{t:'Bring attention to the soles of your feet',d:10},{t:'Notice sensations in ankles and calves',d:10},{t:'Feel the weight of your legs',d:10},{t:'Notice your abdomen expanding',d:12},{t:'Become aware of your hands and fingers',d:10},{t:'Notice the rise and fall of your chest',d:10},{t:'Relax muscles around your eyes',d:10},{t:'Let your jaw soften',d:10}]
+  '5-7':[
+    {t:'Feel your feet resting on the floor or bed',d:12},{t:'Wiggle your toes, then let them become still',d:12},{t:'Notice your legs resting',d:12},{t:'Feel your tummy move as you breathe',d:15},{t:'Let your shoulders drop gently',d:12},{t:'Soften your face and jaw',d:12},{t:'Notice your whole body resting safely',d:15}
+  ],
+  '8-10':[
+    {t:'Notice your feet touching the floor or bed',d:12},{t:'Bring attention to your ankles and legs',d:12},{t:'Feel the weight of your body being supported',d:15},{t:'Notice your tummy rising and falling',d:15},{t:'Feel your hands and fingers',d:12},{t:'Let your shoulders soften',d:12},{t:'Relax around your eyes and jaw',d:12},{t:'Notice your whole body together',d:15}
+  ],
+  '11-12':[
+    {t:'Bring attention to the soles of your feet',d:12},{t:'Notice sensations in your ankles, calves, and knees',d:15},{t:'Feel the weight of your legs',d:12},{t:'Notice the abdomen expanding and settling',d:15},{t:'Become aware of your hands and fingers',d:12},{t:'Notice the rise and fall of your chest',d:15},{t:'Let your shoulders move away from your ears',d:12},{t:'Soften the muscles around your eyes and jaw',d:15},{t:'Rest attention on your whole body',d:18}
+  ],
+  '13-15':[
+    {t:'Notice where your body meets the chair, floor, or bed',d:15},{t:'Bring attention slowly through your feet and lower legs',d:18},{t:'Notice your knees, thighs, and hips without changing anything',d:18},{t:'Feel the natural movement of your abdomen',d:18},{t:'Notice each hand, then both hands together',d:15},{t:'Allow your shoulders and neck to soften',d:18},{t:'Relax your forehead, eyes, and jaw',d:18},{t:'Notice the body as one connected whole',d:22}
+  ],
+  '16-19':[
+    {t:'Feel the support beneath your body',d:18},{t:'Scan slowly from your feet through your lower legs',d:20},{t:'Notice your upper legs and hips',d:20},{t:'Observe sensations in your abdomen without judging them',d:22},{t:'Bring awareness to your chest and breathing',d:20},{t:'Notice your hands, arms, and shoulders',d:20},{t:'Release unnecessary effort in your neck and face',d:22},{t:'Rest with the sensations of your whole body',d:25}
+  ],
+  '20-29':[
+    {t:'Settle into the support beneath you',d:20},{t:'Move awareness through your feet, ankles, and calves',d:22},{t:'Notice your knees, thighs, and hips',d:22},{t:'Observe the abdomen and lower back',d:24},{t:'Feel the chest moving naturally with each breath',d:22},{t:'Notice your fingers, hands, arms, and shoulders',d:24},{t:'Soften your throat, jaw, eyes, and forehead',d:24},{t:'Allow the entire body to be present at once',d:28}
+  ],
+  '30-40':[
+    {t:'Feel the contact points supporting your body',d:22},{t:'Scan from your feet through your lower legs',d:24},{t:'Notice your knees, upper legs, and hips',d:24},{t:'Bring open attention to the abdomen and lower back',d:26},{t:'Notice the chest and upper back moving with the breath',d:24},{t:'Observe your hands, arms, shoulders, and neck',d:26},{t:'Release effort around your mouth, eyes, and forehead',d:26},{t:'Rest in whole-body awareness',d:30}
+  ],
+  '41+':[
+    {t:'Feel how the surface beneath you supports your body',d:22},{t:'Bring gentle awareness through your feet and lower legs',d:25},{t:'Notice your knees, thighs, and hips with kindness',d:25},{t:'Observe your abdomen and lower back without forcing relaxation',d:28},{t:'Notice your chest and upper back moving naturally',d:25},{t:'Feel your hands, arms, shoulders, and neck',d:28},{t:'Soften your jaw, eyes, and forehead',d:28},{t:'Rest with your whole body, exactly as it is',d:32}
+  ]
 };
 const SLEEP_STORIES = {
- '5-7':['Once upon a time, a little cloud named Puff wanted to find the softest place to sleep.','Puff floated over forests and rivers until it saw a cozy pond with lily pads.','It tucked itself between two lily pads and let the waves rock it gently.','The stars hummed a quiet lullaby, and Puff felt its eyes grow heavy.','Goodnight, Puff. Goodnight, little dreamer.'],
- '8-10':['The moon was full and round over the quiet village.','A small lighthouse keeper named Luna climbed up to turn on the light.','The beam swept across the ocean, guiding sleepy ships home.','Luna sat beside the warm lamp and watched the stars.','She felt the whole world slow down, breath by breath.','And she knew it was time to rest.'],
- '11-12':['In a quiet valley, there was an old bell that rang only at twilight.','Everyone in the valley would stop and listen to the deep, slow hum.','It reminded them that the day was done.','The bell said: you have done enough. You are safe.','The valley filled with soft darkness, and the stars dimmed their glow.','And the people rested, knowing the bell would ring again tomorrow.']
+  '5-7':[
+    'Tonight, a small cloud named Puff floated slowly above a quiet meadow. The last birds had tucked their heads beneath their wings, and the flowers had folded their petals for the night.',
+    'Puff drifted past a silver moon and whispered goodnight to every star. One by one, the stars answered with a tiny, gentle glow.',
+    'Below, a sleepy pond held the moon like a round lantern. The water moved softly, in and out, just like a calm breath.',
+    'Puff found two wide lily pads resting side by side. They made a soft green bed, and the pond promised to rock the little cloud very gently.',
+    'Puff settled lower. The meadow became quiet. The trees stopped rustling, the frogs sang more softly, and the moon watched over everything.',
+    'With every slow breath, Puff felt lighter and sleepier. Nothing needed to be finished tonight. Morning could wait until morning.',
+    'The stars dimmed their lights. The pond became still. Puff closed its eyes and rested safely beneath the moon.',
+    'Goodnight, Puff. Goodnight, meadow. Goodnight, little dreamer. Rest softly now.'
+  ],
+  '8-10':[
+    'At the edge of a quiet ocean stood a small lighthouse with a warm golden lamp. Each evening, Luna climbed the spiral stairs to help the light guide ships home.',
+    'Outside, the sky changed from blue to violet. The first stars appeared, and the sea moved in long, slow waves against the shore.',
+    'Luna polished the glass, checked the lamp, and turned the great light toward the water. Its gentle beam travelled across the darkness like a calm, steady breath.',
+    'Far away, a little sailing boat saw the light. The people aboard knew they were on the right path, so they loosened their shoulders and listened to the peaceful water.',
+    'Luna sat beside the warm lamp. She listened to the wind pass the windows, then listened for the quiet space between each sound.',
+    'The lighthouse did not hurry. It simply turned, shone, and returned. Again and again, it showed the way without needing to chase anything.',
+    'The boat reached the sheltered harbour. Its ropes were tied, its sails were folded, and everyone could rest after the journey.',
+    'Luna lowered the lamp to its softest glow. The ocean settled beneath the moon, and the whole coastline seemed to breathe together.',
+    'The work of the day was complete. Nothing more was needed. Luna closed her eyes and let the quiet lighthouse keep watch.',
+    'Goodnight, Luna. Goodnight, ocean. May your own thoughts grow quiet as the waves settle on the shore.'
+  ],
+  '11-12':[
+    'In a valley surrounded by gentle hills, an old bronze bell rang only once each evening. Its deep note travelled over rooftops, gardens, and winding paths.',
+    'When the people heard it, they paused. Shop doors closed, books were placed beside beds, and the final lights in the village became soft and warm.',
+    'A young keeper named Rowan climbed the hill to the bell tower. The path was familiar, and there was no need to hurry.',
+    'At the top, Rowan looked across the valley. The day had held easy moments and difficult moments, but now every part of it could be allowed to rest.',
+    'The bell sounded. Its note began strongly, then slowly faded into the evening air. Rowan listened until even the smallest vibration disappeared.',
+    'In the silence that followed, thoughts still came and went. Rowan did not need to stop them. They could pass like small clouds beyond the hills.',
+    'The village stream reflected the stars. Trees stood quietly along its banks, and every window seemed to say that enough had been done for one day.',
+    'Rowan descended the hill with slow steps, feeling the ground beneath each foot and the cool evening air on each breath.',
+    'At home, a warm blanket waited. The valley was safe, the bell would ring again tomorrow, and tonight belonged only to rest.',
+    'Goodnight, Rowan. Goodnight, quiet valley. Let the day fade gently, and allow sleep to arrive in its own time.'
+  ],
+  '13-15':[
+    'Beyond the last streetlight, a path led to a hill where the city could be seen without being heard. Maya visited that hill when the day had felt especially full.',
+    'She sat beneath an old tree and watched windows glow across the distance. Each light belonged to someone finishing a day of their own.',
+    'Maya noticed that her mind was still replaying conversations, plans, and unfinished tasks. She did not argue with the thoughts. She let them arrive and move on.',
+    'A cool breeze passed through the leaves. For a few moments, she followed only the feeling of breathing in and breathing out.',
+    'The city did not need her attention tonight. Messages could wait. Decisions could wait. Tomorrow would have space for whatever truly mattered.',
+    'Clouds moved across the moon, covering it and revealing it again. Maya realized that calm could be like that too, sometimes hidden but never completely gone.',
+    'She felt the ground supporting her and allowed her shoulders to become less busy. There was nowhere else she needed to be.',
+    'One by one, the distant windows went dark. The hill grew quieter, and the night seemed wider than every thought she had carried there.',
+    'Maya stood and walked home slowly. The day was complete, even if everything on her list was not.',
+    'Under a warm blanket, she let the final thoughts drift past without following them. Rest was enough for now.'
+  ],
+  '16-19':[
+    'A train crossed the countryside late at night, its windows reflecting a quiet row of reading lamps. Eli sat beside the glass after a long and demanding day.',
+    'Fields, rivers, and small stations passed in the darkness. Nothing outside asked to be held onto. Each view appeared, stayed briefly, and moved away.',
+    'Eli noticed thoughts about tomorrow gathering again. Instead of solving them, Eli imagined placing each one on the next empty seat.',
+    'There was a seat for a deadline, a seat for a conversation, and a seat for a decision that did not need to be made tonight.',
+    'The train continued steadily. Its rhythm was simple and predictable, like breathing in, then breathing out.',
+    'As the journey continued, the thoughts remained nearby but no longer had to be carried. They could travel quietly until morning.',
+    'The conductor dimmed the carriage lights. The landscape became softer, and Eli rested against the seat while the train followed its path.',
+    'No effort was needed to make the destination arrive. The train already knew the way.',
+    'Eli allowed the eyes to close. There would be time tomorrow for plans, choices, and action. This part of the journey was for rest.',
+    'The train moved through the peaceful night, carrying everything safely forward while Eli slept.'
+  ],
+  '20-29':[
+    'On a quiet coast, a small cabin faced the sea. Its windows were open just enough to hear the steady movement of water against the shore.',
+    'Inside, a lamp cast a warm circle across the room. The rest of the day, with its messages, responsibilities, and decisions, remained outside that circle.',
+    'A traveller sat near the window and noticed how the sea never held one shape for long. Every wave rose, changed, and returned.',
+    'Thoughts behaved in a similar way. Some arrived with energy, some with uncertainty, and some repeated themselves. None needed an answer right now.',
+    'The traveller followed several slow breaths and felt the chair supporting the body. The room required nothing more than presence.',
+    'Far beyond the window, a lighthouse turned at its unhurried pace. Its beam appeared, moved on, and returned when the time was right.',
+    'The traveller imagined placing the entire day on the shore, where the tide could smooth its sharp edges without erasing what had mattered.',
+    'The lamp was lowered. The cabin grew dim, and the sound of the sea became the only clock worth noticing.',
+    'Tomorrow would bring movement again. Tonight offered stillness, recovery, and enough space to begin again.',
+    'The traveller closed tired eyes and allowed sleep to come as naturally as the next wave reaching the shore.'
+  ],
+  '30-40':[
+    'At the end of a winding forest road stood a simple lodge surrounded by tall pines. The air smelled of rain, wood, and cool earth.',
+    'A fire had burned down to a quiet glow. Its work was nearly complete, and it no longer needed to fill the room with bright light.',
+    'Someone sat nearby, letting the events of the day settle. There had been people to support, tasks to finish, and choices that had required attention.',
+    'For this evening, responsibility could be placed gently beside the door. Nothing important would be lost by resting.',
+    'Rain began on the roof, first as separate drops and then as one continuous, peaceful sound.',
+    'The listener noticed the body being supported by the chair, the floor, and the lodge itself. There was no need to hold everything alone.',
+    'Outside, the forest continued without supervision. Trees stood, rain fell, and the dark path remained where it needed to be.',
+    'The last flame folded into the embers. The room became softer, and thoughts lost the urgency they had carried during the day.',
+    'Tomorrow could be met with clearer attention after genuine rest. Tonight was not empty time. It was restoration.',
+    'The rain continued over the quiet lodge while the listener allowed the whole body to settle into sleep.'
+  ],
+  '41+':[
+    'A garden rested behind an old stone house, protected by a low wall and rows of trees. During the day it held birdsong, conversation, and work. At night it became spacious and still.',
+    'A person walked slowly along the familiar path, noticing the cool air and the steady contact of each step with the ground.',
+    'There was nothing to achieve in the garden now. The flowers had closed, the tools were put away, and the soil was quietly keeping the day’s warmth.',
+    'A bench waited beneath a tree. Sitting there, the person allowed memories and plans to pass without needing to arrange them.',
+    'The moonlight rested on every part of the garden equally, on new leaves, old branches, open spaces, and places still growing.',
+    'Breathing continued in its own rhythm. The body knew how to soften when it was given enough time and support.',
+    'From the house came the faint comfort of familiar rooms. The garden gate was closed, and the night asked for nothing more.',
+    'The person stood when ready, not from urgency but from a quiet sense that the day had reached its natural ending.',
+    'Inside, a bed waited. Tomorrow would have its own light, its own work, and its own moments of rest.',
+    'For now, the house and garden settled together, and sleep arrived gently without needing to be pursued.'
+  ]
 };
 const EX = {
   breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],
@@ -627,7 +749,7 @@ const EX = {
 const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
 function ageGroupFromAge(value){const n=Math.max(5,Math.min(99,Math.floor(Number(value)||8)));return n<=7?'5-7':n<=10?'8-10':n<=12?'11-12':n<=15?'13-15':n<=19?'16-19':n<=29?'20-29':n<=40?'30-40':'41+'}
-function contentAgeGroup(){return state.player.age==='5-7'?'5-7':state.player.age==='8-10'?'8-10':'11-12'}
+function contentAgeGroup(){return AGE_GROUPS.includes(state.player.age)?state.player.age:'8-10'}
 function bedtimeEnabled(){const h=new Date().getHours();return h>=20||h<6}
 function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
 function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
@@ -1168,7 +1290,7 @@ function openPractice(type){
     if(!bedtimeEnabled())return toast('Sleep Story becomes available at 8:00 PM. 🌙');
     $('chooseTitle').textContent='Sleep Story 🌙';
     $('chooseIntro').textContent='A gentle bedtime story. No coins, stars, streak, mission progress, or treasure are awarded.';
-    $('breathPatternArea').style.display='none';
+    $('breathPatternArea').style.display='none';$('breathSafety').style.display='none';
     $('ambientArea').style.display='block';
     const stories=SLEEP_STORIES[contentAgeGroup()]||SLEEP_STORIES['8-10'];
     const options=state.player.age==='5-7'?[['Little Sleep Story',240],['Long Sleep Story',360]]:[['Sleep Story',240],['Long Sleep Story',480]];
@@ -1191,10 +1313,11 @@ function openPractice(type){
     if(!avail.length)avail=[BREATH_PATTERNS.find(bp=>bp.id==='balloon')||BREATH_PATTERNS[0]];
     selectedBreathPattern=avail.some(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:avail[0].id;
     $('breathPatternTabs').innerHTML='';
-    avail.forEach(bp=>{const c=document.createElement('button');c.className='chip'+(selectedBreathPattern===bp.id?' active':'');c.textContent=bp.name;c.addEventListener('click',()=>{selectedBreathPattern=bp.id;state.settings.breathPattern=bp.id;save();$('breathPatternTabs').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});$('breathPatternTabs').appendChild(c);});
-    $('ambientArea').style.display='block';
+    const updateBreathSafety=()=>{const chosen=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern);$('breathSafety').style.display=chosen?.hasHolds?'block':'none'};
+    avail.forEach(bp=>{const c=document.createElement('button');c.className='chip'+(selectedBreathPattern===bp.id?' active':'');c.textContent=bp.name;c.setAttribute('aria-pressed',String(selectedBreathPattern===bp.id));c.addEventListener('click',()=>{selectedBreathPattern=bp.id;state.settings.breathPattern=bp.id;save();$('breathPatternTabs').querySelectorAll('.chip').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-pressed','false')});c.classList.add('active');c.setAttribute('aria-pressed','true');updateBreathSafety()});$('breathPatternTabs').appendChild(c);});
+    updateBreathSafety();$('ambientArea').style.display='block';
   }else{
-    $('breathPatternArea').style.display='none';
+    $('breathPatternArea').style.display='none';$('breathSafety').style.display='none';
     $('ambientArea').style.display = (type==='meditation'||type==='bodyscan') ? 'block' : 'none';
   }
   const exs=getAgeExercises(type);$('practiceOptions').replaceChildren();
@@ -1345,11 +1468,15 @@ function stopBreathLoop(){clearTimeout(breathPhaseTimer);cancelAnimationFrame(br
 function pauseBreathLoop(){if(!session||session.type!=='breathing')return;stopBreathLoop();if(session.breathPhaseStartAt)session.breathPhaseElapsed=(session.breathPhaseElapsed||0)+(Date.now()-session.breathPhaseStartAt);session.breathPhaseStartAt=0;}
 function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
 function animateBreathVisual(phase,duration,elapsed=0){
-  cancelAnimationFrame(breathRAF);const started=performance.now(),inhale=phase.p==='inhale',startScale=inhale?.84:1.30,endScale=inhale?1.30:.84;$('breathRing').style.setProperty('--ring-color',inhale?'#007AFF':'#22A879');$('breathCaption').textContent=phase.t;
-  const frame=now=>{if(!session||!session.running||session.type!=='breathing')return;const raw=Math.min(1,(elapsed+now-started)/duration),eased=easeInOut(raw);$('breathRing').style.setProperty('--ring-progress',`${raw*360}deg`);if(!state.settings.reducedMotion)$('orb').style.transform=`scale(${startScale+(endScale-startScale)*eased})`;else $('orb').style.transform='scale(1)';if(raw<1)breathRAF=requestAnimationFrame(frame)};breathRAF=requestAnimationFrame(frame)
+  cancelAnimationFrame(breathRAF);
+  const started=performance.now(),kind=phase.p,currentRaw=parseFloat($('orb').dataset.scale||'0.84'),startScale=Number.isFinite(currentRaw)?currentRaw:.84;
+  const targets={inhale:1.30,'hold-in':1.30,exhale:.84,'hold-out':.84},colors={inhale:'#007AFF','hold-in':'#FF9500',exhale:'#22A879','hold-out':'#7B68EE'},endScale=targets[kind]??1;
+  $('breathRing').style.setProperty('--ring-color',colors[kind]||'#007AFF');$('breathCaption').textContent=phase.t;
+  const frame=now=>{if(!session||!session.running||session.type!=='breathing')return;const raw=Math.min(1,(elapsed+now-started)/duration),eased=easeInOut(raw),scale=(kind==='hold-in'||kind==='hold-out')?endScale:startScale+(endScale-startScale)*eased;$('breathRing').style.setProperty('--ring-progress',`${raw*360}deg`);$('orb').dataset.scale=String(scale);$('orb').style.transform=state.settings.reducedMotion?'scale(1)':`scale(${scale})`;if(raw<1)breathRAF=requestAnimationFrame(frame)};
+  breathRAF=requestAnimationFrame(frame)
 }
 function breathLoop(reset){
-  stopBreathLoop();if(!session||session.type!=='breathing'||!session.running)return;const pattern=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern)||BREATH_PATTERNS[0];if(reset){session.breathPhaseIdx=0;session.breathPhaseElapsed=0}const idx=session.breathPhaseIdx%pattern.phases.length,phase=pattern.phases[idx],elapsed=session.breathPhaseElapsed||0,rem=Math.max(300,phase.d-elapsed);$('orb').className='orb '+phase.p;$('orb').textContent=phase.p==='inhale'?'Breathe in':'Breathe out';animateBreathVisual(phase,phase.d,elapsed);session.breathPhaseStartAt=Date.now();breathPhaseTimer=setTimeout(()=>{if(!session||!session.running)return;session.breathPhaseElapsed=0;session.breathPhaseIdx=(session.breathPhaseIdx+1)%pattern.phases.length;breathLoop(false)},rem)
+  stopBreathLoop();if(!session||session.type!=='breathing'||!session.running)return;const pattern=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern)||BREATH_PATTERNS[0];if(reset){session.breathPhaseIdx=0;session.breathPhaseElapsed=0}const idx=session.breathPhaseIdx%pattern.phases.length,phase=pattern.phases[idx],elapsed=session.breathPhaseElapsed||0,rem=Math.max(300,phase.d-elapsed);$('orb').className='orb '+phase.p;$('orb').textContent=phase.p==='inhale'?'Breathe in':phase.p==='exhale'?'Breathe out':phase.p==='hold-in'?'Hold gently':'Rest gently';animateBreathVisual(phase,phase.d,elapsed);session.breathPhaseStartAt=Date.now();breathPhaseTimer=setTimeout(()=>{if(!session||!session.running)return;session.breathPhaseElapsed=0;session.breathPhaseIdx=(session.breathPhaseIdx+1)%pattern.phases.length;breathLoop(false)},rem)
 }
 function resyncBreathing(){
   const pattern=BREATH_PATTERNS.find(bp=>bp.id===selectedBreathPattern)||BREATH_PATTERNS[0];
@@ -1411,13 +1538,13 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis' in window){speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis'in window)speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
   else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
 function pauseResume(){if(!session)return;setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
 function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
-function cleanupPractice(){stopCompletionAudio();stopStorySpeech();$('storyControlPanel').style.display='none';$('storyGreeting').style.display='none';$('timer').style.display='block';clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').style.transform='scale(1)';$('orb').textContent='Ready';$('breathRing').style.setProperty('--ring-progress','0deg');$('breathCaption').textContent='';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
+function cleanupPractice(){stopCompletionAudio();stopStorySpeech();$('storyControlPanel').style.display='none';$('storyGreeting').style.display='none';$('timer').style.display='block';clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').style.transform='scale(1)';$('orb').dataset.scale='.84';$('orb').textContent='Ready';$('breathRing').style.setProperty('--ring-progress','0deg');$('breathCaption').textContent='';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
 
 function createPendingReward(done){
   const id=done.id||crypto.randomUUID?.()||String(Date.now());state.pendingReward={id,session:done,stage:'feeling',feeling:null,createdAt:new Date().toISOString(),claimed:false};saveNow();return state.pendingReward
@@ -1521,8 +1648,10 @@ function updateStreak(){
 function renderParentLog(){const rows=[...state.progress.checkIns].slice(-8).reverse();$('parentLog').innerHTML='';if(!rows.length){$('parentLog').textContent='No practices yet.';return;}rows.forEach(r=>{const d=new Date(r.at);const row=document.createElement('div');row.className='row';const info=`${r.presenceScore??'—'}% • ${r.attentionPassed||0}✓`;row.innerHTML=`<span><b>${r.type}</b>${r.notice?' • '+r.notice:''}<br>${Math.round(r.seconds/60)} min • ${d.toLocaleDateString()}</span><span>${info}</span>`;$('parentLog').appendChild(row);});}
 function renderMoodTracker(){const el=$('moodTracker');if(!el)return;const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],moodMap={calm:'😌',happy:'😊',sleepy:'😴',same:'🙂'};el.innerHTML='';const grid=document.createElement('div');grid.className='mood-grid';for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const ci=state.progress.checkIns.filter(c=>isoToLocalDate(c.at)===ds);const f=ci.length?ci[ci.length-1].feeling:null;const cell=document.createElement('div');cell.className='mood-cell';cell.innerHTML=`<span class="mood-emoji">${f?(moodMap[f]||'🙂'):'—'}</span><span class="mood-day">${days[d.getDay()]}</span>`;grid.appendChild(cell);}el.appendChild(grid);}
 function renderStreakCalendar(){const el=$('streakCalendar');if(!el)return;const today=localDate(),dates=new Set(state.progress.checkIns.map(c=>isoToLocalDate(c.at)));el.innerHTML='<p class="small" style="margin:0 0 6px">Last 28 days</p>';const grid=document.createElement('div');grid.className='streak-calendar';for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDate(d);const done=dates.has(ds);const cell=document.createElement('div');cell.className='cal-cell '+(done?'cal-done':'cal-miss')+(ds===today?' cal-today':'');cell.textContent=done?'🟢':'⬜';grid.appendChild(cell);}el.appendChild(grid);}
-function renderWeeklySummary(){const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*864e5),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),checked=week.filter(r=>Number.isFinite(Number(r.presenceScore))),avg=checked.length?Math.round(checked.reduce((a,r)=>a+Number(r.presenceScore),0)/checked.length):0;$('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${avg}%</b><br><span class="small">Check-ins</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;}
-
+function renderWeeklySummary(){
+  const now=Date.now(),week=state.progress.checkIns.filter(r=>now-new Date(r.at).getTime()<7*864e5),mins=Math.round(week.reduce((a,r)=>a+(Number(r.seconds)||0),0)/60),mindfulDays=new Set(week.map(r=>isoToLocalDate(r.at)).filter(Boolean)).size;
+  $('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${mindfulDays}/7</b><br><span class="small">Mindful days</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;
+}
 /* ═══ SETTINGS ═══ */
 $('btnSaveChildSettings').addEventListener('click',()=>{state.settings.sound=$('soundToggle').checked;state.settings.reducedMotion=$('motionToggle').checked;state.settings.buddy=$('buddyToggle').checked;state.settings.petSignal=$('petSignalToggle').checked;state.settings.haptic=$('hapticToggle').checked;save();render();toast('Saved.');});
 $('btnManualSave').addEventListener('click',()=>{save();toast('✅ Progress saved!');});
@@ -1618,7 +1747,8 @@ $('btnExport').addEventListener('click',()=>requestProtectedAction('export'));
 $('btnImport').addEventListener('click',()=>requestProtectedAction('import'));
 $('importFile').addEventListener('change',importData);
 $('btnSetPin').addEventListener('click',()=>{if(state.settings.pinHash)openPinModal('change','changePin');else openPinModal('create','createPin');});
-$('btnReset').addEventListener('click',()=>{const userConfirm=prompt('Type RESET (all caps) to confirm erasing all progress:');if(userConfirm==='RESET')requestProtectedAction('reset');else toast('Reset cancelled.');});
+$('btnReset').addEventListener('click',()=>openModal('resetModal'));
+$('btnConfirmReset').addEventListener('click',()=>{closeModal('resetModal');requestProtectedAction('reset');});
 $('btnSubmitPin').addEventListener('click',submitPin);
 $('btnSaveNickname').addEventListener('click',()=>{if(!renamingPetId)return;const raw=cleanUserText($('nicknameInput').value,12);if(raw.length<1){toast('Nickname too short.');return;}state.pets[renamingPetId].nickname=raw;save();render();closeModal('nicknameModal');toast(`Named: ${raw}`);renamingPetId=null;});
 $('checkModal').querySelectorAll('[data-feeling]').forEach(b=>b.addEventListener('click',()=>finishCheck(b.dataset.feeling)));
@@ -1641,9 +1771,21 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('age groups ready',()=>AGE_GROUPS.length===8&&BREATH_PATTERNS[0].ages===AGE_GROUPS);check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('box breath age gates',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7'))&&BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('20-29'));check('box phases complete',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.p).join(',')==='inhale,hold-in,exhale,hold-out');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runCapabilityCheck(){
+  const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
+  try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
+  if(!support.storage){document.querySelectorAll('button').forEach(b=>{if(!['btnExport'].includes(b.id))b.disabled=true});const n=document.createElement('div');n.className='notice';n.textContent='Browser storage is unavailable. Mindful Moments cannot safely save progress in this browsing mode.';document.querySelector('main').prepend(n)}
+  if(!support.speech&&$('storyAutoNarrate')){$('storyAutoNarrate').checked=false;$('storyAutoNarrate').disabled=true;const copy=$('storyAutoNarrate').closest('.setting-item')?.querySelector('small');if(copy)copy.textContent='Narration is unavailable in this browser. You can still read the story.'}
+  if(!support.crypto){$('btnUnlockParent').disabled=true;$('btnUnlockParent').textContent='Parent PIN unavailable';}
+  console.info('Mindful Moments capabilities',support);return support
+}
+function safeStart(){
+  try{const capabilities=runCapabilityCheck();render();const testsPassed=runDataSelfTests();if(!testsPassed)toast('A local data check needs attention. Export a backup before continuing.');showOnboarding();setTimeout(restorePendingReward,150);return capabilities}
+  catch(error){console.error('Mindful Moments startup failed',error);const host=document.querySelector('main')||document.body;const box=document.createElement('div');box.className='notice';box.style.margin='20px';box.textContent='Mindful Moments could not start safely. Please reload the page. If the problem continues, export or clear this site’s local data.';host.prepend(box);return null}
+}
 /* ═══ INIT ═══ */
-render();runDataSelfTests();showOnboarding();setTimeout(restorePendingReward,150);
+safeStart();
 </script>
 </body>
 </html>
