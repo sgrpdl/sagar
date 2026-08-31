@@ -378,9 +378,13 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <p class="small" style="font-weight:900">Calm sound</p>
 <select id="ambientSound" style="width:100%;padding:10px;border:1px solid #dce2ec;border-radius:13px">
 <option value="none">🔇 No sound</option>
-<option value="rain">🌧️ Rainfall</option>
-<option value="ocean">🌊 Ocean waves</option>
-<option value="forest">🌲 Forest birds</option>
+<option value="rain">🌧️ Gentle Rain</option>
+<option value="ocean">🌊 Soft Ocean</option>
+<option value="forest">🌲 Quiet Forest</option>
+<option value="zenGarden">🪷 Zen Garden</option>
+<option value="bamboo">🎋 Bamboo Breeze</option>
+<option value="temple">🔔 Temple Bells</option>
+<option value="softKeys">🎹 Soft Dream Keys</option>
 </select>
 </div>
 <div id="practiceOptions" class="list"></div>
@@ -677,7 +681,7 @@ let parentUnlockedUntil = 0;
 let renamingPetId = null;
 let marketCat = 'food';
 let wakeLockSentinel = null;
-let ambientNodes=[];
+let ambientNodes=[],ambientTimers=[],currentAmbientType='none',ambientWasPaused=false;
 
 const $ = id => document.getElementById(id);
 const activePet = () => state.pets[state.activePetId];
@@ -794,6 +798,7 @@ document.addEventListener('visibilitychange',()=>{
 function handlePracticeHide(){
   if(!session||!session.running)return;
   session.hiddenAt=Date.now();
+  pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();
   clearTimeout(breathPhaseTimer);cancelAnimationFrame(breathRAF);
   clearTimeout(bodyscanTimer);
   clearTimeout(alertScheduleTimer);
@@ -801,6 +806,7 @@ function handlePracticeHide(){
 }
 function handlePracticeReturn(){
   if(!session||!session.hiddenAt)return;
+  resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.resume();
   const awaySec=Math.floor((Date.now()-session.hiddenAt)/1000);
   session.hiddenAt=0;
   if(!session.running)return;
@@ -1071,26 +1077,47 @@ function showStreakCelebration(day){
 }
 
 /* ═══ AMBIENT SOUNDS ═══ */
-function startAmbient(type){
-  if(!type || type==='none' || !state.settings.sound) return;
-  try{
-    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    if(audioCtx.state==='suspended') audioCtx.resume();
-    const ctx=audioCtx, bufferSize=ctx.sampleRate*2, buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate), data=buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++) data[i]=Math.random()*2-1;
-    const source=ctx.createBufferSource();source.buffer=buffer;source.loop=true;
-    const filter=ctx.createBiquadFilter();filter.type='lowpass';
-    if(type==='rain') filter.frequency.value=1000;
-    if(type==='ocean') filter.frequency.value=500;
-    if(type==='forest') filter.frequency.value=2200;
-    const gain=ctx.createGain();gain.gain.value=0.1;
-    source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
-    source.start();
-    ambientNodes=[source,filter,gain];
-  }catch(e){console.warn('Ambient sound failed',e);}
+function stopAmbientNodes(){
+  ambientTimers.forEach(t=>clearTimeout(t));ambientTimers=[];
+  ambientNodes.forEach(n=>{try{if(typeof n.stop==='function')n.stop()}catch(e){}try{if(typeof n.disconnect==='function')n.disconnect()}catch(e){}});ambientNodes=[];
 }
-function stopAmbient(){ambientNodes.forEach(n=>{try{n.stop()}catch(e){}});ambientNodes=[];}
-  /* ═══ PRACTICE ═══ */
+function scheduleAmbient(fn,ms){const id=setTimeout(fn,ms);ambientTimers.push(id);return id}
+function ambientNote(freq,dur=2,vol=.018,type='sine',delay=0){
+  if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(vol,t+.08);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur+.05);ambientNodes.push(o,g)
+}
+function startAmbient(type,currentRestart=false){
+  stopAmbientNodes();currentAmbientType=type||'none';ambientWasPaused=false;
+  if(currentAmbientType==='none'||!state.settings.sound)return;
+  try{
+    if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();
+    if(['rain','ocean','forest'].includes(currentAmbientType)){
+      const size=audioCtx.sampleRate*2,buf=audioCtx.createBuffer(1,size,audioCtx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<size;i++)data[i]=Math.random()*2-1;
+      const src=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();src.buffer=buf;src.loop=true;filter.type='lowpass';filter.frequency.value=currentAmbientType==='rain'?850:currentAmbientType==='ocean'?420:1500;gain.gain.value=currentAmbientType==='forest'?.025:.045;src.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);src.start();ambientNodes.push(src,filter,gain);return;
+    }
+    if(currentAmbientType==='zenGarden'){
+      const loop=()=>{if(currentAmbientType!=='zenGarden'||ambientWasPaused)return;[220,329.63,440].forEach((f,i)=>ambientNote(f,6,.012/(i+1),'sine',i*.7));scheduleAmbient(loop,9000)};loop();return;
+    }
+    if(currentAmbientType==='bamboo'){
+      const notes=[523.25,587.33,659.25,783.99,659.25,587.33],loop=()=>{if(currentAmbientType!=='bamboo'||ambientWasPaused)return;const f=notes[Math.floor(Math.random()*notes.length)];ambientNote(f,2.8,.014,'sine');scheduleAmbient(loop,3300+Math.random()*1800)};loop();return;
+    }
+    if(currentAmbientType==='temple'){
+      const loop=()=>{if(currentAmbientType!=='temple'||ambientWasPaused)return;[196,392,588].forEach((f,i)=>ambientNote(f,7,.022/(i+1),'sine',i*.12));scheduleAmbient(loop,15000)};loop();return;
+    }
+    if(currentAmbientType==='softKeys'){
+      const chords=[[261.63,329.63,392],[220,261.63,329.63],[196,246.94,293.66]],loop=()=>{if(currentAmbientType!=='softKeys'||ambientWasPaused)return;const chord=chords[Math.floor(Math.random()*chords.length)];chord.forEach((f,i)=>ambientNote(f,5,.01,'triangle',i*.18));scheduleAmbient(loop,6500)};loop();return;
+    }
+  }catch(e){console.warn('Ambient sound failed',e)}
+}
+function pauseAmbient(){
+  if(currentAmbientType==='none')return;ambientWasPaused=true;stopAmbientNodes();
+}
+function resumeAmbient(){
+  if(currentAmbientType==='none'||!state.settings.sound)return;const type=currentAmbientType;startAmbient(type,true);
+}
+function stopAmbient(){
+  ambientWasPaused=false;currentAmbientType='none';stopAmbientNodes();
+}
+/* ═══ PRACTICE ═══ */
 function getAgeExercises(type){
   const age=state.player.age,base=EX[type]||[];
   if(type==='breathing'||type==='meditation'){
@@ -1320,8 +1347,8 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
-  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.resume();$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
+  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
 function pauseResume(){if(!session)return;setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
