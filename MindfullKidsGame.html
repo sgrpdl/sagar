@@ -839,12 +839,12 @@ function getPetEmotionState(){
 }
 function updatePetMessage(){
   const p=activePet(),nick=p.nickname||activePetDef().name,h=new Date().getHours();
-  let msg='I\'m happy you\'re here!',care=false;
+  let msg=personalizedWelcome(),care=false;
   if(p.health<50){msg=`${nick} is resting. Practice and choose a healthy snack! 🍎`;care=true;}
   else if(p.happiness<50){msg=`${nick} missed you. Gentle pats would feel lovely. 💛`;care=true;}
   else if(p.health<=65){msg='I used energy today. Shall we earn a healthy snack? 🥕';care=true;}
   else if(p.happiness<=60){msg='Can we play after calm practice? 🌿';care=true;}
-  else if(h<12)msg='Good morning! Shall we practice together?';
+  else if(h<12)msg=hasRealChildName()?`Good morning, ${displayFirstName()}! Shall we practice together?`:'Good morning! Shall we practice together?';
   $('petMessage').textContent=msg;
   $('petMessage').classList.toggle('needs-care',care);
 }
@@ -903,7 +903,7 @@ function render(){
   updatePetMessage();
   const wb=$('welcomeBanner');
   const practiced=state.player.lastPracticeDate===localDate();
-  if(practiced){wb.style.display='none';}else{wb.style.display='block';const h=new Date().getHours();wb.textContent=h<12?`Good morning! ${ps.nickname||petDef.name} is waiting. 🌅`:h<17?`Good afternoon! Time for calm practice. 🌿`:`Good evening! Gentle practice before bed? 🌙`;}
+  if(practiced){wb.style.display='none';}else{wb.style.display='block';const h=new Date().getHours(),name=hasRealChildName()?`, ${displayFirstName()}`:'';wb.textContent=h<12?`Good morning${name}! ${ps.nickname||petDef.name} is waiting. 🌅`:h<17?`Good afternoon${name}! Time for a calm moment. 🌿`:`Good evening${name}! Gentle practice before bed? 🌙`; }
   $('healthFill').style.width=ps.health+'%';$('healthN').textContent=Math.round(ps.health);
   $('happyFill').style.width=ps.happiness+'%';$('happyN').textContent=Math.round(ps.happiness);
   $('friendFill').style.width=(ps.friendXP%100)+'%';$('friendN').textContent=Math.round(ps.friendXP%100);
@@ -1249,9 +1249,18 @@ function resyncBodyScan(){
   session.bodyscanStepElapsed=stepElapsedMs;
   advanceBodyScan();
 }
+function hasRealChildName(){
+  const raw=cleanUserText(state.player.name||'',18);
+  return !!raw && raw.toLowerCase()!=='explorer';
+}
 function displayFirstName(){
-  const raw=String(state.player.name||'').trim(),first=(raw.split(/\s+/)[0]||'Little dreamer');
+  const raw=cleanUserText(state.player.name||'',18);
+  if(!raw||raw.toLowerCase()==='explorer')return 'Little dreamer';
+  const first=raw.split(/\s+/)[0];
   return first.length>10?first.slice(0,10)+'…':first;
+}
+function personalizedWelcome(){
+  return hasRealChildName()?`I'm happy you're here, ${displayFirstName()}!`:`I'm happy you're here!`;
 }
 function chooseStoryVoice(){
   if(!('speechSynthesis'in window))return null;const voices=speechSynthesis.getVoices();
