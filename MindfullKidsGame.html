@@ -598,10 +598,11 @@ const STREAK_MILESTONES = {
 };
 
 const BREATH_PATTERNS = [
-  {id:'balloon',name:'Balloon Breath',ages:['5-7','8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in like a balloon'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
-  {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:3000,t:'Sniff in like a bunny'},{p:'exhale',d:3000,t:'Breathe out slowly'}]},
-  {id:'boxBeginner',name:'Box Breathing (Easy)',ages:['8-10','11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:4000,t:'Hold gently'},{p:'exhale',d:4000,t:'Breathe out'}]},
-  {id:'boxAdvanced',name:'Box Breathing (Full)',ages:['11-12'],phases:[{p:'inhale',d:4000,t:'Breathe in'},{p:'hold-in',d:4000,t:'Hold gently'},{p:'exhale',d:4000,t:'Breathe out'},{p:'hold-out',d:4000,t:'Hold gently'}]}
+  {id:'balloon',name:'Balloon Breath',ages:AGE_GROUPS,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'exhale',d:5000,t:'Breathe out slowly'}]},
+  {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
+  {id:'ocean',name:'Ocean Wave',ages:['8-10','11-12','13-15','16-19','20-29','30-40','41+'],phases:[{p:'inhale',d:4000,t:'Wave rises — breathe in'},{p:'exhale',d:6000,t:'Wave settles — breathe out'}]},
+  {id:'star',name:'Star Breathing',ages:['8-10','11-12','13-15'],phases:[{p:'inhale',d:4000,t:'Trace up — breathe in'},{p:'exhale',d:5000,t:'Trace down — breathe out'}]},
+  {id:'steady',name:'Steady Exhale',ages:['16-19','20-29','30-40','41+'],phases:[{p:'inhale',d:4000,t:'Breathe in naturally'},{p:'exhale',d:6000,t:'Let the breath out slowly'}]}
 ];
 const BODYSCAN_SCRIPTS = {
   '5-7':[{t:'Notice your feet on the ground',d:12},{t:'Wiggle your toes gently',d:10},{t:'Feel your tummy breathing',d:12},{t:'Relax your shoulders down',d:10},{t:'Notice sounds around you',d:12}],
@@ -640,14 +641,16 @@ function migrate(x){
   merged.ownedItems = Array.isArray(x.ownedItems)?x.ownedItems:[];
   if(merged.monthlyGift===undefined)merged.monthlyGift=null;if(!Array.isArray(merged.appliedRewardIds))merged.appliedRewardIds=[];merged.appliedRewardIds=merged.appliedRewardIds.slice(-200);if(!merged.pendingReward||typeof merged.pendingReward!=='object')merged.pendingReward=null;
   merged.pets = {};
-  const src = (x.pets && Object.keys(x.pets).length) ? x.pets : {cat:petProfile()};
-  Object.keys(src).forEach(id=>{
-    merged.pets[id] = {...petProfile(), ...src[id]};
-    if(!Array.isArray(merged.pets[id].milestones)) merged.pets[id].milestones = [];
-    merged.pets[id].health = Math.max(0,Math.min(100,merged.pets[id].health ?? 60));
-    merged.pets[id].happiness = Math.max(0,Math.min(100,merged.pets[id].happiness ?? 60));
-  });
-  merged.activePetId = (x.activePetId && merged.pets[x.activePetId]) ? x.activePetId : Object.keys(merged.pets)[0];
+  const src=(x.pets&&typeof x.pets==='object')?x.pets:{};
+  PETS.forEach(def=>{if(src[def.id]&&typeof src[def.id]==='object'){
+    merged.pets[def.id]={...petProfile(),...src[def.id]};
+    if(!Array.isArray(merged.pets[def.id].milestones))merged.pets[def.id].milestones=[];
+    merged.pets[def.id].health=Math.max(0,Math.min(100,Number(merged.pets[def.id].health)??60));
+    merged.pets[def.id].happiness=Math.max(0,Math.min(100,Number(merged.pets[def.id].happiness)??60));
+  }});
+  if(!Object.keys(merged.pets).length)merged.pets.cat=petProfile();
+  merged.activePetId=(x.activePetId&&PETS.some(p=>p.id===x.activePetId)&&merged.pets[x.activePetId])?x.activePetId:'cat';
+  if(!merged.pets[merged.activePetId]){merged.pets.cat=merged.pets.cat||petProfile();merged.activePetId='cat';}
   if(!Array.isArray(merged.progress.checkIns)) merged.progress.checkIns=[];
   if(!Array.isArray(merged.progress.badges)) merged.progress.badges=[];
   merged.player.coins = Math.max(0,Math.min(999999,Math.floor(merged.player.coins||0)));
@@ -692,8 +695,8 @@ let wakeLockSentinel = null;
 let ambientNodes=[],ambientTimers=[],currentAmbientType='none',ambientWasPaused=false,storyUtterance=null,storyAdvanceTimer=null,storySpeechToken=0,storyAudioPaused=false,storyVoice=null;
 
 const $ = id => document.getElementById(id);
-const activePet = () => state.pets[state.activePetId];
-const activePetDef = () => PETS.find(p=>p.id===state.activePetId);
+const activePet=()=>state.pets[state.activePetId]||state.pets.cat||(state.pets.cat=petProfile());
+const activePetDef=()=>PETS.find(p=>p.id===state.activePetId)||PETS[0];
 
 /* ═══ AUDIO ═══ */
 let audioCtx = null;
@@ -1146,8 +1149,9 @@ function openPractice(type){
   }[type]||'';
   if(type==='breathing'){
     $('breathPatternArea').style.display='block';
-    const avail=BREATH_PATTERNS.filter(bp=>bp.ages.includes(state.player.age));
-    selectedBreathPattern=avail.find(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:avail[0].id;
+    let avail=BREATH_PATTERNS.filter(bp=>bp.ages.includes(state.player.age));
+    if(!avail.length)avail=[BREATH_PATTERNS.find(bp=>bp.id==='balloon')||BREATH_PATTERNS[0]];
+    selectedBreathPattern=avail.some(bp=>bp.id===state.settings.breathPattern)?state.settings.breathPattern:avail[0].id;
     $('breathPatternTabs').innerHTML='';
     avail.forEach(bp=>{const c=document.createElement('button');c.className='chip'+(selectedBreathPattern===bp.id?' active':'');c.textContent=bp.name;c.addEventListener('click',()=>{selectedBreathPattern=bp.id;state.settings.breathPattern=bp.id;save();$('breathPatternTabs').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});$('breathPatternTabs').appendChild(c);});
     $('ambientArea').style.display='block';
@@ -1369,7 +1373,7 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.resume();$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis'in window)speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
   else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
@@ -1418,15 +1422,15 @@ function finishJournal(notice){
   const typeKey=s.mode||s.type||'breathing';state.progress[typeKey]=(state.progress[typeKey]||0)+1;state.progress.totalSeconds+=actual;
   state.progress.checkIns.push({feeling,notice:notice==='__skip'?null:(notice||null),type:typeKey,seconds:actual,at:new Date().toISOString(),attentionPassed:s.attentionPassed,attentionMissed:s.attentionMissed,presenceScore:s.presenceScore??100});
   // Seasonal gift — once per month
-  const month = new Date().getMonth();
-  const seasonalMap = {0:'scarf', 11:'flower', 2:'flower', 9:'flower'};
-  if(month !== state.monthlyGift && seasonalMap[month]){
-    const item = ITEMS.find(x=>x.id===seasonalMap[month]);
+  const giftNow=new Date(),month=giftNow.getMonth(),monthKey=`${giftNow.getFullYear()}-${String(month+1).padStart(2,'0')}`;
+  const seasonalMap={0:'scarf',11:'flower',2:'flower',9:'flower'};
+  if(monthKey!==state.monthlyGift&&seasonalMap[month]){
+    const item=ITEMS.find(x=>x.id===seasonalMap[month]);
     if(item && !state.ownedItems.includes(item.id)){
       state.ownedItems.push(item.id);
       toast(`🎁 Seasonal gift: ${item.icon} ${item.name}!`);
     }
-    state.monthlyGift = month;
+    state.monthlyGift=monthKey;
   }
   // Mystery egg every 5th practice
   if(state.progress.sessions % 5 === 0){
@@ -1599,7 +1603,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{cat:petProfile()},activePetId:'bad'}).activePetId==='cat');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 /* ═══ INIT ═══ */
 render();runDataSelfTests();showOnboarding();setTimeout(restorePendingReward,150);
 </script>
