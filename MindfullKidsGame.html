@@ -601,6 +601,7 @@ const STREAK_MILESTONES = {
   365:{icon:'👑',title:'ONE FULL YEAR!',desc:'365 days of calm. You are officially a Mindfulness Legend!'}
 };
 
+const AGE_GROUPS=['5-7','8-10','11-12','13-15','16-19','20-29','30-40','41+'];
 const BREATH_PATTERNS = [
   {id:'balloon',name:'Balloon Breath',ages:AGE_GROUPS,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'exhale',d:5000,t:'Breathe out slowly'}]},
   {id:'bunny',name:'Bunny Breath',ages:['5-7'],phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
@@ -625,7 +626,6 @@ const EX = {
 };
 const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
-const AGE_GROUPS=['5-7','8-10','11-12','13-15','16-19','20-29','30-40','41+'];
 function ageGroupFromAge(value){const n=Math.max(5,Math.min(99,Math.floor(Number(value)||8)));return n<=7?'5-7':n<=10?'8-10':n<=12?'11-12':n<=15?'13-15':n<=19?'16-19':n<=29?'20-29':n<=40?'30-40':'41+'}
 function contentAgeGroup(){return state.player.age==='5-7'?'5-7':state.player.age==='8-10'?'8-10':'11-12'}
 function bedtimeEnabled(){const h=new Date().getHours();return h>=20||h<6}
@@ -1411,7 +1411,7 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis'in window)speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis' in window){speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
   else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
@@ -1641,7 +1641,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('age groups ready',()=>AGE_GROUPS.length===8&&BREATH_PATTERNS[0].ages===AGE_GROUPS);check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 /* ═══ INIT ═══ */
 render();runDataSelfTests();showOnboarding();setTimeout(restorePendingReward,150);
 </script>
