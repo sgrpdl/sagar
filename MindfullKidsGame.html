@@ -10,7 +10,8 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#20243a}button,input,select{font:inherit}button{cursor:pointer}
 .app{width:min(100%,520px);min-height:100dvh;margin:auto;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);position:relative;overflow:hidden}
 .top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.72);backdrop-filter:blur(15px);border-bottom:1px solid #fff}
-.brand{font-weight:900}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.brand{font-weight:900}
+.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .pill{background:#fff;border-radius:999px;padding:6px 9px;font-weight:900;font-size:13px;box-shadow:0 4px 12px #65719a19}
 .main{padding:15px 15px 92px}.view{display:none;animation:in .25s ease}.view.active{display:block}
 @keyframes in{from{opacity:.3;transform:translateY(4px)}}
@@ -168,8 +169,6 @@ h1,h2,h3,p{margin-top:0}
 .wakelock-status{font-size:11px;font-weight:700;border-radius:99px;padding:3px 10px;display:inline-block;margin:4px 0}
 .wakelock-active{background:#e1f5e8;color:#1a7544}
 .wakelock-inactive{background:#fff3cd;color:#735700}
-.returncheck{text-align:center;padding:10px 0}
-.returncheck h3{margin:0 0 8px}
 .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300;overflow:hidden}
 .confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 1.8s ease-out forwards}
 .confetti-piece:nth-child(odd){border-radius:50%}
@@ -311,16 +310,8 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <!-- Eyes-closed mode banner -->
 <div id="eyesClosedBanner" class="eyes-closed-banner" style="display:none">
 <b>🧘 Eyes-closed mode active</b>
-<div class="small">Screen can lock safely. Timer continues in the background. A gentle check will appear when you return.</div>
+<div class="small">Screen can lock safely. Timer continues in the background. Simply return when your practice finishes.</div>
 <div id="wakelockStatus" class="wakelock-status wakelock-inactive">Wake lock: not active</div>
-</div>
-<!-- Return check (shown when user comes back from eyes-closed) -->
-<div id="returnCheck" class="presence-card" style="display:none">
-<div class="returncheck">
-<h3>Welcome back 🌿</h3>
-<p id="returnCheckText" class="small">You were away for 0 minutes. Tap the symbol to confirm you were practising.</p>
-<div id="returnCheckChoices" class="check"></div>
-</div>
 </div>
 <div class="participation">
 <b>Practice presence</b>
@@ -334,7 +325,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <p id="presenceInstruction">Tap the matching symbol.</p>
 <div id="presenceChoices" class="check"></div>
 </div>
-<p class="notice">This app checks attention and visibility but cannot prove meditation. If hidden during breathing, it pauses. During meditation and body scan, it continues but asks a gentle check when you return.</p>
+<p class="notice">This app checks attention and visibility but cannot prove meditation. If hidden during breathing, it pauses. During meditation and body scan, it continues safely in the background.</p>
 <div style="width:100%" class="grid2">
 <button class="btn soft" id="btnPauseResume">Pause</button>
 <button class="btn danger" id="btnQuitPractice">End</button>
@@ -583,7 +574,6 @@ let wakeLockSentinel = null;
 let eyesClosedMode = false;
 let hiddenAt = 0;       // timestamp when screen went off during eyes-closed
 let hiddenSeconds = 0;  // accumulated hidden seconds during eyes-closed
-let returnCheckPending = false;
 
 /* ═══ DOM CACHE ═══ */
 const $ = id => document.getElementById(id);
@@ -614,7 +604,7 @@ function petCompletionSignal(){
 function clamp(n){return Math.max(0,Math.min(100,n));}
 function localDate(d=new Date()){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function isoToLocalDate(s){const d=new Date(s);return isNaN(d.getTime())?'':localDate(d);}
-function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);}
+function dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00')) / 864e5);}
 function checkDaily(){const d=localDate();if(state.daily.date!==d){state.daily={date:d,earned:0,missionCount:0};Object.values(state.pets).forEach(p=>{p.fedToday=false;p.fedDate=d;});}}
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;$('toastbox').appendChild(e);setTimeout(()=>e.remove(),3500);}
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
@@ -624,8 +614,6 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){if
 function applyGentleCareDecay(){const now=Date.now(),day=864e5;Object.values(state.pets).forEach(p=>{if(!p.lastDecayAt)p.lastDecayAt=now;if(!p.lastCareAt)p.lastCareAt=now;const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day;});}
 
 /* ═══ WAKE LOCK ═══ */
-// Keeps screen on during meditation and body scan so the timer doesn't pause.
-// Falls back to eyes-closed mode if Wake Lock is unsupported.
 async function requestWakeLock(){
   if(!('wakeLock' in navigator))return false;
   try{
@@ -651,21 +639,16 @@ function updateWakeLockUI(){
     el.textContent='🟢 Screen will stay on';
   }else{
     el.className='wakelock-status wakelock-inactive';
-    el.textContent='Screen may dim — timer continues if it does';
+    el.textContent='Screen may dim — timer continues safely';
   }
 }
-// Re-acquire wake lock when tab becomes visible again (browser releases it on hide)
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&session&&eyesClosedMode&&!wakeLockSentinel){
     requestWakeLock();
   }
 });
 
-/* ═══ EYES-CLOSED MODE ═══ */
-// For meditation and body scan: the timer CONTINUES when the screen locks.
-// When the user returns, a gentle "return check" verifies they were practising.
-// For breathing: screen-off = pause (child needs to watch the orb).
-
+/* ═══ EYES-CLOSED MODE (Disables Mid-session Checks) ═══ */
 function isEyesClosedType(){
   return session && (session.type==='meditation'||session.type==='bodyscan');
 }
@@ -675,9 +658,7 @@ function enterEyesClosedMode(){
   eyesClosedMode=true;
   hiddenSeconds=0;
   hiddenAt=0;
-  returnCheckPending=false;
   $('eyesClosedBanner').style.display='block';
-  // Request wake lock to try keeping screen on
   requestWakeLock();
   updateWakeLockUI();
 }
@@ -688,105 +669,68 @@ function exitEyesClosedMode(){
   releaseWakeLock();
 }
 
-// Called when the app goes hidden during an eyes-closed session
 function handleEyesClosedHide(){
   if(!session||!eyesClosedMode||!session.running)return;
   hiddenAt=Date.now();
-  // DON'T pause the session — the timer keeps counting via endAt.
-  // Body scan timer will stop advancing prompts (that's fine, eyes closed).
   clearTimeout(bodyscanTimer);
-  // Breathing is not in eyes-closed mode, so this shouldn't happen, but guard:
   stopBreathLoop();
 }
 
-// Called when the app returns from being hidden during eyes-closed
 function handleEyesClosedReturn(){
   if(!session||!eyesClosedMode)return;
-  // Calculate how long we were hidden
   const awayMs = hiddenAt > 0 ? (Date.now() - hiddenAt) : 0;
   const awaySec = Math.floor(awayMs / 1000);
   hiddenSeconds += awaySec;
   hiddenAt = 0;
 
-  // If the session already ended while hidden
   if(Date.now() >= session.endAt){
     session.remaining = 0;
-    // Credit the hidden time as visible (they were meditating)
     session.eyesClosedSeconds = (session.eyesClosedSeconds||0) + awaySec;
     completePractice();
     return;
   }
 
-  // Update remaining time (endAt-based, so it auto-advances even when hidden)
   session.remaining = Math.max(0, Math.ceil((session.endAt - Date.now())/1000));
   session.eyesClosedSeconds = (session.eyesClosedSeconds||0) + awaySec;
 
-  // If away for more than 10 seconds, show a gentle return check
-  if(awaySec >= 10){
-    showReturnCheck(awaySec);
-  }else{
-    // Short absence — just resume body scan prompts
-    if(session.type==='bodyscan')resumeBodyScan();
+  if(session.type==='bodyscan'){
+    // Re-sync Body Scan index based on actual elapsed time so it doesn't get stuck
+    const script = BODYSCAN_SCRIPTS[state.player.age] || BODYSCAN_SCRIPTS['8-10'];
+    let totalTime = 0;
+    let foundIdx = 0;
+    const sessionElapsed = session.planned - session.remaining;
+    for(let i=0; i<script.length; i++){
+      totalTime += script[i].d;
+      if(sessionElapsed < totalTime){
+        foundIdx = i;
+        session.bodyscanStepElapsed = (sessionElapsed - (totalTime - script[i].d)) * 1000;
+        break;
+      }
+    }
+    if(sessionElapsed >= totalTime){
+      foundIdx = script.length;
+      session.bodyscanStepElapsed = 0;
+    }
+    session.bodyscanIdx = foundIdx;
+    resumeBodyScan();
   }
 
-  // Re-acquire wake lock
   requestWakeLock();
-}
-
-function showReturnCheck(awaySec){
-  returnCheckPending=true;
-  const mins=Math.round(awaySec/60);
-  const timeText=mins>=1?`${mins} minute${mins>1?'s':''}`:`${awaySec} seconds`;
-  $('returnCheckText').textContent=`You were away for ${timeText}. Tap the matching symbol to confirm you were practising.`;
-  const answer=PRESENCE_SYMBOLS[Math.floor(Math.random()*PRESENCE_SYMBOLS.length)];
-  session.returnAnswer=answer;
-  $('returnCheckText').textContent+=` Tap ${answer}.`;
-  const choices=$('returnCheckChoices');
-  choices.innerHTML='';
-  shuffle(PRESENCE_SYMBOLS).forEach(sym=>{
-    const btn=document.createElement('button');
-    btn.className='btn soft';
-    btn.textContent=sym;
-    btn.addEventListener('click',()=>answerReturnCheck(sym));
-    choices.appendChild(btn);
-  });
-  $('returnCheck').style.display='block';
-}
-
-function answerReturnCheck(sym){
-  if(!session||!returnCheckPending)return;
-  if(sym!==session.returnAnswer){
-    playSound('error');
-    toast('Look for the correct symbol.');
-    return;
-  }
-  returnCheckPending=false;
-  $('returnCheck').style.display='none';
-  session.returnAnswer=null;
-  session.attentionPassed++;
-  // Resume body scan if applicable
-  if(session.type==='bodyscan')resumeBodyScan();
   updateParticipation();
-  toast('Welcome back. Practice continues. 🌿');
 }
 
-/* ═══ VISIBILITY HANDLER (redesigned) ═══ */
+/* ═══ VISIBILITY CHANGE ═══ */
 document.addEventListener('visibilitychange',()=>{
   if(!session)return;
-
   if(document.hidden){
-    // Screen went off or tab hidden
     if(isEyesClosedType()&&eyesClosedMode&&session.running){
-      // Meditation/body scan in eyes-closed mode: DON'T pause
       handleEyesClosedHide();
     }else if(session.running){
-      // Breathing or non-eyes-closed: pause
       session.hiddenPauses++;
       $('focusBanner').classList.add('show');
       setSessionRunning(false);
     }
   }else{
-    // Screen came back
     if(isEyesClosedType()&&eyesClosedMode){
       handleEyesClosedReturn();
     }else if(!session.running&&!session.attentionDue){
@@ -1024,7 +968,7 @@ function getAgeExercises(type){
 
 function openPractice(type){
   $('chooseTitle').textContent={breathing:'Breathing Adventure',meditation:'Meditation Adventure',bodyscan:'Body Scan Adventure'}[type]||'Practice';
-  $('chooseIntro').textContent={breathing:'Follow the calm circle. Never force the breath.',meditation:'Sit quietly. No special breathing needed. You can close your eyes — the timer continues even if the screen dims.',bodyscan:'Follow gentle body prompts. You can close your eyes — the timer continues.'}[type]||'';
+  $('chooseIntro').textContent={breathing:'Follow the calm circle. Never force the breath.',meditation:'Sit quietly. You can close your eyes — the timer continues even if the screen dims.',bodyscan:'Follow gentle body prompts. You can close your eyes — the timer continues.'}[type]||'';
   if(type==='breathing'){
     $('breathPatternArea').style.display='block';
     const avail=BREATH_PATTERNS.filter(bp=>bp.ages.includes(state.player.age));
@@ -1039,12 +983,10 @@ function openPractice(type){
 
 function startPractice(type,name,seconds){
   playSound('tap');closeModal('chooseModal');completionLocked=false;
-  eyesClosedMode=false;hiddenAt=0;hiddenSeconds=0;returnCheckPending=false;
-  $('returnCheck').style.display='none';
-  session={id:(crypto.randomUUID?.()||String(Date.now())),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),endAt:Date.now()+seconds*1000,breathPhaseIdx:0,breathPhaseElapsed:0,breathPhaseStartAt:0,bodyscanIdx:0,bodyscanStepElapsed:0,bodyscanStepStartAt:0,hiddenPauses:0,attentionPassed:0,attentionMissed:0,attentionDue:false,visibleSeconds:0,pausedSeconds:0,eyesClosedSeconds:0,lastAnnounced:null,presenceAnswer:null,presenceScore:100,returnAnswer:null};
+  eyesClosedMode=false;hiddenAt=0;hiddenSeconds=0;
+  session={id:(crypto.randomUUID?.()||String(Date.now())),type,name,planned:seconds,remaining:seconds,running:true,last:Date.now(),endAt:Date.now()+seconds*1000,breathPhaseIdx:0,breathPhaseElapsed:0,breathPhaseStartAt:0,bodyscanIdx:0,bodyscanStepElapsed:0,bodyscanStepStartAt:0,hiddenPauses:0,attentionPassed:0,attentionMissed:0,attentionDue:false,visibleSeconds:0,pausedSeconds:0,eyesClosedSeconds:0,lastAnnounced:null,presenceAnswer:null,presenceScore:100};
   $('practiceTitle').textContent=name;
   $('practiceGuide').textContent={breathing:'Follow the expanding circle.',meditation:'Sit comfortably. Close your eyes when ready.',bodyscan:'Follow the body prompts. Close your eyes when ready.'}[type]||'';
-  // Eyes-closed mode for meditation and body scan
   if(type==='meditation'||type==='bodyscan'){
     enterEyesClosedMode();
     if(type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';$('bodyscanGuide').style.display='block';startBodyScan(true);}
@@ -1053,7 +995,6 @@ function startPractice(type,name,seconds){
     $('bodyscanGuide').style.display='none';$('eyesClosedBanner').style.display='none';
     $('orb').className='orb';$('orb').textContent='Get ready';
   }
-  // Buddy
   const pet=activePetDef();$('buddyPet').textContent=pet.icon;
   $('buddyPet').style.display=state.settings.buddy?'block':'none';
   $('buddyBubble').style.display=state.settings.buddy?'block':'none';
@@ -1073,9 +1014,7 @@ function stopBodyScan(){clearTimeout(bodyscanTimer);}
 /* ─── Timer ─── */
 function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!session)return;const now=Date.now();
   if(session.running){
-    // endAt-based: time advances even if screen is off (eyes-closed mode)
     session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));
-    // Visible seconds only count when app is actually visible
     if(!document.hidden)session.visibleSeconds=Math.min(session.planned,session.planned-session.remaining);
   }else session.pausedSeconds+=.25;
   $('timer').textContent=format(session.remaining);
@@ -1097,8 +1036,15 @@ function breathLoop(reset){
   session.breathPhaseStartAt=Date.now();breathPhaseTimer=setTimeout(()=>{if(!session||!session.running)return;session.breathPhaseElapsed=0;session.breathPhaseIdx=(session.breathPhaseIdx+1)%pattern.phases.length;breathLoop(false);},rem);
 }
 
-/* ─── Presence checks ─── */
-function scheduleAttention(){clearTimeout(attentionTick);if(!session||session.remaining<75||session.attentionDue)return;const token=session.id;const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue&&!returnCheckPending)showPresenceCheck();},wait+Math.random()*30000);}
+/* ─── Presence checks (No Checks During Meditation/Body Scan) ─── */
+function scheduleAttention(){
+  clearTimeout(attentionTick);
+  if(!session||session.remaining<75||session.attentionDue)return;
+  // DISALLOW mid-session checks for eyes-closed practices
+  if(session.type==='meditation'||session.type==='bodyscan')return;
+  const token=session.id;const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));
+  attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue)showPresenceCheck();},wait+Math.random()*30000);
+}
 function showPresenceCheck(){
   if(!session||!session.running||session.attentionDue)return;clearTimeout(attentionTick);
   session.running=false;session.attentionDue=true;pauseBreathLoop();pauseBodyScan();playSound('attention');
@@ -1106,13 +1052,12 @@ function showPresenceCheck(){
   $('presencePrompt').textContent='Quick mindful check';$('presenceInstruction').textContent=`Tap ${answer} to continue.`;
   $('presenceChoices').innerHTML='';shuffle(PRESENCE_SYMBOLS).forEach(x=>{const b=document.createElement('button');b.className='btn soft';b.textContent=x;b.addEventListener('click',()=>answerPresence(x));$('presenceChoices').appendChild(b);});
   $('presenceCard').classList.add('show');$('btnPauseResume').textContent='▶ Resume after check';
-  session.checkDeadline=setTimeout(()=>{if(session&&session.attentionDue){session.attentionMissed++;$('presenceInstruction').textContent='Check missed. Choose the correct symbol.';updateParticipation();}},20000);
+  session.checkDeadline=setTimeout(()=>{if(session&&session.attentionDue){session.attentionMissed++;$('presenceInstruction').textContent='Check missed. Choose correct symbol.';updateParticipation();}},20000);
 }
 function answerPresence(x){if(!session||!session.attentionDue||!session.presenceAnswer)return;if(x!==session.presenceAnswer){playSound('error');toast('Look for the correct symbol.');return;}clearTimeout(session.checkDeadline);session.attentionPassed++;session.attentionDue=false;session.presenceAnswer=null;$('presenceCard').classList.remove('show');setSessionRunning(true,'Check complete.');$('buddyBubble').textContent='Back to practice together.';scheduleAttention();updateParticipation();}
 
 function updateParticipation(){
   if(!session)return;
-  // For eyes-closed types, credit hidden seconds too
   const totalActive=session.visibleSeconds+(session.eyesClosedSeconds||0);
   const visible=Math.min(100,Math.round(totalActive/Math.max(1,session.planned)*100));
   const penalty=session.hiddenPauses*12+session.attentionMissed*18;
@@ -1131,9 +1076,9 @@ function setSessionRunning(shouldRun,message=''){
   else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
-function pauseResume(){if(!session)return;if(session.attentionDue)return toast('Complete check first.');if(returnCheckPending)return toast('Complete the return check first.');setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
+function pauseResume(){if(!session)return;if(session.attentionDue)return toast('Complete check first.');setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
 function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
-function cleanupPractice(){clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);if(session&&session.checkDeadline)clearTimeout(session.checkDeadline);$('presenceCard').classList.remove('show');$('returnCheck').style.display='none';exitEyesClosedMode();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
+function cleanupPractice(){clearInterval(tick);stopBreathLoop();stopBodyScan();clearTimeout(attentionTick);if(session&&session.checkDeadline)clearTimeout(session.checkDeadline);$('presenceCard').classList.remove('show');exitEyesClosedMode();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
 
 function completePractice(){
   if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);
