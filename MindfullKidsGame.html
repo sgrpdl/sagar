@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments V18.2</title>
+<title>Mindful Moments V18.3</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -375,9 +375,9 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <h2 id="chooseTitle">Choose a practice</h2>
 <p id="chooseIntro" class="small"></p>
 <div id="breathPatternArea" style="display:none">
-<p class="small" style="margin:8px 0 4px;font-weight:900">Breathing pattern</p>
+<p class="small" style="margin:8px 0 4px;font-weight:900">Breathing technique</p>
 <div id="breathPatternTabs" class="tabs"></div>
-<div id="breathSafety" class="notice" style="display:none;margin-top:4px">Keep every breath comfortable. Never force a deep breath. Skip the pauses if they feel uncomfortable.</div>
+<div id="breathSafety" class="notice" style="display:none;margin-top:4px">Keep every breath comfortable. Never force a deep breath or a hold. Breathe normally or switch to Balloon Breathing if a pause feels uncomfortable, painful, or makes you dizzy.</div>
 </div>
 <div id="ambientArea" style="display:none;margin:8px 0">
 <p class="small" style="font-weight:900">Calm sound</p>
@@ -610,14 +610,15 @@ const STREAK_MILESTONES = {
 const AGE_GROUPS=['5-7','8-10','11-12','13-15','16-19','20-29','30-40','41+'];
 
 const BREATH_PATTERNS = [
-  {id:'balloon',name:'Balloon Breath',ages:AGE_GROUPS,hasHolds:false,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'exhale',d:5000,t:'Breathe out slowly'}]},
-  {id:'bunny',name:'Bunny Breath',ages:['5-7'],hasHolds:false,phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
-  {id:'ocean',name:'Ocean Wave',ages:['8-10','11-12','13-15','16-19','20-29','30-40','41+'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Wave rises — breathe in'},{p:'exhale',d:6000,t:'Wave settles — breathe out'}]},
-  {id:'star',name:'Star Breathing',ages:['8-10','11-12','13-15'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Trace up — breathe in'},{p:'exhale',d:5000,t:'Trace down — breathe out'}]},
-  {id:'steady',name:'Steady Exhale',ages:['16-19','20-29','30-40','41+'],hasHolds:false,phases:[{p:'inhale',d:4000,t:'Breathe in naturally'},{p:'exhale',d:6000,t:'Let the breath out slowly'}]},
-  {id:'easyBox',name:'Easy Box Breath',ages:['8-10'],hasHolds:true,phases:[{p:'inhale',d:3000,t:'Breathe in gently'},{p:'hold-in',d:2000,t:'Pause gently — or breathe normally'},{p:'exhale',d:4000,t:'Breathe out slowly'}]},
-  {id:'gentleBox',name:'Gentle Box Breathing',ages:['11-12','13-15'],hasHolds:true,phases:[{p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'hold-in',d:3000,t:'Hold gently — never strain'},{p:'exhale',d:4000,t:'Breathe out slowly'},{p:'hold-out',d:2000,t:'Rest gently — breathe if needed'}]},
-  {id:'classicBox',name:'Box Breathing 4-4-4-4',ages:['16-19','20-29','30-40','41+'],hasHolds:true,phases:[{p:'inhale',d:4000,t:'Breathe in for four'},{p:'hold-in',d:4000,t:'Hold gently for four'},{p:'exhale',d:4000,t:'Breathe out for four'},{p:'hold-out',d:4000,t:'Hold gently for four'}]}
+  {id:'balloon',family:'balloon',name:'Balloon Breathing',ages:AGE_GROUPS,hasHolds:false,phases:[
+    {p:'inhale',d:4000,t:'Fill the balloon gently'},{p:'exhale',d:6000,t:'Let the air out slowly'}
+  ]},
+  {id:'gentleBox',family:'box',name:'Gentle Box Breathing',ages:['11-12','13-15'],hasHolds:true,phases:[
+    {p:'inhale',d:4000,t:'Breathe in comfortably'},{p:'hold-in',d:3000,t:'Hold gently — never strain'},{p:'exhale',d:4000,t:'Breathe out slowly'},{p:'hold-out',d:2000,t:'Rest gently — breathe if needed'}
+  ]},
+  {id:'classicBox',family:'box',name:'Box Breathing 4-4-4-4',ages:['16-19','20-29','30-40','41+'],hasHolds:true,phases:[
+    {p:'inhale',d:4000,t:'Breathe in for four'},{p:'hold-in',d:4000,t:'Hold gently for four'},{p:'exhale',d:4000,t:'Breathe out for four'},{p:'hold-out',d:4000,t:'Hold gently for four'}
+  ]}
 ];
 const BODYSCAN_SCRIPTS = {
   '5-7':[
@@ -1771,7 +1772,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('box breath age gates',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7'))&&BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('20-29'));check('box phases complete',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.p).join(',')==='inhale,hold-in,exhale,hold-out');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 function runCapabilityCheck(){
   const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
   try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
