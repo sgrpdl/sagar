@@ -158,7 +158,7 @@ h2{font-weight:800;letter-spacing:-.3px}
 .streak-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0}
 .cal-cell{width:100%;aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:16px}
 .cal-done{background:#e7f8ef}.cal-miss{background:#f5f7fb}.cal-today{outline:2px solid var(--iosPurple)}
-.bodyscan-guide{font-size:15px;font-weight:800;color:var(--ink);margin:8px 0;min-height:28px;transition:opacity .4s}
+.bodyscan-guide{font-size:15px;font-weight:800;color:var(--ink);margin:8px 0;min-height:28px;transition:opacity .4s}.story-guide{font-size:18px;line-height:1.65;min-height:92px;background:#f8f5ff;border-radius:18px;padding:16px;margin:10px 0;width:100%}.story-progress{font-size:12px;font-weight:800;color:var(--muted);margin:4px 0 8px}.story-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.story-buttons .btn{padding:11px 8px}.story-audio-row{display:flex;align-items:center;justify-content:center;gap:10px;background:#f5f7fb;border-radius:14px;padding:10px;margin:9px 0;width:100%}
 .journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
 .journal-btn{border:0;background:#f5f7fb;border-radius:14px;padding:10px 6px;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:.15s}
 .journal-btn:hover,.journal-btn:active{background:#eee9ff}
@@ -336,6 +336,16 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="orb" class="orb">Ready</div>
 </div>
 <div id="bodyscanGuide" class="bodyscan-guide" style="display:none"></div>
+<div id="storyControlPanel" style="display:none;width:100%">
+  <div id="storyProgress" class="story-progress">Line 1 of 1</div>
+  <div class="story-audio-row"><label><input id="storyAutoNarrate" type="checkbox" checked> 🔊 Auto narrate</label></div>
+  <div class="story-buttons">
+    <button class="btn soft" id="btnStoryPrevious">← Previous</button>
+    <button class="btn purple" id="btnStoryListen">🔊 Listen</button>
+    <button class="btn soft" id="btnStoryAudioPause">⏸ Pause audio</button>
+    <button class="btn green" id="btnStoryNext">Next →</button>
+  </div>
+</div>
 <div id="timer" class="timer" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
 <div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div id="continuityBanner" class="continuity-banner" style="display:none">
@@ -605,9 +615,84 @@ const BODYSCAN_SCRIPTS = {
   '11-12':[{t:'Bring attention to the soles of your feet',d:10},{t:'Notice sensations in ankles and calves',d:10},{t:'Feel the weight of your legs',d:10},{t:'Notice your abdomen expanding',d:12},{t:'Become aware of your hands and fingers',d:10},{t:'Notice the rise and fall of your chest',d:10},{t:'Relax muscles around your eyes',d:10},{t:'Let your jaw soften',d:10}]
 };
 const SLEEP_STORIES = {
- '5-7':['Once upon a time, a little cloud named Puff wanted to find the softest place to sleep.','Puff floated over forests and rivers until it saw a cozy pond with lily pads.','It tucked itself between two lily pads and let the waves rock it gently.','The stars hummed a quiet lullaby, and Puff felt its eyes grow heavy.','Goodnight, Puff. Goodnight, little dreamer.'],
- '8-10':['The moon was full and round over the quiet village.','A small lighthouse keeper named Luna climbed up to turn on the light.','The beam swept across the ocean, guiding sleepy ships home.','Luna sat beside the warm lamp and watched the stars.','She felt the whole world slow down, breath by breath.','And she knew it was time to rest.'],
- '11-12':['In a quiet valley, there was an old bell that rang only at twilight.','Everyone in the valley would stop and listen to the deep, slow hum.','It reminded them that the day was done.','The bell said: you have done enough. You are safe.','The valley filled with soft darkness, and the stars dimmed their glow.','And the people rested, knowing the bell would ring again tomorrow.']
+ '5-7':[
+  'Once upon a quiet evening, Puff the little cloud floated above a sleepy green hill.',
+  'The sun had gone home, leaving soft pink colors behind.',
+  'Puff wanted to find the coziest place in the whole sky.',
+  'First, Puff drifted over a forest where tiny birds tucked their heads beneath their wings.',
+  'The leaves whispered, rest now, rest now.',
+  'Puff breathed in gently and floated a little lower.',
+  'Next came a silver river moving slowly between smooth stones.',
+  'The water made a soft, steady song.',
+  'Puff listened until every busy thought felt far away.',
+  'Beside the river stood a small rabbit named Clover.',
+  'Clover waved and showed Puff a field of moonlit flowers.',
+  'Each flower closed its petals as if pulling up a blanket.',
+  'Puff tried the same, becoming round, soft, and still.',
+  'A warm breeze carried Puff toward a quiet pond.',
+  'Two lily pads made a perfect little resting place.',
+  'Puff settled above them while gentle ripples rocked below.',
+  'One star appeared, then another, then a whole sky of tiny lights.',
+  'The stars hummed a lullaby too soft for anyone except Puff to hear.',
+  'Clover curled up beneath a fern and closed both eyes.',
+  'The birds were quiet, the flowers were sleeping, and the river kept its gentle song.',
+  'Puff felt safe in the peaceful night.',
+  'Puff let the last little worry float away like a feather.',
+  'The moon watched kindly as Puff became still.',
+  'Goodnight, Puff. Goodnight, Clover. Goodnight, little dreamer.'
+ ],
+ '8-10':[
+  'The moon rose full and round above a quiet village beside the sea.',
+  'At the edge of the village stood a white lighthouse with a warm golden lamp.',
+  'A young keeper named Luna climbed the winding stairs one slow step at a time.',
+  'Outside, the evening wind moved gently across the grass.',
+  'Inside, every stair creaked like an old friend saying goodnight.',
+  'Luna reached the lamp room and polished the wide glass until it shone.',
+  'Then she turned the handle, and the great light began its peaceful journey.',
+  'The beam crossed the dark water and returned again.',
+  'Far away, a little sailing boat noticed the light.',
+  'Its captain smiled, knowing the harbor was near.',
+  'Luna watched the waves rise and settle beneath the moon.',
+  'She matched her breathing to the ocean without trying to change it.',
+  'A sleepy gull rested on the lighthouse roof.',
+  'A small cat curled beside the warm lamp and began to purr.',
+  'The beam moved across the water once more, calm and dependable.',
+  'Each time it returned, Luna felt the day becoming quieter.',
+  'She remembered the things she had finished and let the unfinished things wait for tomorrow.',
+  'The village windows slowly became dark as families went to sleep.',
+  'The little boat entered the safe harbor and lowered its sail.',
+  'The captain gave one grateful wave toward the lighthouse.',
+  'Luna wrapped herself in a soft blanket beside the lamp.',
+  'The sea continued its ancient song against the shore.',
+  'The stars seemed to breathe with the turning light.',
+  'Luna closed her eyes, safe, warm, and ready to rest.'
+ ],
+ '11-12':[
+  'Beyond the last road and the highest green ridge, there was a valley known for its evening bell.',
+  'The bell stood in a small wooden tower surrounded by cedar trees.',
+  'It rang only once each day, just as the final light disappeared.',
+  'A young traveler named Rowan arrived after walking beneath a wide and changing sky.',
+  'Rowan carried a heavy pack filled with maps, notebooks, and questions.',
+  'The valley path followed a clear stream toward a cluster of warm cottages.',
+  'No one seemed to hurry there.',
+  'People finished their work, closed their gates, and looked toward the bell tower.',
+  'Rowan found a quiet place beneath the oldest cedar tree.',
+  'The air smelled of rain, earth, and wood smoke.',
+  'Then the bell began to ring.',
+  'Its deep note traveled across the fields and through the branches.',
+  'Rowan felt the sound not only in the ears, but gently through the whole body.',
+  'The bell seemed to say, the day is complete enough.',
+  'It seemed to say, unanswered questions can wait until morning.',
+  'The stream continued moving while the valley became still.',
+  'One by one, lanterns appeared in the cottage windows.',
+  'Rowan set down the heavy pack and noticed how light the shoulders felt.',
+  'A fox crossed the distant field and disappeared into the silver grass.',
+  'Clouds moved aside, revealing a sky crowded with stars.',
+  'Rowan took one comfortable breath and allowed the mind to become spacious.',
+  'Nothing needed to be solved in that moment.',
+  'The old bell became quiet, but its calm seemed to remain everywhere.',
+  'Rowan rested beneath the cedar, knowing morning would bring a new path.'
+ ]
 };
 const EX = {
   breathing:[['Calm Balloon',300],['Rainbow Breathing',600],['Breeze Master',900]],
@@ -681,7 +766,7 @@ let parentUnlockedUntil = 0;
 let renamingPetId = null;
 let marketCat = 'food';
 let wakeLockSentinel = null;
-let ambientNodes=[],ambientTimers=[],currentAmbientType='none',ambientWasPaused=false;
+let ambientNodes=[],ambientTimers=[],currentAmbientType='none',ambientWasPaused=false,storyUtterance=null,storyAdvanceTimer=null,storySpeechToken=0,storyAudioPaused=false;
 
 const $ = id => document.getElementById(id);
 const activePet = () => state.pets[state.activePetId];
@@ -798,7 +883,7 @@ document.addEventListener('visibilitychange',()=>{
 function handlePracticeHide(){
   if(!session||!session.running)return;
   session.hiddenAt=Date.now();
-  pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();
+  pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window){speechSynthesis.pause();storyAudioPaused=true;$('btnStoryAudioPause').textContent='▶ Resume audio';}
   clearTimeout(breathPhaseTimer);cancelAnimationFrame(breathRAF);
   clearTimeout(bodyscanTimer);
   clearTimeout(alertScheduleTimer);
@@ -806,7 +891,7 @@ function handlePracticeHide(){
 }
 function handlePracticeReturn(){
   if(!session||!session.hiddenAt)return;
-  resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.resume();
+  resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window){speechSynthesis.resume();storyAudioPaused=false;$('btnStoryAudioPause').textContent='⏸ Pause audio';}
   const awaySec=Math.floor((Date.now()-session.hiddenAt)/1000);
   session.hiddenAt=0;
   if(!session.running)return;
@@ -1129,11 +1214,11 @@ function getAgeExercises(type){
 function openPractice(type){
   if(type==='sleep'){
     $('chooseTitle').textContent='Sleep Story 🌙';
-    $('chooseIntro').textContent='A gentle story will guide you to sleep. No interruptions — close your eyes and listen.';
+    $('chooseIntro').textContent='A gentle bedtime story for rest. Sleep Stories do not earn coins, stars, streaks, mission progress, or treasures.';
     $('breathPatternArea').style.display='none';
     $('ambientArea').style.display='block';
     const stories=SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
-    const options=[['Quiet Story',Math.min(600,stories.length*45)],['Long Sleep Story',900]];
+    const options=state.player.age==='5-7'?[['Little Sleep Story',240],['Long Sleep Story',360]]:[['Sleep Story',240],['Long Sleep Story',480]];
     $('practiceOptions').replaceChildren();
     options.forEach(([name,sec])=>{
       const btn=document.createElement('button');btn.className='btn purple';btn.textContent=`${name} • ${Math.floor(sec/60)} min`;btn.addEventListener('click',()=>startPractice('sleep',name,sec));$('practiceOptions').appendChild(btn);
@@ -1181,11 +1266,12 @@ function startPractice(type,name,seconds){
     $('continuityTitle').textContent='🌙 Sleep story active';
     $('continuityText').textContent='No interruptions. Close your eyes and let the words carry you.';
     $('participationBlock').style.display='none';
-    $('bodyscanGuide').style.display='block';
+    $('bodyscanGuide').style.display='block';$('storyControlPanel').style.display='block';
     $('orb').className='orb bodyscan';$('orb').textContent='Rest';
     startSleepStory(true);
-    $('practiceNotice').textContent='This is a time to relax completely.';
+    $('practiceNotice').textContent='Bedtime mode: listen and rest. No points or rewards are earned from Sleep Stories.';
   } else if(type==='meditation'){
+    $('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='🧘 Eyes-closed mode active';
     $('continuityText').textContent='No interruptions at all. The timer continues safely even if the screen locks.';
     $('participationBlock').style.display='none';
@@ -1193,6 +1279,7 @@ function startPractice(type,name,seconds){
     $('orb').className='orb meditation';$('orb').textContent='Be still';
     $('practiceNotice').textContent='Presence is estimated gently and privately — we never use camera or microphone.';
   } else if(type==='bodyscan'){
+    $('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='🧍 Practice continues safely';
     $('continuityText').textContent='Look away or close your eyes anytime. A gentle hello check may appear at the top sometimes.';
     $('participationBlock').style.display='block';
@@ -1201,6 +1288,7 @@ function startPractice(type,name,seconds){
     startBodyScan(true);
     $('practiceNotice').textContent='A quick, friendly check-in may appear at the top sometimes. It never pauses your practice — just tap and keep going.';
   } else {
+    $('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='💨 Practice continues safely';
     $('continuityText').textContent='Look away anytime. A gentle hello check may appear at the top sometimes.';
     $('participationBlock').style.display='block';
@@ -1214,7 +1302,7 @@ function startPractice(type,name,seconds){
   $('buddyPet').className='buddy-pet'+((type==='meditation'||type==='bodyscan'||type==='sleep')?' resting':'');
   if(type==='sleep') $('buddyBubble').textContent = 'I will rest with you. 🐾';
   else $('buddyBubble').textContent = {breathing:'I will follow the circle with you.',meditation:'I will sit quietly with you. Close your eyes when ready.',bodyscan:'I will relax my body with you.'}[type]||'';
-  $('btnPauseResume').textContent='⏸ Pause'; showView('practice');
+  $('btnPauseResume').style.display='block';$('btnQuitPractice').textContent='End';$('btnPauseResume').textContent='⏸ Pause'; showView('practice');
   updateParticipation();
   timerLoop();
   if(type==='breathing') breathLoop(true);
@@ -1238,32 +1326,78 @@ function resyncBodyScan(){
   session.bodyscanStepElapsed=stepElapsedMs;
   advanceBodyScan();
 }
+function stopStorySpeech(){
+  storySpeechToken++;clearTimeout(storyAdvanceTimer);storyAdvanceTimer=null;storyUtterance=null;storyAudioPaused=false;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if($('btnStoryAudioPause'))$('btnStoryAudioPause').textContent='⏸ Pause audio';
+}
+function storyLineSlotMs(){
+  if(!session||session.mode!=='sleep')return 8000;
+  const story=session.storyScript||SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
+  return Math.max(4500,Math.floor(session.planned*1000/story.length));
+}
+function storyReadingDelay(text){
+  const words=(String(text).trim().match(/\S+/g)||[]).length;
+  const natural=Math.round(words/145*60000)+700;
+  return Math.max(natural,storyLineSlotMs());
+}
+function renderStoryLine(options={}){
+  if(!session||session.mode!=='sleep')return;
+  const story=session.storyScript||SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
+  session.bodyscanIdx=Math.max(0,Math.min(story.length-1,session.bodyscanIdx||0));
+  const line=story[session.bodyscanIdx];session.storyLineShownAt=Date.now();
+  $('bodyscanGuide').textContent=line;
+  $('bodyscanGuide').classList.add('story-guide');
+  $('storyProgress').textContent=`Line ${session.bodyscanIdx+1} of ${story.length} • ${Math.round(session.planned/60)}-minute story`; 
+  $('btnStoryPrevious').disabled=session.bodyscanIdx===0;
+  $('btnStoryNext').textContent=session.bodyscanIdx===story.length-1?'Rest here 🌙':'Next →';
+  if(options.speak||($('storyAutoNarrate').checked&&options.auto!==false))speakCurrentStoryLine(true);
+  else if(options.scheduleSilent!==false)scheduleSilentStoryAdvance(line);
+}
 function startSleepStory(reset){
-  clearTimeout(bodyscanTimer);
-  if(reset && session){session.bodyscanIdx=0;session.bodyscanStepElapsed=0;}
-  advanceSleepStory();
+  stopStorySpeech();
+  if(reset&&session)session.bodyscanIdx=0;
+  renderStoryLine({auto:true});
 }
-function advanceSleepStory(){
-  if(!session || session.type!=='meditation' || !session.mode || session.mode!=='sleep' || !session.running) return;
-  const story = session.storyScript || SLEEP_STORIES[state.player.age] || SLEEP_STORIES['8-10'];
-  if(session.bodyscanIdx>=story.length){
-    $('bodyscanGuide').textContent='Rest now... 🌙';
-    return;
+function scheduleSilentStoryAdvance(line){
+  clearTimeout(storyAdvanceTimer);
+  storyAdvanceTimer=setTimeout(()=>moveStoryLine(1,true),storyReadingDelay(line));
+}
+function speakCurrentStoryLine(autoAdvance=true){
+  if(!session||session.mode!=='sleep')return;
+  const story=session.storyScript||SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
+  const line=story[session.bodyscanIdx];
+  stopStorySpeech();
+  if(!('speechSynthesis' in window)){
+    toast('Narration is not available on this device.');
+    scheduleSilentStoryAdvance(line);return;
   }
-  const line = story[session.bodyscanIdx];
-  $('bodyscanGuide').textContent = line;
-  $('bodyscanGuide').style.opacity='0';
-  requestAnimationFrame(()=>$('bodyscanGuide').style.opacity='1');
-  const rem = Math.max(2500, 45000 - (session.bodyscanStepElapsed||0));
-  session.bodyscanStepStartAt = Date.now();
-  bodyscanTimer = setTimeout(()=>{
-    if(!session) return;
-    session.bodyscanIdx++;
-    session.bodyscanStepElapsed=0;
-    advanceSleepStory();
-  }, rem);
+  const token=++storySpeechToken,u=new SpeechSynthesisUtterance(line);
+  u.rate=.9;u.pitch=1;u.volume=.78;
+  const voices=speechSynthesis.getVoices();
+  const voice=voices.find(v=>v.localService&&v.lang&&v.lang.toLowerCase().startsWith('en'))||voices.find(v=>v.localService)||voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith('en'));
+  if(voice)u.voice=voice;
+  u.onstart=()=>{if(token===storySpeechToken)$('btnStoryListen').textContent='🔊 Listening...'};
+  u.onend=()=>{if(token!==storySpeechToken)return;$('btnStoryListen').textContent='🔊 Listen';storyUtterance=null;if(autoAdvance){const elapsed=Date.now()-(session?.storyLineShownAt||Date.now()),wait=Math.max(700,storyLineSlotMs()-elapsed);storyAdvanceTimer=setTimeout(()=>moveStoryLine(1,true),wait)}};
+  u.onerror=()=>{if(token!==storySpeechToken)return;$('btnStoryListen').textContent='🔊 Listen';storyUtterance=null;scheduleSilentStoryAdvance(line)};
+  storyUtterance=u;speechSynthesis.speak(u);
 }
-
+function moveStoryLine(delta,fromAuto=false){
+  if(!session||session.mode!=='sleep')return;
+  const story=session.storyScript||SLEEP_STORIES[state.player.age]||SLEEP_STORIES['8-10'];
+  stopStorySpeech();
+  const next=Math.max(0,Math.min(story.length-1,(session.bodyscanIdx||0)+delta));
+  if(next===session.bodyscanIdx&&delta>0){
+    $('bodyscanGuide').textContent='Rest now... 🌙';$('storyProgress').textContent=`Story complete • rest until the timer ends`;clearTimeout(storyAdvanceTimer);return;
+  }
+  session.bodyscanIdx=next;
+  renderStoryLine({auto:fromAuto||$('storyAutoNarrate').checked});
+}
+function toggleStoryAudioPause(){
+  if(!('speechSynthesis' in window)||!speechSynthesis.speaking)return toast('Tap Listen to hear this line.');
+  if(storyAudioPaused){speechSynthesis.resume();storyAudioPaused=false;$('btnStoryAudioPause').textContent='⏸ Pause audio'}
+  else{speechSynthesis.pause();storyAudioPaused=true;$('btnStoryAudioPause').textContent='▶ Resume audio'}
+}
 /* ─── Timer ─── */
 function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!session)return;const now=Date.now();
   if(session.running && !session.hiddenAt){
@@ -1347,20 +1481,39 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.resume();$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
-  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
+  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window){speechSynthesis.resume();storyAudioPaused=false;$('btnStoryAudioPause').textContent='⏸ Pause audio';}$('btnPauseResume').textContent='⏸ Pause';if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
+  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window){speechSynthesis.pause();storyAudioPaused=true;$('btnStoryAudioPause').textContent='▶ Resume audio';}$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
   if(message)toast(message);
 }
 function pauseResume(){if(!session)return;setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
-function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
-function cleanupPractice(){clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
+function quitPractice(){const hadSession=!!session;cleanupPractice();showView('home');$('btnPauseResume').style.display='block';$('btnQuitPractice').textContent='End';if(hadSession)toast('Practice ended.');}
+function cleanupPractice(){stopStorySpeech();$('storyControlPanel').style.display='none';clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').textContent='Ready';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
 
 function completePractice(){
-  if(completionLocked||!session)return;completionLocked=true;playSound('complete');haptic([50,60,80]);
-  $('a11yAnnounce').textContent='Practice complete';
+  if(completionLocked||!session)return;
+  completionLocked=true;
+  const isSleep=session.mode==='sleep';
+
+  if(isSleep){
+    // Sleep Story is a no-reward bedtime feature. It never affects the economy,
+    // daily mission, streak, friendship level, stars, badges, or treasures.
+    if('speechSynthesis' in window)speechSynthesis.cancel();
+    const done={...session};
+    clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(storyAdvanceTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();
+    $('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();stopStorySpeech();
+    state.progress.checkIns.push({feeling:null,notice:'bedtime story',type:'sleep',seconds:Math.max(0,done.planned-(done.remaining||0)),at:new Date().toISOString(),attentionPassed:0,attentionMissed:0,presenceScore:null,reward:0});
+    state.progress.checkIns=state.progress.checkIns.slice(-500);
+    session=null;save();
+    $('timer').textContent='00:00';$('bodyscanGuide').textContent='Goodnight... rest peacefully. 🌙';$('storyProgress').textContent='Story complete • no points awarded';
+    $('storyControlPanel').style.display='none';$('practiceNotice').textContent='Sleep Story complete. No coins, stars, streak, mission progress, or treasure were awarded.';
+    $('btnPauseResume').style.display='none';$('btnQuitPractice').textContent='Back Home';
+    return;
+  }
+
+  playSound('complete');haptic([50,60,80]);$('a11yAnnounce').textContent='Practice complete';
   if(state.settings.buddy){$('buddyPet').className='buddy-pet celebrate';$('buddyBubble').textContent='We finished together! 🎉';}
-  setTimeout(petCompletionSignal,850);
-  const done={...session};clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
+  setTimeout(()=>petCompletionSignal(),850);
+  const done={...session};stopStorySpeech();$('storyControlPanel').style.display='none';clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
   setTimeout(()=>{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(done);openModal('checkModal');},1250);
 }
 function finishCheck(feeling){
@@ -1496,6 +1649,11 @@ document.querySelectorAll('.modal').forEach(m=>{
 function showOnboarding(){if(state.onboardingDone)return;$('onboarding').classList.remove('hidden');let step=0;const steps=[{pet:'🐱',title:'Meet Whiskers!',text:'I will practice calm with you. Breathe, meditate, and play!',btn:'Next →'},{pet:'🪙',title:'Earn & Grow',text:'Each practice earns coins. Save for new pets and treats!',btn:'Next →'},{pet:'🔒',title:'Safe & Private',text:'Everything stays on this device. Your parent can check your progress.',btn:'Let\'s begin! 🎉'}];function renderStep(){$('obPet').textContent=steps[step].pet;$('obTitle').textContent=steps[step].title;$('obText').textContent=steps[step].text;$('obBtn').textContent=steps[step].btn;for(let i=0;i<3;i++)$('obDot'+i).classList.toggle('active',i===step);}renderStep();$('obBtn').onclick=()=>{step++;if(step>=steps.length){state.onboardingDone=true;save();$('onboarding').classList.add('hidden');}else renderStep();};}
 
 /* ═══ EVENT WIRING ═══ */
+$('btnStoryPrevious').addEventListener('click',()=>moveStoryLine(-1,false));
+$('btnStoryNext').addEventListener('click',()=>moveStoryLine(1,false));
+$('btnStoryListen').addEventListener('click',()=>speakCurrentStoryLine(false));
+$('btnStoryAudioPause').addEventListener('click',toggleStoryAudioPause);
+$('storyAutoNarrate').addEventListener('change',()=>{if(!$('storyAutoNarrate').checked)stopStorySpeech();else if(session&&session.mode==='sleep')speakCurrentStoryLine(true)});
 $('btnBreathe').addEventListener('click',()=>openPractice('breathing'));
 $('btnMeditate').addEventListener('click',()=>openPractice('meditation'));
 $('btnBodyscan').addEventListener('click',()=>openPractice('bodyscan'));
