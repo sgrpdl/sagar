@@ -16,7 +16,7 @@
 .main{padding:15px 15px 92px}.view{display:none;animation:in .25s ease}.view.active{display:block}
 @keyframes in{from{opacity:.3;transform:translateY(4px)}}
 h1,h2,h3,p{margin-top:0}
-.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);border:2px solid #fff;border-radius:28px;padding:18px;box-shadow:var(--shadow);text-align:center}
+.hero{background:linear-gradient(145deg,#fff9,#ffffffd9);border:2px solid #fff;border-radius:28px;padding:18px;box-shadow:var(--shadow);text-align:center;transition:background .5s}
 .pet{font-size:106px;cursor:pointer;filter:drop-shadow(0 14px 12px #5260802c);animation:float 3.2s ease-in-out infinite;margin:8px 0;display:inline-block}
 @keyframes float{50%{transform:translateY(-9px)}}
 .pet.exhausted{animation:exhaustedPet 3.2s ease-in-out infinite;filter:grayscale(.18) drop-shadow(0 10px 9px #53607b2b)}
@@ -99,24 +99,18 @@ h1,h2,h3,p{margin-top:0}
 .list{display:grid;gap:9px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f5f7fb;border-radius:16px;padding:11px}
 .practice{min-height:calc(100dvh - 170px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:21px;font-weight:900;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform 1s ease}
-.orb.inhale{animation:inhale 4s ease-in-out forwards}
-.orb.exhale{animation:exhale 5s ease-in-out forwards}
-.orb.hold-in{animation:holdIn 4s ease-in-out forwards}
-.orb.hold-out{animation:holdOut 4s ease-in-out forwards}
-@keyframes holdIn{from,to{transform:scale(1.45)}}
-@keyframes holdOut{from,to{transform:scale(.92)}}
+.orb{width:155px;height:155px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#99e4ff,#2f9cf4 65%,#4872ec);color:white;font-size:21px;font-weight:900;box-shadow:0 0 0 18px #4bbbf22b,0 20px 50px #397ed94a;transition:transform .2s ease,box-shadow .2s;position:relative;z-index:2}
+.orb::after{content:'';position:absolute;inset:0;border-radius:50%;background:inherit;filter:brightness(1.2);z-index:-1;opacity:.4}
+.orb.inhale{background:radial-gradient(circle at 35% 30%,#9ef0c4,#4db8ff 60%,#4872ec);animation:inhale 4s ease-in-out forwards}
+.orb.exhale{background:radial-gradient(circle at 35% 30%,#b9f0ff,#34b6a7 60%,#287c9e);animation:exhale 5s ease-in-out forwards}
+.orb.hold-in{background:radial-gradient(circle at 35% 30%,#ffe38a,#ff9a3d 60%,#e07a1f);animation:holdIn 4s ease-in-out forwards}
+.orb.hold-out{background:radial-gradient(circle at 35% 30%,#d8d0ff,#8b7dff 60%,#5f4bc9);animation:holdOut 4s ease-in-out forwards}
 .orb.meditation{background:radial-gradient(circle at 35% 30%,#baf7d8,#22b884 65%,#4977b9);animation:meditateGlow 5s ease-in-out infinite}
 .orb.bodyscan{background:radial-gradient(circle at 35% 30%,#f0d9ff,#9b6dfc 65%,#6a4bb9);animation:bodyscanGlow 6s ease-in-out infinite}
-@keyframes bodyscanGlow{50%{transform:scale(1.05);box-shadow:0 0 0 22px #a06dfc22,0 18px 50px #7b5dcc40}}
-.goal-card{background:linear-gradient(135deg,#fff,#fff4ce);border:2px solid #fff;border-radius:20px;padding:14px;margin:14px 0;box-shadow:0 8px 20px #65719a16}
-.goal-row{display:flex;align-items:center;gap:11px;text-align:left}
-.goal-icon{font-size:48px}
-.goalbar{height:12px;background:#e8e5dc;border-radius:99px;overflow:hidden;margin-top:9px}
-.goalfill{height:100%;background:linear-gradient(90deg,#ffb728,#6d5dfc);transition:width .4s}
-.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.special-reward{background:linear-gradient(135deg,#fff2b8,#f4dcff);border:2px solid #fff;border-radius:18px;padding:12px;margin:10px 0;font-weight:900;color:#59429b}
+@keyframes holdIn{from,to{transform:scale(1.45)}}
+@keyframes holdOut{from,to{transform:scale(.92)}}
 @keyframes meditateGlow{50%{transform:scale(1.08);box-shadow:0 0 0 24px #53dba22b,0 20px 55px #258e7140}}
+@keyframes bodyscanGlow{50%{transform:scale(1.05);box-shadow:0 0 0 22px #a06dfc22,0 18px 50px #7b5dcc40}}
 @keyframes inhale{to{transform:scale(1.45)}}
 @keyframes exhale{from{transform:scale(1.45)}to{transform:scale(.92)}}
 .buddy-zone{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:105px;margin:4px 0 10px}
@@ -173,6 +167,8 @@ h1,h2,h3,p{margin-top:0}
 .confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 1.8s ease-out forwards}
 .confetti-piece:nth-child(odd){border-radius:50%}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(.3)}}
+.coin-burst{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:48px;font-weight:900;z-index:999;pointer-events:none;animation:coinPop 1s ease forwards}
+@keyframes coinPop{0%{opacity:0;transform:translate(-50%,-50%) scale(0)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-50%) translateY(-40px) scale(1)}}
 .onboarding{position:fixed;inset:0;z-index:500;background:linear-gradient(145deg,#e4f5ff,#f0e9ff 48%,#e3fff2);display:flex;align-items:center;justify-content:center;padding:20px}
 .onboarding.hidden{display:none}
 .ob-card{text-align:center;max-width:380px;width:100%}
@@ -180,6 +176,7 @@ h1,h2,h3,p{margin-top:0}
 .ob-dots{display:flex;gap:8px;justify-content:center;margin:14px 0}
 .ob-dot{width:10px;height:10px;border-radius:50%;background:#d4d8e0}
 .ob-dot.active{background:var(--purple)}
+.practice-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 0%,rgba(0,0,0,0.1) 70%);pointer-events:none;z-index:1}
 body.reduce *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{animation:none!important;transform:none!important}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
@@ -303,11 +300,12 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="buddyPet" class="buddy-pet">🐱</div>
 <div id="buddyBubble" class="buddy-bubble">I will practice quietly with you.</div>
 </div>
+<div class="orb-container" style="position:relative;width:220px;height:220px;margin:0 auto;display:grid;place-items:center;">
 <div id="orb" class="orb">Ready</div>
+</div>
 <div id="bodyscanGuide" class="bodyscan-guide" style="display:none"></div>
-<div id="timer" class="timer" role="timer" aria-label="Time remaining">05:00</div>
+<div id="timer" class="timer" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
 <div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-<!-- Eyes-closed mode banner -->
 <div id="eyesClosedBanner" class="eyes-closed-banner" style="display:none">
 <b>🧘 Eyes-closed mode active</b>
 <div class="small">Screen can lock safely. Timer continues in the background. Simply return when your practice finishes.</div>
@@ -325,7 +323,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <p id="presenceInstruction">Tap the matching symbol.</p>
 <div id="presenceChoices" class="check"></div>
 </div>
-<p class="notice">This app checks attention and visibility but cannot prove meditation. If hidden during breathing, it pauses. During meditation and body scan, it continues safely in the background.</p>
+<p class="notice">This app checks attention and visibility but cannot prove meditation. If hidden during breathing, it pauses. During meditation and body scan, it continues safely in the background with no interruptions.</p>
 <div style="width:100%" class="grid2">
 <button class="btn soft" id="btnPauseResume">Pause</button>
 <button class="btn danger" id="btnQuitPractice">End</button>
@@ -448,7 +446,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 'use strict';
 
 /* ═══ CONSTANTS ═══ */
-const KEY = 'mindfulPetsOneFileV3';
+const KEY = 'mindfulPetsOneFileV4';
 const PETS = [
   {id:'cat',name:'Whiskers',icon:'🐱',cost:0},{id:'dog',name:'Buddy',icon:'🐶',cost:120},
   {id:'bunny',name:'Thumper',icon:'🐰',cost:180},{id:'panda',name:'Bao',icon:'🐼',cost:280},
@@ -525,13 +523,18 @@ const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
 function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
 function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
-function defaults(){ return {version:3,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,onboardingDone:false}; }
+function defaults(){ return {version:4,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,onboardingDone:false}; }
 
 /* ═══ STATE ═══ */
 function loadState(){
   try{
     const x=JSON.parse(localStorage.getItem(KEY));
-    if(!x||x.version!==3)return defaults();
+    if(!x||x.version!==4)return defaults();
+    // Validate and sanitize
+    if(!x.player||!x.pets||!x.inventory)return defaults();
+    x.player.coins=Math.max(0,Math.min(999999,Math.floor(x.player.coins||0)));
+    x.player.stars=Math.max(0,Math.floor(x.player.stars||0));
+    // Add missing defaults
     x.settings=x.settings||{};
     const sd={buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon',sound:true,reducedMotion:false};
     for(const[k,v]of Object.entries(sd))if(x.settings[k]===undefined)x.settings[k]=v;
@@ -544,6 +547,8 @@ function loadState(){
       if(p.fedToday===undefined)p.fedToday=false;
       if(p.fedDate===undefined)p.fedDate=null;
       if(!Array.isArray(p.milestones))p.milestones=[];
+      p.health=Math.max(0,Math.min(100,p.health||60));
+      p.happiness=Math.max(0,Math.min(100,p.happiness||60));
     });
     return x;
   }catch{return defaults();}
@@ -570,10 +575,9 @@ let renamingPetId = null;
 let marketCat = 'food';
 // Wake Lock
 let wakeLockSentinel = null;
-// Eyes-closed mode
 let eyesClosedMode = false;
-let hiddenAt = 0;       // timestamp when screen went off during eyes-closed
-let hiddenSeconds = 0;  // accumulated hidden seconds during eyes-closed
+let hiddenAt = 0;
+let hiddenSeconds = 0;
 
 /* ═══ DOM CACHE ═══ */
 const $ = id => document.getElementById(id);
@@ -584,7 +588,19 @@ const activePetDef = () => PETS.find(p=>p.id===state.activePetId);
 let audioCtx = null;
 function tone(freq,dur=.13,type='sine',vol=.12,del=0){
   if(!state.settings.sound)return;
-  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+del;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur+.03);}catch(e){}
+  try{
+    if(!audioCtx){
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended')audioCtx.resume();
+    }
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+del;
+    o.type=type;o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(.001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+.015);
+    g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t);o.stop(t+dur+.03);
+  }catch(e){console.warn('Audio error:',e);}
 }
 function playSound(k){
   const m={coin:()=>{tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)},complete:()=>{tone(523,.2,'sine',.12);tone(659,.22,'sine',.12,.18);tone(784,.35,'sine',.13,.38)},treasure:()=>{tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)},attention:()=>{tone(740,.16,'sine',.08);tone(740,.16,'sine',.08,.22)},buy:()=>{tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)},tap:()=>{tone(520,.08,'sine',.05)},levelup:()=>{tone(523,.15,'sine',.11);tone(659,.15,'sine',.11,.14);tone(784,.15,'sine',.11,.28);tone(1047,.3,'sine',.12,.42)},error:()=>{tone(300,.18,'square',.06)}};
@@ -610,6 +626,7 @@ function toast(t){const e=document.createElement('div');e.className='toast';e.te
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function format(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
 function showConfetti(){if(state.settings.reducedMotion)return;const c=document.createElement('div');c.className='confetti';const cols=['#6d5dfc','#2f9cf4','#22b884','#ffb728','#ec6470','#ff9e3d'];for(let i=0;i<30;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=cols[i%cols.length];p.style.animationDelay=Math.random()*.6+'s';p.style.width=(6+Math.random()*8)+'px';p.style.height=(6+Math.random()*8)+'px';c.appendChild(p);}document.body.appendChild(c);setTimeout(()=>c.remove(),2500);}
+function animateCoinBurst(text){const div=document.createElement('div');div.className='coin-burst';div.textContent=text;document.body.appendChild(div);setTimeout(()=>div.remove(),1000);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){if(e.name==='QuotaExceededError'){state.progress.checkIns=state.progress.checkIns.slice(-20);try{localStorage.setItem(KEY,JSON.stringify(state));}catch{toast('Storage full.');}}}}
 function applyGentleCareDecay(){const now=Date.now(),day=864e5;Object.values(state.pets).forEach(p=>{if(!p.lastDecayAt)p.lastDecayAt=now;if(!p.lastCareAt)p.lastCareAt=now;const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day;});}
 
@@ -648,11 +665,10 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-/* ═══ EYES-CLOSED MODE (Disables Mid-session Checks) ═══ */
+/* ═══ EYES-CLOSED MODE (No checks) ═══ */
 function isEyesClosedType(){
   return session && (session.type==='meditation'||session.type==='bodyscan');
 }
-
 function enterEyesClosedMode(){
   if(!session)return;
   eyesClosedMode=true;
@@ -662,20 +678,18 @@ function enterEyesClosedMode(){
   requestWakeLock();
   updateWakeLockUI();
 }
-
 function exitEyesClosedMode(){
   eyesClosedMode=false;
   $('eyesClosedBanner').style.display='none';
   releaseWakeLock();
+  // No need to call updateParticipation here; timer loop already handles
 }
-
 function handleEyesClosedHide(){
   if(!session||!eyesClosedMode||!session.running)return;
   hiddenAt=Date.now();
   clearTimeout(bodyscanTimer);
   stopBreathLoop();
 }
-
 function handleEyesClosedReturn(){
   if(!session||!eyesClosedMode)return;
   const awayMs = hiddenAt > 0 ? (Date.now() - hiddenAt) : 0;
@@ -694,7 +708,6 @@ function handleEyesClosedReturn(){
   session.eyesClosedSeconds = (session.eyesClosedSeconds||0) + awaySec;
 
   if(session.type==='bodyscan'){
-    // Re-sync Body Scan index based on actual elapsed time so it doesn't get stuck
     const script = BODYSCAN_SCRIPTS[state.player.age] || BODYSCAN_SCRIPTS['8-10'];
     let totalTime = 0;
     let foundIdx = 0;
@@ -703,12 +716,13 @@ function handleEyesClosedReturn(){
       totalTime += script[i].d;
       if(sessionElapsed < totalTime){
         foundIdx = i;
-        session.bodyscanStepElapsed = (sessionElapsed - (totalTime - script[i].d)) * 1000;
+        // Recalculate remaining time in current step
+        session.bodyscanStepElapsed = Math.max(0, (sessionElapsed - (totalTime - script[i].d)) * 1000);
         break;
       }
     }
     if(sessionElapsed >= totalTime){
-      foundIdx = script.length;
+      foundIdx = Math.min(script.length, script.length);
       session.bodyscanStepElapsed = 0;
     }
     session.bodyscanIdx = foundIdx;
@@ -716,10 +730,9 @@ function handleEyesClosedReturn(){
   }
 
   requestWakeLock();
-  updateParticipation();
+  // updateParticipation() will be called by timer loop
 }
 
-/* ═══ VISIBILITY CHANGE ═══ */
 document.addEventListener('visibilitychange',()=>{
   if(!session)return;
   if(document.hidden){
@@ -776,11 +789,9 @@ function render(){
   $('petName').textContent=ps.nickname?`${ps.nickname} (${petDef.name})`:petDef.name;
   $('petLevel').textContent=`Friendship level ${ps.level}`;
   updatePetMessage();
-  // Welcome banner
   const wb=$('welcomeBanner');
   const practiced=state.player.lastPracticeDate===localDate();
   if(practiced){wb.style.display='none';}else{wb.style.display='block';const h=new Date().getHours();wb.textContent=h<12?`Good morning! ${ps.nickname||petDef.name} is waiting. 🌅`:h<17?`Good afternoon! Time for calm practice. 🌿`:`Good evening! Gentle practice before bed? 🌙`;}
-  // Meters
   $('healthFill').style.width=ps.health+'%';$('healthN').textContent=Math.round(ps.health);
   $('happyFill').style.width=ps.happiness+'%';$('happyN').textContent=Math.round(ps.happiness);
   $('friendFill').style.width=(ps.friendXP%100)+'%';$('friendN').textContent=Math.round(ps.friendXP%100);
@@ -1036,11 +1047,11 @@ function breathLoop(reset){
   session.breathPhaseStartAt=Date.now();breathPhaseTimer=setTimeout(()=>{if(!session||!session.running)return;session.breathPhaseElapsed=0;session.breathPhaseIdx=(session.breathPhaseIdx+1)%pattern.phases.length;breathLoop(false);},rem);
 }
 
-/* ─── Presence checks (No Checks During Meditation/Body Scan) ─── */
+/* ─── Presence checks (No checks for meditation/bodyscan) ─── */
 function scheduleAttention(){
   clearTimeout(attentionTick);
   if(!session||session.remaining<75||session.attentionDue)return;
-  // DISALLOW mid-session checks for eyes-closed practices
+  // Absolutely no checks for meditation/bodyscan
   if(session.type==='meditation'||session.type==='bodyscan')return;
   const token=session.id;const wait=Math.min(150000,Math.max(65000,(session.remaining-40)*500));
   attentionTick=setTimeout(()=>{if(session&&session.id===token&&!session.attentionDue)showPresenceCheck();},wait+Math.random()*30000);
@@ -1113,6 +1124,7 @@ function finishJournal(notice){
   const oldBadges=[...state.progress.badges];state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);const newBadges=state.progress.badges.filter(b=>!oldBadges.includes(b));if(newBadges.length){showConfetti();const badge=BADGES.find(b=>b.id===newBadges[0]);setTimeout(()=>toast(`🏅 ${badge.icon} ${badge.name}!`),800);}
   save();render();showView('home');playSound(specialMessage?'treasure':'coin');
   toast(`+${reward} coins, +${actual>=600?3:1} star${actual>=600?'s':''}!`);
+  animateCoinBurst(`🪙 +${reward}`);
   if(specialMessage)setTimeout(()=>toast(specialMessage),500);
   $('rewardChoiceText').textContent=`Earned ${reward} coins. Save or spend?`;
   setTimeout(()=>openModal('rewardChoiceModal'),900);
@@ -1120,13 +1132,13 @@ function finishJournal(notice){
 function unlockSpecial(count,label){const pool=ITEMS.filter(i=>i.cat==='special'&&!state.ownedItems.includes(i.id));const won=pool.slice(0,count);won.forEach(i=>state.ownedItems.push(i.id));if(won.length)return`${label}: ${won.map(i=>i.icon+' '+i.name).join(', ')}`;state.player.coins+=count*50;state.daily.earned+=count*50;return`${label}: +${count*50} coins!`;}
 function chooseAfterReward(c){closeModal('rewardChoiceModal');if(c==='food'){marketCat='food';showView('market');renderMarket();}else showView('home');}
 
-/* ═══ STREAK (corrected shield algorithm) ═══ */
+/* ═══ STREAK ═══ */
 function updateStreak(){
   const today=localDate(),last=state.player.lastPracticeDate;
   if(!last){state.player.streak=1;}
   else{
     const d=dayDiff(last,today);
-    if(d===0){/* same day */}
+    if(d===0){}
     else if(d===1){state.player.streak++;}
     else if(d>1){
       const missed=d-1;const shields=state.player.streakShields||0;const used=Math.min(shields,missed);
@@ -1149,7 +1161,7 @@ $('btnSaveChildSettings').addEventListener('click',()=>{state.settings.sound=$('
 
 /* ═══ EXPORT / IMPORT ═══ */
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mindful-pets-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-function validateBackup(x){if(!x||typeof x!=='object'||x.version!==3||!x.player||!Number.isFinite(x.player.coins)||x.player.coins<0||!x.pets||!x.pets[x.activePetId]||!x.inventory||!x.progress||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems)||!x.settings||!x.daily)return false;for(const[id,n]of Object.entries(x.inventory))if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false;for(const[id,p]of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!p||![p.health,p.happiness,p.friendXP,p.level].every(Number.isFinite))return false;p.health=clamp(p.health);p.happiness=clamp(p.happiness);if(!Array.isArray(p.milestones))p.milestones=[];}x.player.name=String(x.player.name||'Explorer').replace(/[<>]/g,'').slice(0,18);x.ownedItems=x.ownedItems.filter(id=>ITEMS.some(i=>i.id===id));x.progress.checkIns=x.progress.checkIns.slice(-500);return true;}
+function validateBackup(x){if(!x||typeof x!=='object'||x.version!==4||!x.player||!Number.isFinite(x.player.coins)||x.player.coins<0||!x.pets||!x.pets[x.activePetId]||!x.inventory||!x.progress||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems)||!x.settings||!x.daily)return false;for(const[id,n]of Object.entries(x.inventory))if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false;for(const[id,p]of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!p||![p.health,p.happiness,p.friendXP,p.level].every(Number.isFinite))return false;p.health=clamp(p.health);p.happiness=clamp(p.happiness);if(!Array.isArray(p.milestones))p.milestones=[];}x.player.name=String(x.player.name||'Explorer').replace(/[<>]/g,'').slice(0,18);x.ownedItems=x.ownedItems.filter(id=>ITEMS.some(i=>i.id===id));x.progress.checkIns=x.progress.checkIns.slice(-500);return true;}
 function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000){e.target.value='';return toast('Too large.');}const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=x;save();render();toast('Restored.');}catch{toast('Invalid backup.');}finally{e.target.value='';}};r.readAsText(f);}
 
 /* ═══ PARENT PIN ═══ */
@@ -1211,9 +1223,9 @@ $('btnExport').addEventListener('click',()=>requestProtectedAction('export'));
 $('btnImport').addEventListener('click',()=>requestProtectedAction('import'));
 $('importFile').addEventListener('change',importData);
 $('btnSetPin').addEventListener('click',()=>{if(state.settings.pinHash)openPinModal('change','changePin');else openPinModal('create','createPin');});
-$('btnReset').addEventListener('click',()=>requestProtectedAction('reset'));
+$('btnReset').addEventListener('click',()=>{const userConfirm=prompt('Type "RESET" to confirm reset:');if(userConfirm==='RESET')requestProtectedAction('reset');else toast('Reset cancelled.');});
 $('btnSubmitPin').addEventListener('click',submitPin);
-$('btnSaveNickname').addEventListener('click',()=>{if(!renamingPetId)return;const raw=$('nicknameInput').value.replace(/[<>]/g,'').trim().slice(0,12);state.pets[renamingPetId].nickname=raw||null;save();render();closeModal('nicknameModal');toast(raw?`Named: ${raw}`:'Nickname removed.');renamingPetId=null;});
+$('btnSaveNickname').addEventListener('click',()=>{if(!renamingPetId)return;const raw=$('nicknameInput').value.replace(/[<>'"&]/g,'').trim().slice(0,12);if(raw.length<1){toast('Nickname too short.');return;}state.pets[renamingPetId].nickname=raw;save();render();closeModal('nicknameModal');toast(`Named: ${raw}`);renamingPetId=null;});
 $('checkModal').querySelectorAll('[data-feeling]').forEach(b=>b.addEventListener('click',()=>finishCheck(b.dataset.feeling)));
 $('journalModal').querySelectorAll('[data-journal]').forEach(b=>b.addEventListener('click',()=>finishJournal(b.dataset.journal)));
 $('rewardChoiceModal').querySelectorAll('[data-reward]').forEach(b=>b.addEventListener('click',()=>chooseAfterReward(b.dataset.reward)));
