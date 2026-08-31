@@ -408,7 +408,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" data-close="feedModal">Close</button>
 </div></div>
 
-<div id="checkModal" class="modal"><div class="sheet">
+<div id="checkModal" class="modal" data-escape="blocked"><div class="sheet">
 <h2>Time is up! Practice complete 🎉</h2>
 <p>How do you feel now? Any answer is okay.</p>
 <div class="check">
@@ -419,7 +419,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 </div>
 </div></div>
 
-<div id="journalModal" class="modal"><div class="sheet">
+<div id="journalModal" class="modal" data-escape="blocked"><div class="sheet">
 <h2>What did you notice? ✨</h2>
 <p class="small">Optional — tap one or skip.</p>
 <div class="journal-grid">
@@ -433,7 +433,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" data-journal="__skip" style="width:100%;margin-top:8px">Skip</button>
 </div></div>
 
-<div id="rewardChoiceModal" class="modal"><div class="sheet">
+<div id="rewardChoiceModal" class="modal" data-escape="blocked"><div class="sheet">
 <h2>We earned this together! ✨</h2>
 <p id="rewardChoiceText"></p>
 <div class="choice-grid">
@@ -443,7 +443,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" data-reward="home" style="margin-top:8px;width:100%">Maybe later</button>
 </div></div>
 
-<div id="pinModal" class="modal"><div class="sheet">
+<div id="pinModal" class="modal" data-escape="confirm"><div class="sheet">
 <h2 id="pinTitle">Parent PIN</h2>
 <p id="pinText" class="small"></p>
 <div id="pinCurrentRow" class="pin-row" style="display:none">
@@ -627,7 +627,7 @@ const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
 function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
 function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
-function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},wishlist:null,monthlyGift:null,onboardingDone:false}; }
+function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},pendingReward:null,appliedRewardIds:[],wishlist:null,monthlyGift:null,onboardingDone:false}; }
 
 function migrate(x){
   const d = defaults();
@@ -639,7 +639,7 @@ function migrate(x){
   merged.daily = {...d.daily, ...(x.daily||{})};
   merged.inventory = {...(x.inventory||{apple:1})};
   merged.ownedItems = Array.isArray(x.ownedItems)?x.ownedItems:[];
-  if(merged.monthlyGift===undefined) merged.monthlyGift=null;
+  if(merged.monthlyGift===undefined)merged.monthlyGift=null;if(!Array.isArray(merged.appliedRewardIds))merged.appliedRewardIds=[];merged.appliedRewardIds=merged.appliedRewardIds.slice(-200);if(!merged.pendingReward||typeof merged.pendingReward!=='object')merged.pendingReward=null;
   merged.pets = {};
   const src = (x.pets && Object.keys(x.pets).length) ? x.pets : {cat:petProfile()};
   Object.keys(src).forEach(id=>{
@@ -999,7 +999,7 @@ function buy(cat,id){
   save();render();playSound('buy');toast(`${obj.name} added!`);
 }
 function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();playSound('tap');}
-function selectPet(id){state.activePetId=id;save();render();showView('home');toast('Pet selected.');}
+function selectPet(id){state.activePetId=id;save();render();updateManifestIcon();showView('home');toast('Pet selected.');}
 
 function renderCollection(){
   const pc=$('petCollection'),bg=$('badgeGrid');pc.innerHTML='';bg.innerHTML='';
@@ -1045,24 +1045,24 @@ function feed(id){
 }
 
 /* ═══ PLAY ═══ */
-let playRewardReady=false,playMode='pat',patCount=0,ballThrows=0,dragging=false;
+let playRewardReady=false,playMode='pat',patCount=0,ballThrows=0,ballCatches=0,dragging=false;function playTargets(){return state.player.age==='5-7'?{pats:4,catches:2,zone:95}:state.player.age==='11-12'?{pats:8,catches:4,zone:60}:{pats:6,catches:3,zone:75}}function resetPlayVisuals(){$('gamePet').style.left='50%';$('gamePet').classList.remove('catch','giggle');$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');dragging=false}
 function playPet(){
-  const p=activePet();patCount=0;ballThrows=0;playRewardReady=Date.now()-p.lastPlay>=3600000;
-  $('gamePet').textContent=activePetDef().icon;$('playScore').textContent='Joy 0/6';
+  const p=activePet();patCount=0;ballThrows=0;ballCatches=0;resetPlayVisuals();playRewardReady=Date.now()-p.lastPlay>=3600000;
+  $('gamePet').textContent=activePetDef().icon;$('playScore').textContent=`Joy 0/${playTargets().pats}`;
   openModal('playModal');requestAnimationFrame(()=>requestAnimationFrame(()=>setPlayMode('pat')));playSound('tap');
 }
 function setPlayMode(m){
   if(m==='ball'&&activePet().health<50){toast('Too tired for ball.');m='pat';}
-  playMode=m;$('patTab').classList.toggle('active',m==='pat');$('ballTab').classList.toggle('active',m==='ball');
+  resetPlayVisuals();playMode=m;$('patTab').classList.toggle('active',m==='pat');$('ballTab').classList.toggle('active',m==='ball');
   $('gameBall').hidden=m!=='ball';$('handHint').hidden=m!=='pat';
   $('playInstruction').textContent=m==='pat'?'Tap your pet!':'Drag ball and release!';
   if(m==='pat')requestAnimationFrame(()=>{const r=$('playArea').getBoundingClientRect();$('handHint').style.left=Math.max(10,r.width*.48)+'px';$('handHint').style.top=Math.max(50,r.height*.34)+'px';});
   else{$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');}
 }
-function patPet(e){if(playMode!=='pat')return;const now=performance.now();if(now-lastPatAt<280)return;lastPatAt=now;patCount=Math.min(6,patCount+1);const r=$('playArea').getBoundingClientRect();const jp=document.createElement('div');jp.className='joy-pop';jp.textContent=patCount%3===0?'😂':'💖';jp.style.left=(e.clientX-r.left)+'px';jp.style.top=(e.clientY-r.top)+'px';$('playArea').appendChild(jp);setTimeout(()=>jp.remove(),900);$('gamePet').classList.remove('giggle');void $('gamePet').offsetWidth;$('gamePet').classList.add('giggle');$('playScore').textContent=`Joy ${patCount}/6`;playSound('tap');if(patCount===6)completePlayReward();}
+function patPet(e){if(playMode!=='pat')return;const now=performance.now(),target=playTargets().pats;if(now-lastPatAt<280)return;lastPatAt=now;patCount=Math.min(target,patCount+1);const r=$('playArea').getBoundingClientRect(),jp=document.createElement('div');jp.className='joy-pop';jp.textContent=patCount%3===0?'😂':'💖';jp.style.left=(e.clientX-r.left)+'px';jp.style.top=(e.clientY-r.top)+'px';$('playArea').appendChild(jp);setTimeout(()=>jp.remove(),900);$('gamePet').classList.remove('giggle');void $('gamePet').offsetWidth;$('gamePet').classList.add('giggle');$('playScore').textContent=`Joy ${patCount}/${target}`;playSound('tap');if(patCount===target)completePlayReward()}
 function ballDown(e){if(playMode!=='ball')return;dragging=true;try{$('gameBall').setPointerCapture(e.pointerId);}catch(er){}e.preventDefault();}
 function ballMove(e){if(!dragging)return;e.preventDefault();const r=$('playArea').getBoundingClientRect();$('gameBall').style.left=Math.max(5,Math.min(r.width-55,e.clientX-r.left-25))+'px';$('gameBall').style.bottom=Math.max(10,Math.min(r.height-60,r.bottom-e.clientY-25))+'px';}
-function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;const r=$('playArea').getBoundingClientRect(),aW=r.width,tX=Math.max(10,aW*.68);ballThrows++;$('gameBall').classList.add('flying');$('gameBall').style.left=tX+'px';$('gameBall').style.bottom=Math.max(10,r.height*.42)+'px';$('gameBall').style.transform=`rotate(${ballThrows*420}deg)`;$('gamePet').style.left='72%';$('gamePet').classList.add('catch');playSound('tap');haptic(25);setTimeout(()=>{$('playScore').textContent=`Catches ${Math.min(ballThrows,3)}/3`;if(ballThrows>=3)completePlayReward();else setTimeout(()=>{$('gamePet').style.left='50%';$('gamePet').classList.remove('catch');$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');},650);},650);}
+function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;const area=$('playArea').getBoundingClientRect(),pet=$('gamePet').getBoundingClientRect(),zone=playTargets().zone,target=playTargets().catches,dx=e.clientX-(pet.left+pet.width/2),dy=e.clientY-(pet.top+pet.height/2),caught=Math.hypot(dx,dy)<=zone;ballThrows++;$('gameBall').classList.add('flying');$('gameBall').style.left=(pet.left-area.left+pet.width*.25)+'px';$('gameBall').style.bottom=(area.bottom-pet.top-pet.height*.55)+'px';$('gameBall').style.transform=`rotate(${ballThrows*420}deg)`;playSound('tap');if(caught){ballCatches++;$('gamePet').classList.add('catch');haptic(25)}setTimeout(()=>{$('playScore').textContent=`Catches ${ballCatches}/${target}`;$('playInstruction').textContent=caught?'Caught it! 🎉':'Almost! Toss a little closer.';if(ballCatches>=target)completePlayReward();else setTimeout(resetPlayVisuals,650)},650)}
 function completePlayReward(){
   $('playInstruction').textContent='Great playing! 🎉';
   const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.happiness=clamp(p.happiness+8);p.friendXP+=5;levelPet(p);save();render();playSound('coin');setTimeout(()=>toast('Happiness +8 • Friendship +5'),300);}else toast('Play reward recharging.');
@@ -1072,7 +1072,10 @@ $('gamePet').addEventListener('pointerdown',patPet);$('gameBall').addEventListen
 /* ═══ LEVELLING & MILESTONES ═══ */
 function levelPet(p){const old=p.level;while(p.friendXP>=p.level*100){p.friendXP-=p.level*100;p.level++;state.player.stars++;}if(p.level>old)checkMilestone(p,old);}
 const MILESTONES={3:{icon:'🎪',title:'New Trick!',desc:'Pet learned a spin! Tap it on home.'},5:{icon:'✨',title:'Sparkle Power!',desc:'Permanent golden glow.'},7:{icon:'📖',title:'Story Unlocked!',desc:'Read origin story in Collection.'},10:{icon:'🏆',title:'Master Companion!',desc:'Rainbow master aura!'}};
-function checkMilestone(p,old){for(let l=old+1;l<=p.level;l++){const m=MILESTONES[l];if(!m||p.milestones.includes(l))continue;p.milestones.push(l);setTimeout(()=>{playSound('levelup');haptic([40,50,40,50,100]);showConfetti(false);$('milestoneContent').innerHTML=`<div style="text-align:center"><div style="font-size:72px">${m.icon}</div><h2>Level ${l}: ${m.title}</h2><p>${m.desc}</p></div>`;const cb=document.createElement('button');cb.className='btn purple';cb.style.width='100%';cb.textContent='Amazing! 🎉';cb.addEventListener('click',()=>closeModal('milestoneModal'));$('milestoneContent').appendChild(cb);openModal('milestoneModal');},600);break;}}
+function checkMilestone(p,old){
+  const unlocked=[];for(let l=old+1;l<=p.level;l++){const m=MILESTONES[l];if(!m||p.milestones.includes(l))continue;p.milestones.push(l);unlocked.push({l,m})}
+  unlocked.forEach(({l,m},i)=>setTimeout(()=>{playSound('levelup');haptic([40,50,40,50,100]);showConfetti(false);$('milestoneContent').innerHTML=`<div style="text-align:center"><div style="font-size:72px">${m.icon}</div><h2>Level ${l}: ${m.title}</h2><p>${m.desc}</p></div>`;const cb=document.createElement('button');cb.className='btn purple';cb.style.width='100%';cb.textContent='Amazing! 🎉';cb.addEventListener('click',()=>closeModal('milestoneModal'));$('milestoneContent').appendChild(cb);openModal('milestoneModal')},600+i*1800))
+}
 function showStreakCelebration(day){
   const m=STREAK_MILESTONES[day];if(!m)return;
   playSound('levelup');haptic([40,60,40,60,120]);showConfetti(true);
@@ -1201,12 +1204,12 @@ function startPractice(type,name,seconds){
   } else if(type==='bodyscan'){
     $('timer').style.display='block';$('storyGreeting').style.display='none';$('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='🧍 Practice continues safely';
-    $('continuityText').textContent='Look away or close your eyes anytime. A gentle hello check may appear at the top sometimes.';
+    $('continuityText').textContent='Close your eyes if comfortable. No visual check-ins are required.';
     $('participationBlock').style.display='block';
     $('bodyscanGuide').style.display='block';
     $('orb').className='orb bodyscan';$('orb').textContent='Notice';
     startBodyScan(true);
-    $('practiceNotice').textContent='A quick, friendly check-in may appear at the top sometimes. It never pauses your practice — just tap and keep going.';
+    $('practiceNotice').textContent='No visual check-ins are required. Leaving the app still pauses the timer.';
   } else {
     $('timer').style.display='block';$('storyGreeting').style.display='none';$('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='💨 Practice continues safely';
@@ -1327,13 +1330,13 @@ function resyncBreathing(){
 function scheduleAlertCheck(){
   clearTimeout(alertScheduleTimer);
   if(!session) return;
-  if(session.type==='meditation' || session.mode==='sleep') return;
+  if(session.type!=='breathing') return;
   if(session.remaining<45)return;
   const token=session.id;const wait=45000+Math.random()*45000;
-  alertScheduleTimer=setTimeout(()=>{if(session&&session.id===token&&session.type!=='meditation'&&!session.alertActive)showAlertCheck();},wait);
+  alertScheduleTimer=setTimeout(()=>{if(session&&session.id===token&&session.type==='breathing'&&!session.alertActive)showAlertCheck();},wait);
 }
 function showAlertCheck(){
-  if(!session||session.alertActive||session.type==='meditation')return;
+  if(!session||session.alertActive||session.type!=='breathing')return;
   session.alertActive=true;
   const symbol=PRESENCE_SYMBOLS[Math.floor(Math.random()*PRESENCE_SYMBOLS.length)];
   session.alertAnswer=symbol;
@@ -1376,6 +1379,12 @@ function pauseResume(){if(!session)return;setSessionRunning(!session.running,ses
 function quitPractice(){cleanupPractice();showView('home');toast('Practice ended.');}
 function cleanupPractice(){stopCompletionAudio();stopStorySpeech();$('storyControlPanel').style.display='none';$('storyGreeting').style.display='none';$('timer').style.display='block';clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);if(session&&session.alertTimeout)clearTimeout(session.alertTimeout);$('alertCheckBanner').classList.remove('show');releaseWakeLock();$('continuityBanner').style.display='none';stopAmbient();session=null;$('orb').className='orb';$('orb').style.transform='scale(1)';$('orb').textContent='Ready';$('breathRing').style.setProperty('--ring-progress','0deg');$('breathCaption').textContent='';$('bodyscanGuide').style.display='none';$('btnPauseResume').textContent='Pause';}
 
+function createPendingReward(done){
+  const id=done.id||crypto.randomUUID?.()||String(Date.now());state.pendingReward={id,session:done,stage:'feeling',feeling:null,createdAt:new Date().toISOString(),claimed:false};saveNow();return state.pendingReward
+}
+function restorePendingReward(){
+  const pr=state.pendingReward;if(!pr||pr.claimed||state.appliedRewardIds.includes(pr.id))return;if(pr.stage==='journal'){lastCheckFeeling=pr.feeling||'same';$('checkModal').dataset.savedDone=JSON.stringify(pr.session);openModal('journalModal')}else{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(pr.session);openModal('checkModal')}
+}
 function completePractice(){
   if(completionLocked||!session)return;completionLocked=true;const isSleep=session.mode==='sleep';
   stopCompletionAudio();
@@ -1387,21 +1396,21 @@ function completePractice(){
   playSound('complete');haptic([50,60,80]);$('a11yAnnounce').textContent='Time is up. Practice complete.';
   if(state.settings.buddy){$('buddyPet').className='buddy-pet celebrate';$('buddyBubble').textContent='Time is up. We finished together! 🎉'}
   completionSignalTimer=setTimeout(()=>{petCompletionSignal();completionSignalTimer=null},850);
-  const done={...session};clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
+  const done={...session};createPendingReward(done);clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
   setTimeout(()=>{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(done);openModal('checkModal')},1250)
 }
 function finishCheck(feeling){
   stopCompletionAudio();
-  if($('checkModal').dataset.claimed==='1')return;$('checkModal').dataset.claimed='1';lastCheckFeeling=feeling;
+  if($('checkModal').dataset.claimed==='1')return;$('checkModal').dataset.claimed='1';lastCheckFeeling=feeling;if(state.pendingReward){state.pendingReward.stage='journal';state.pendingReward.feeling=feeling;saveNow();}
   $('checkModal').dataset.savedDone=$('checkModal').dataset.done;closeModal('checkModal');
   setTimeout(()=>openModal('journalModal'),300);
 }
 function finishJournal(notice){
   closeModal('journalModal');
-  const s=JSON.parse($('checkModal').dataset.savedDone||$('checkModal').dataset.done||'{}');
+  const pending=state.pendingReward;if(!pending||pending.claimed||state.appliedRewardIds.includes(pending.id)){closeModal('journalModal');return toast('This reward was already collected.');}pending.claimed=true;saveNow();const s=pending.session||JSON.parse($('checkModal').dataset.savedDone||$('checkModal').dataset.done||'{}');
   const feeling=lastCheckFeeling||'same';checkDaily();
   const actual=s.planned-(s.remaining||0);const presence=s.presenceScore??100;
-  let reward=Math.max(20,Math.round(actual/15));if(presence<60)reward=Math.max(20,Math.round(reward*.7));
+  let reward=Math.max(20,Math.round(actual/15));const attentionBonus=Math.min(6,(s.attentionPassed||0)*2);reward+=attentionBonus;
   let specialMessage='';
   if(actual>=900){reward+=40;specialMessage=unlockSpecial(2,'Super Calm Treasure');}
   else if(actual>=600){reward+=20;specialMessage=unlockSpecial(1,'Calm Treasure');}
@@ -1437,7 +1446,7 @@ function finishJournal(notice){
   updateStreak();
   const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);
   const oldBadges=[...state.progress.badges];state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);const newBadges=state.progress.badges.filter(b=>!oldBadges.includes(b));
-  save();render();showView('home');playSound(specialMessage?'treasure':'coin');
+  state.appliedRewardIds.push(pending.id);state.appliedRewardIds=state.appliedRewardIds.slice(-200);state.pendingReward=null;saveNow();render();showView('home');playSound(specialMessage?'treasure':'coin');
   toast(`+${reward} coins, +${actual>=600?3:1} star${actual>=600?'s':''}!`);
   animateCoinBurst(`🪙 +${reward}`);
   if(specialMessage)setTimeout(()=>toast(specialMessage),500);
@@ -1490,10 +1499,10 @@ function validateBackup(x){
   x.progress.checkIns=x.progress.checkIns.filter(c=>c&&typeof c==='object'&&Number.isFinite(Number(c.seconds))&&Number(c.seconds)>=0&&Number(c.seconds)<=86400).slice(-500).map(c=>({...c,notice:c.notice?cleanUserText(c.notice,80):null,type:cleanUserText(c.type,20)}));
   return true
 }
-function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000){e.target.value='';return toast('Too large.');}const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=migrate(x);saveNow();render();toast('Restored.');}catch{toast('Invalid backup.');}finally{e.target.value='';}};r.readAsText(f);}
+function importData(e){const f=e.target.files[0];if(!f)return;if(f.size>500000){e.target.value='';return toast('Too large.');}const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!validateBackup(x))throw Error();state=migrate(x);saveNow();render();updateManifestIcon();toast('Restored.');}catch{toast('Invalid backup.');}finally{e.target.value='';}};r.readAsText(f);}
 
 /* ═══ PARENT PIN ═══ */
-let pinMode2='verify';
+let pinMode2='verify',pinFailures=0,pinBlockedUntil=0;function pinFailure(){pinFailures++;const delay=pinFailures>=5?60000:pinFailures>=3?10000:1500;pinBlockedUntil=Date.now()+delay;playSound('error');toast(`Try again in ${Math.ceil(delay/1000)} seconds.`)}
 async function hashPin(pin){const d=new TextEncoder().encode('mindful-pets:'+pin);const h=await crypto.subtle.digest('SHA-256',d);return[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
 function openPinModal(mode,action){
   pinMode2=mode;pendingProtectedAction=action;$('pinInput').value='';$('pinConfirm').value='';$('pinCurrent').value='';
@@ -1503,10 +1512,10 @@ function openPinModal(mode,action){
   openModal('pinModal');setTimeout(()=>(mode==='change'?$('pinCurrent'):$('pinInput')).focus(),60);
 }
 async function submitPin(){
-  const newPin=$('pinInput').value;
-  if(pinMode2==='verify'){if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');const h=await hashPin(newPin);if(h!==state.settings.pinHash){playSound('error');return toast('Wrong PIN.');}parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;closeModal('pinModal');executeProtectedAction(pendingProtectedAction);pendingProtectedAction=null;return;}
-  if(pinMode2==='create'){const conf=$('pinConfirm').value;if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');if(newPin!==conf){playSound('error');return toast('PINs don\'t match.');}state.settings.pinHash=await hashPin(newPin);save();parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;closeModal('pinModal');toast('PIN saved.');const a=pendingProtectedAction;pendingProtectedAction=null;if(a&&a!=='createPin'&&a!=='unlockAfterCreate')executeProtectedAction(a);render();return;}
-  if(pinMode2==='change'){const cur=$('pinCurrent').value,conf=$('pinConfirm').value;if(!/^\d{4}$/.test(cur))return toast('Enter current PIN.');if(!/^\d{4}$/.test(newPin))return toast('Enter new PIN.');if(newPin!==conf){playSound('error');return toast('New PINs don\'t match.');}const ch=await hashPin(cur);if(ch!==state.settings.pinHash){playSound('error');return toast('Current PIN wrong.');}state.settings.pinHash=await hashPin(newPin);save();closeModal('pinModal');toast('PIN changed.');pendingProtectedAction=null;render();}
+  if(Date.now()<pinBlockedUntil)return toast(`Try again in ${Math.ceil((pinBlockedUntil-Date.now())/1000)} seconds.`);const newPin=$('pinInput').value;
+  if(pinMode2==='verify'){if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');const h=await hashPin(newPin);if(h!==state.settings.pinHash){pinFailure();return;}pinFailures=0;pinBlockedUntil=0;parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;armParentAutoLock();closeModal('pinModal');executeProtectedAction(pendingProtectedAction);pendingProtectedAction=null;return;}
+  if(pinMode2==='create'){const conf=$('pinConfirm').value;if(!/^\d{4}$/.test(newPin))return toast('4 digits needed.');if(newPin!==conf){playSound('error');return toast('PINs don\'t match.');}state.settings.pinHash=await hashPin(newPin);save();parentUnlocked=true;parentUnlockedUntil=Date.now()+15*60*1000;armParentAutoLock();closeModal('pinModal');toast('PIN saved.');const a=pendingProtectedAction;pendingProtectedAction=null;if(a&&a!=='createPin'&&a!=='unlockAfterCreate')executeProtectedAction(a);render();return;}
+  if(pinMode2==='change'){const cur=$('pinCurrent').value,conf=$('pinConfirm').value;if(!/^\d{4}$/.test(cur))return toast('Enter current PIN.');if(!/^\d{4}$/.test(newPin))return toast('Enter new PIN.');if(newPin!==conf){playSound('error');return toast('New PINs don\'t match.');}const ch=await hashPin(cur);if(ch!==state.settings.pinHash){pinFailure();return;}pinFailures=0;pinBlockedUntil=0;state.settings.pinHash=await hashPin(newPin);save();closeModal('pinModal');toast('PIN changed.');pendingProtectedAction=null;render();}
 }
 function unlockParent(){if(!state.settings.pinHash)openPinModal('create','unlockAfterCreate');else openPinModal('verify','unlockParent');}
 function requestProtectedAction(action){if(!state.settings.pinHash)openPinModal('create',action);else if(parentUnlocked)executeProtectedAction(action);else openPinModal('verify',action);}
@@ -1519,14 +1528,15 @@ function executeProtectedAction(action){
   render();
 }
 
+let parentLockTimer=null;function armParentAutoLock(){clearTimeout(parentLockTimer);if(!parentUnlocked)return;parentLockTimer=setTimeout(()=>{parentUnlocked=false;parentUnlockedUntil=0;renderParentArea();toast('🔒 Parent dashboard locked automatically.')},Math.max(0,parentUnlockedUntil-Date.now()))}
 /* ═══ MODALS ═══ */
 let modalOpener=null;function openModal(id){modalOpener=document.activeElement;$(id).classList.add('show');}
-function closeModal(id){$(id).classList.remove('show');if(modalOpener&&document.contains(modalOpener))setTimeout(()=>modalOpener.focus(),0);modalOpener=null;}
+function closeModal(id){if(id==='playModal')resetPlayVisuals();$(id).classList.remove('show');if(modalOpener&&document.contains(modalOpener))setTimeout(()=>modalOpener.focus(),0);modalOpener=null;}
 document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>{
   m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
   new MutationObserver(()=>{if(m.classList.contains('show'))setTimeout(()=>{const f=m.querySelector('button:not([disabled]),input:not([disabled])');if(f)f.focus();},30);}).observe(m,{attributes:true,attributeFilter:['class']});
-  m.addEventListener('keydown',e=>{if(e.key==='Escape'){m.classList.remove('show');return;}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled])')];if(!f.length)return;if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}});
+  m.addEventListener('keydown',e=>{if(e.key==='Escape'){const policy=m.dataset.escape||'close';if(policy==='blocked'){e.preventDefault();$('a11yAnnounce').textContent='Please complete this step before continuing.';toast('Please complete this step first.');return}if(policy==='confirm'&&!confirm('Close this protected step?'))return;closeModal(m.id);return;}if(e.key!=='Tab')return;const f=[...m.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled])')];if(!f.length)return;if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}});
 });
 
 /* ═══ ONBOARDING ═══ */
@@ -1588,13 +1598,13 @@ function updateManifestIcon(){
   document.head.appendChild(link);
 }
 updateManifestIcon();
-setInterval(()=>{if(activePetDef().icon!==window.__lastIcon){window.__lastIcon=activePetDef().icon;updateManifestIcon();}},1000);
+window.__lastIcon=activePetDef().icon;
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{cat:petProfile()},activePetId:'bad'}).activePetId==='cat');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 /* ═══ INIT ═══ */
-render();
-showOnboarding();
+render();runDataSelfTests();showOnboarding();setTimeout(restorePendingReward,150);
 </script>
 </body>
 </html>
