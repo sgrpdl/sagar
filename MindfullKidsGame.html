@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments V18.3</title>
+<title>Mindful Moments V18.4</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -282,9 +282,10 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div class="setup">
 <label class="setting-item"><input id="buddyToggle" type="checkbox"><span class="setting-copy"><b>Practice with my pet</b><small>Show pet alongside during practice.</small></span></label>
 <label class="setting-item"><input id="soundToggle" type="checkbox"><span class="setting-copy"><b>Game and reward sounds</b><small>Play sounds for rewards and activities.</small></span></label>
-<label class="setting-item"><input id="petSignalToggle" type="checkbox"><span class="setting-copy"><b>Pet completion sound</b><small>Pet sound when practice finishes.</small></span></label>
+<label class="setting-item"><input id="petSignalToggle" type="checkbox"><span class="setting-copy"><b>Pet completion sound</b><small>One brief pet sound when Meditation, Breathing, or Body Scan finishes.</small></span></label>
 <label class="setting-item"><input id="hapticToggle" type="checkbox"><span class="setting-copy"><b>Gentle vibration</b><small>Vibrate for catches and completions.</small></span></label>
 <label class="setting-item"><input id="motionToggle" type="checkbox"><span class="setting-copy"><b>Use fewer animations</b><small>Reduce motion for a calmer screen.</small></span></label>
+<button class="btn soft" id="btnTestPetSound">🔊 Test selected pet sound</button>
 <button class="btn purple" id="btnSaveChildSettings">Save my settings</button>
 <button class="btn green" id="btnManualSave">💾 Save Progress Now</button>
 </div>
@@ -842,7 +843,7 @@ const activePetDef=()=>PETS.find(p=>p.id===state.activePetId)||PETS[0];
 
 /* ═══ AUDIO ═══ */
 let audioCtx = null;
-let completionAudioNodes=[],completionSignalTimer=null;
+let completionAudioNodes=[],completionSignalTimer=null,completionWatchdogTimer=null,completionSequenceId=0;
 function tone(freq,dur=.13,type='sine',vol=.12,del=0,trackCompletion=false){
   if(!state.settings.sound)return;
   try{
@@ -858,28 +859,35 @@ function tone(freq,dur=.13,type='sine',vol=.12,del=0,trackCompletion=false){
   }catch(e){console.warn('Audio error:',e);}
 }
 function playSound(k){
-  const m={coin:()=>{tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)},complete:()=>{tone(523,.2,'sine',.12);tone(659,.22,'sine',.12,.18);tone(784,.35,'sine',.13,.38)},treasure:()=>{tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)},attention:()=>{tone(740,.16,'sine',.08)},buy:()=>{tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)},tap:()=>{tone(520,.08,'sine',.05)},levelup:()=>{tone(523,.15,'sine',.11);tone(659,.15,'sine',.11,.14);tone(784,.15,'sine',.11,.28);tone(1047,.3,'sine',.12,.42)},error:()=>{tone(300,.18,'square',.06)}};
+  const m={coin:()=>{tone(660,.1,'triangle',.11);tone(880,.16,'triangle',.1,.09)},complete:()=>{tone(523,.16,'sine',.075,0,true);tone(659,.18,'sine',.07,.14,true);tone(784,.22,'sine',.065,.29,true)},treasure:()=>{tone(523,.12,'triangle',.12);tone(659,.12,'triangle',.12,.12);tone(784,.12,'triangle',.12,.24);tone(1047,.4,'triangle',.13,.36)},attention:()=>{tone(740,.16,'sine',.08)},buy:()=>{tone(440,.1,'triangle',.08);tone(660,.2,'triangle',.1,.08)},tap:()=>{tone(520,.08,'sine',.05)},levelup:()=>{tone(523,.15,'sine',.11);tone(659,.15,'sine',.11,.14);tone(784,.15,'sine',.11,.28);tone(1047,.3,'sine',.12,.42)},error:()=>{tone(300,.18,'square',.06)}};
   if(m[k])m[k]();
 }
 function haptic(p){if(state.settings.haptic&&navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
 function stopCompletionAudio(){
-  clearTimeout(completionSignalTimer);completionSignalTimer=null;
+  completionSequenceId++;clearTimeout(completionSignalTimer);clearTimeout(completionWatchdogTimer);completionSignalTimer=null;completionWatchdogTimer=null;
   completionAudioNodes.forEach(n=>{try{if(typeof n.stop==='function')n.stop()}catch(e){}try{n.disconnect?.()}catch(e){}});completionAudioNodes=[];
   if(navigator.vibrate)try{navigator.vibrate(0)}catch(e){}
 }
-function petCompletionSignal(){
-  if(!state.settings.sound||!state.settings.petSignal)return;
+function petCompletionSignal(sequenceId=completionSequenceId){
+  if(sequenceId!==completionSequenceId||!state.settings.sound||!state.settings.petSignal)return;
   const patterns={
-    dog:[[185,.13,'sawtooth',.06,0],[125,.18,'sawtooth',.05,.14]],
-    kingcharles:[[185,.13,'sawtooth',.06,0],[125,.18,'sawtooth',.05,.14]],
-    cat:[[520,.16,'sine',.06,0],[680,.22,'sine',.05,.13]],
-    dragon:[[95,.25,'sawtooth',.05,0],[190,.18,'triangle',.05,.22]],
-    bunny:[[460,.12,'triangle',.05,0],[620,.16,'triangle',.05,.13]],
-    panda:[[330,.15,'sine',.05,0],[440,.18,'sine',.05,.14]],
-    fox:[[560,.12,'triangle',.05,0],[710,.15,'triangle',.05,.13]]
+    dog:[[196,.10,'triangle',.038,0],[147,.12,'triangle',.032,.10]],
+    kingcharles:[[196,.10,'triangle',.038,0],[147,.12,'triangle',.032,.10]],
+    cat:[[494,.11,'sine',.04,0],[622,.13,'sine',.034,.10]],
+    dragon:[[110,.14,'triangle',.032,0],[165,.12,'triangle',.03,.13]],
+    bunny:[[440,.09,'triangle',.032,0],[554,.11,'triangle',.03,.09]],
+    panda:[[294,.11,'sine',.032,0],[392,.12,'sine',.03,.10]],
+    fox:[[523,.09,'triangle',.032,0],[659,.11,'triangle',.03,.09]]
   };
   (patterns[state.activePetId]||patterns.cat).forEach(([f,d,w,v,delay])=>tone(f,d,w,v,delay,true));
-  setTimeout(stopCompletionAudio,1200);
+}
+function playCompletionSequence({test=false}={}){
+  stopCompletionAudio();if(!state.settings.sound)return false;const id=completionSequenceId;
+  playSound('complete');
+  completionSignalTimer=setTimeout(()=>{if(id!==completionSequenceId)return;completionSignalTimer=null;petCompletionSignal(id)},520);
+  completionWatchdogTimer=setTimeout(()=>{if(id===completionSequenceId)stopCompletionAudio()},1450);
+  if(test)toast(state.settings.petSignal?'Short completion sound played.':'Completion chime played. Pet sound is switched off.');
+  return true
 }
 /* ═══ UTILITY ═══ */
 function cleanUserText(value,maxLength=100){return String(value??'').replace(/[\u0000-\u001F\u007F]/g,'').replace(/[<>]/g,'').replace(/\s+/g,' ').trim().slice(0,maxLength)}
@@ -903,7 +911,7 @@ function saveNow(){
 }
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,450)}
 window.addEventListener('pagehide',saveNow);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){saveNow();stopCompletionAudio()}});
 function applyGentleCareDecay(){const now=Date.now(),day=864e5;Object.values(state.pets).forEach(p=>{if(!p.lastDecayAt)p.lastDecayAt=now;if(!p.lastCareAt)p.lastCareAt=now;const days=Math.floor((now-p.lastDecayAt)/day);if(days<1)return;const applied=Math.min(days,5);p.health=Math.max(35,p.health-applied*4);p.happiness=Math.max(35,p.happiness-applied*3);p.lastDecayAt+=days*day;});}
 
 function hasWeekendPair(s){
@@ -1561,9 +1569,8 @@ function completePractice(){
     state.progress.checkIns.push({feeling:null,notice:'bedtime story',type:'sleep',seconds:Math.max(0,done.planned-(done.remaining||0)),at:new Date().toISOString(),attentionPassed:0,attentionMissed:0,presenceScore:null,reward:0});state.progress.checkIns=state.progress.checkIns.slice(-500);session=null;saveNow();
     setStoryText('Goodnight… rest peacefully. 🌙');$('storyProgress').textContent='Story complete';$('storyControlPanel').style.display='none';$('practiceNotice').textContent='Sleep Story complete. No rewards were awarded.';$('btnPauseResume').style.display='none';$('btnQuitPractice').textContent='Back Home';return;
   }
-  playSound('complete');haptic([50,60,80]);$('a11yAnnounce').textContent='Time is up. Practice complete.';
+  playCompletionSequence();haptic([50,60,80]);$('a11yAnnounce').textContent='Time is up. Practice complete.';
   if(state.settings.buddy){$('buddyPet').className='buddy-pet celebrate';$('buddyBubble').textContent='Time is up. We finished together! 🎉'}
-  completionSignalTimer=setTimeout(()=>{petCompletionSignal();completionSignalTimer=null},850);
   const done={...session};createPendingReward(done);clearInterval(tick);stopBreathLoop();clearTimeout(bodyscanTimer);clearTimeout(alertScheduleTimer);releaseWakeLock();$('continuityBanner').style.display='none';$('alertCheckBanner').classList.remove('show');stopAmbient();session=null;
   setTimeout(()=>{$('checkModal').dataset.claimed='0';$('checkModal').dataset.done=JSON.stringify(done);openModal('checkModal')},1250)
 }
@@ -1654,6 +1661,7 @@ function renderWeeklySummary(){
   $('weeklySummary').innerHTML=`<div class="weekly-stat"><b>${week.length}</b><br><span class="small">Practices</span></div><div class="weekly-stat"><b>${mins}</b><br><span class="small">Minutes</span></div><div class="weekly-stat"><b>${mindfulDays}/7</b><br><span class="small">Mindful days</span></div><div class="weekly-stat"><b>${state.player.bestStreak}</b><br><span class="small">Best streak</span></div>`;
 }
 /* ═══ SETTINGS ═══ */
+$('btnTestPetSound').addEventListener('click',()=>{const previousSound=state.settings.sound,previousPet=state.settings.petSignal;state.settings.sound=$('soundToggle').checked;state.settings.petSignal=$('petSignalToggle').checked;playCompletionSequence({test:true});state.settings.sound=previousSound;state.settings.petSignal=previousPet;});
 $('btnSaveChildSettings').addEventListener('click',()=>{state.settings.sound=$('soundToggle').checked;state.settings.reducedMotion=$('motionToggle').checked;state.settings.buddy=$('buddyToggle').checked;state.settings.petSignal=$('petSignalToggle').checked;state.settings.haptic=$('hapticToggle').checked;save();render();toast('Saved.');});
 $('btnManualSave').addEventListener('click',()=>{save();toast('✅ Progress saved!');});
 
@@ -1772,7 +1780,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 function runCapabilityCheck(){
   const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
   try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
