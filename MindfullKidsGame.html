@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments V18.5</title>
+<title>Mindful Moments V18.6</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -342,8 +342,8 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="timer" class="timer" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
 <div id="a11yAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div id="continuityBanner" class="continuity-banner" style="display:none">
-<b id="continuityTitle">🧘 Practice continues safely</b>
-<div id="continuityText" class="small">Screen can lock or you can look away. The timer keeps going.</div>
+<b id="continuityTitle">🧘 Active practice</b>
+<div id="continuityText" class="small">The screen stays awake when supported. Leaving the app pauses the timer.</div>
 <div id="wakelockStatus" class="wakelock-status wakelock-inactive">Wake lock: not active</div>
 </div>
 <div id="participationBlock">
@@ -934,27 +934,52 @@ function hasComeback(s){
 }
 
 /* ═══ WAKE LOCK ═══ */
+let wakeLockRequestPending=false,wakeLockRetryTimer=null,wakeLockReleaseExpected=false;
+function shouldKeepScreenAwake(){
+  return !!(session&&session.running&&session.mode!=='sleep'&&!document.hidden);
+}
+function scheduleWakeLockRetry(delay=800){
+  clearTimeout(wakeLockRetryTimer);wakeLockRetryTimer=null;
+  if(!shouldKeepScreenAwake()||!('wakeLock' in navigator))return;
+  wakeLockRetryTimer=setTimeout(()=>{wakeLockRetryTimer=null;requestWakeLock();},delay);
+}
 async function requestWakeLock(){
-  if(!('wakeLock' in navigator))return false;
+  if(!shouldKeepScreenAwake()){updateWakeLockUI();return false;}
+  if(!('wakeLock' in navigator)){updateWakeLockUI('unsupported');return false;}
+  if(wakeLockSentinel&&!wakeLockSentinel.released){updateWakeLockUI();return true;}
+  if(wakeLockRequestPending)return false;
+  wakeLockRequestPending=true;wakeLockReleaseExpected=false;
   try{
-    wakeLockSentinel=await navigator.wakeLock.request('screen');
-    wakeLockSentinel.addEventListener('release',()=>{wakeLockSentinel=null;updateWakeLockUI();});
+    const sentinel=await navigator.wakeLock.request('screen');
+    if(!shouldKeepScreenAwake()){wakeLockReleaseExpected=true;try{await sentinel.release();}catch(e){}return false;}
+    wakeLockSentinel=sentinel;
+    sentinel.addEventListener('release',()=>{
+      if(wakeLockSentinel===sentinel)wakeLockSentinel=null;
+      updateWakeLockUI();
+      if(!wakeLockReleaseExpected&&shouldKeepScreenAwake())scheduleWakeLockRetry(700);
+      wakeLockReleaseExpected=false;
+    });
     updateWakeLockUI();return true;
-  }catch(e){wakeLockSentinel=null;updateWakeLockUI();return false;}
+  }catch(e){wakeLockSentinel=null;updateWakeLockUI('unavailable');if(shouldKeepScreenAwake())scheduleWakeLockRetry(2500);return false;}
+  finally{wakeLockRequestPending=false;}
 }
 async function releaseWakeLock(){
-  if(wakeLockSentinel){try{await wakeLockSentinel.release();}catch(e){}wakeLockSentinel=null;}
-  updateWakeLockUI();
+  clearTimeout(wakeLockRetryTimer);wakeLockRetryTimer=null;wakeLockReleaseExpected=true;
+  const sentinel=wakeLockSentinel;wakeLockSentinel=null;
+  if(sentinel){try{await sentinel.release();}catch(e){}}
+  wakeLockRequestPending=false;updateWakeLockUI();
 }
-function updateWakeLockUI(){
+function updateWakeLockUI(reason=''){
   const el=$('wakelockStatus');if(!el)return;
-  if(wakeLockSentinel){el.className='wakelock-status wakelock-active';el.textContent='🟢 Screen will stay on';}
-  else{el.className='wakelock-status wakelock-inactive';el.textContent='Screen may dim — timer continues safely';}
+  if(session&&session.mode==='sleep'){el.className='wakelock-status wakelock-inactive';el.textContent='Bedtime mode — screen may dim';return;}
+  if(wakeLockSentinel&&!wakeLockSentinel.released){el.className='wakelock-status wakelock-active';el.textContent='🟢 Screen will stay awake';}
+  else if(reason==='unsupported'){el.className='wakelock-status wakelock-inactive';el.textContent='Screen-awake mode is not supported';}
+  else if(reason==='unavailable'){el.className='wakelock-status wakelock-inactive';el.textContent='Screen-awake mode is unavailable right now';}
+  else{el.className='wakelock-status wakelock-inactive';el.textContent=session&&session.running?'Requesting screen-awake mode…':'Screen-awake mode paused';}
 }
-
 document.addEventListener('visibilitychange',()=>{
   if(!session)return;
-  if(document.hidden) handlePracticeHide();
+  if(document.hidden)handlePracticeHide();
   else handlePracticeReturn();
 });
 function handlePracticeHide(){
@@ -970,8 +995,8 @@ function handlePracticeReturn(){
   if(!session||!session.hiddenAt)return;session.hiddenAt=0;
   if(session.mode==='sleep'){
     resumeAmbient();if('speechSynthesis'in window)speechSynthesis.resume();
-    if(Date.now()>=session.endAt){session.remaining=0;completePractice();return}
-    session.remaining=Math.max(0,Math.ceil((session.endAt-Date.now())/1000));startSleepStory(false);requestWakeLock();return;
+    if(Date.now()>=session.endAt){session.remaining=0;completePractice();return;}
+    session.remaining=Math.max(0,Math.ceil((session.endAt-Date.now())/1000));startSleepStory(false);return;
   }
   $('continuityBanner').style.display='block';$('continuityTitle').textContent='Practice paused';$('continuityText').textContent='The app was hidden, so the timer stopped. Tap Resume when ready.';
   toast('Practice is paused. Tap Resume when ready.');
@@ -1345,7 +1370,7 @@ function startPractice(type,name,seconds){
     bodyscan:'Follow the body prompts. Close your eyes when ready.',
     sleep:'Lie down, relax, and let the story carry you to sleep.'
   }[type]||'';
-  requestWakeLock();
+  if(type!=='sleep')requestWakeLock();else releaseWakeLock();
   $('continuityBanner').style.display='block';
   if(type==='sleep'){
     $('continuityTitle').textContent='🌙 Sleep story active';
@@ -1358,14 +1383,14 @@ function startPractice(type,name,seconds){
   } else if(type==='meditation'){
     $('timer').style.display='block';$('storyGreeting').style.display='none';$('storyControlPanel').style.display='none';
     $('continuityTitle').textContent='🧘 Eyes-closed mode active';
-    $('continuityText').textContent='No interruptions at all. The timer continues safely even if the screen locks.';
+    $('continuityText').textContent='The screen will stay awake when supported. Leaving the app pauses the timer.';
     $('participationBlock').style.display='none';
     $('bodyscanGuide').style.display='none';
     $('orb').className='orb meditation';$('orb').textContent='Be still';
     $('practiceNotice').textContent='Presence is estimated gently and privately — we never use camera or microphone.';
   } else if(type==='bodyscan'){
     $('timer').style.display='block';$('storyGreeting').style.display='none';$('storyControlPanel').style.display='none';
-    $('continuityTitle').textContent='🧍 Practice continues safely';
+    $('continuityTitle').textContent='🧍 Active practice';
     $('continuityText').textContent='Close your eyes if comfortable. No visual check-ins are required.';
     $('participationBlock').style.display='block';
     $('bodyscanGuide').style.display='block';
@@ -1374,7 +1399,7 @@ function startPractice(type,name,seconds){
     $('practiceNotice').textContent='No visual check-ins are required. Leaving the app still pauses the timer.';
   } else {
     $('timer').style.display='block';$('storyGreeting').style.display='none';$('storyControlPanel').style.display='none';
-    $('continuityTitle').textContent='💨 Practice continues safely';
+    $('continuityTitle').textContent='💨 Active practice';
     $('continuityText').textContent='Look away anytime. A gentle hello check may appear at the top sometimes.';
     $('participationBlock').style.display='block';
     $('bodyscanGuide').style.display='none';
@@ -1546,8 +1571,14 @@ function updateParticipation(){
 
 function setSessionRunning(shouldRun,message=''){
   if(!session||session.running===shouldRun)return;const now=Date.now();
-  if(shouldRun){session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';if('speechSynthesis'in window)speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';}
-  else{session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';}
+  if(shouldRun){
+    session.endAt=now+session.remaining*1000;session.running=true;session.last=now;resumeAmbient();$('btnPauseResume').textContent='⏸ Pause';
+    if(session.mode==='sleep'){$('orb').className='orb bodyscan';$('orb').textContent='Rest';releaseWakeLock();if('speechSynthesis'in window){speechSynthesis.resume();if(!speechSynthesis.speaking)startSleepStory(false);}else startSleepStory(false);}
+    else{requestWakeLock();if(session.type==='meditation'){$('orb').className='orb meditation';$('orb').textContent='Be still';}else if(session.type==='bodyscan'){$('orb').className='orb bodyscan';$('orb').textContent='Notice';advanceBodyScan();}else breathLoop(false);}
+    scheduleAlertCheck();$('a11yAnnounce').textContent='Resumed';
+  }else{
+    session.remaining=Math.max(0,Math.ceil((session.endAt-now)/1000));session.running=false;session.last=now;pauseBreathLoop();pauseBodyScan();clearTimeout(alertScheduleTimer);pauseAmbient();releaseWakeLock();if(session.mode==='sleep'&&'speechSynthesis'in window)speechSynthesis.pause();$('btnPauseResume').textContent='▶ Resume';$('orb').textContent='Paused';$('a11yAnnounce').textContent='Paused';
+  }
   if(message)toast(message);
 }
 function pauseResume(){if(!session)return;setSessionRunning(!session.running,session.running?'Paused.':'Resumed.');}
@@ -1795,7 +1826,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');check('wake lock targets active practices',()=>typeof shouldKeepScreenAwake==='function'&&typeof scheduleWakeLockRetry==='function');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 function runCapabilityCheck(){
   const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
   try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
