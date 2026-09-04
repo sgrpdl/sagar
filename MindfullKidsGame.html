@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments V18.6</title>
+<title>Mindful Moments V18.7</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -239,13 +239,15 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <p class="small" id="petLevel">Friendship level 1</p>
 <div id="petMessage" class="pet-message">I'm happy you're here!</div>
 <div class="meters">
-<div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div>
 <div class="meterline"><span>Happiness</span><div class="bar"><div id="happyFill" class="fill happy"></div></div><b id="happyN"></b></div>
+<div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div>
 <div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div>
 </div>
 </div>
 <div id="bedtimeTopSlot"></div>
 <div id="todayCalmCard" class="today-card" aria-label="Today's calm progress"></div>
+<div id="dailyEncouragement" class="welcome-banner" style="display:block;margin-top:13px"></div>
+<button class="btn soft" id="btnQuickStretch" style="width:100%;margin-top:10px">🤸 Quick Stretch • 1 min</button>
 <button class="btn green home-primary" id="btnMeditate" style="width:100%;margin-top:13px;font-size:17px">🧘 Meditate</button>
 <div class="grid2"><button class="btn blue" id="btnBreathe">💨 Breathe</button><button class="btn teal" id="btnBodyscan">🧍 Body Scan</button></div>
 <div class="grid2" id="restActivityRow"><button class="btn purple" id="btnSleepStory">🌙 Available at 8 PM</button><button class="btn purple" id="btnPlay">💖 Play</button></div>
@@ -297,7 +299,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div id="parentUnlockedCard" style="display:none">
 <div class="card" style="text-align:left"><div class="setup">
 <label>Child nickname<input id="childName" maxlength="18"></label>
-<label>Age group<select id="ageGroup"><option value="5-7">5–7</option><option value="8-10">8–10</option><option value="11-12">11–12</option><option value="13-15">13–15</option><option value="16-19">16–19</option><option value="20-29">20–29</option><option value="30-40">30–40</option><option value="41+">41+</option></select></label>
+<label>Exact age<input id="exactAge" type="number" min="5" max="99" inputmode="numeric"></label><label>Age group<select id="ageGroup" disabled><option value="5-7">5–7</option><option value="8-10">8–10</option><option value="11-12">11–12</option><option value="13-15">13–15</option><option value="16-19">16–19</option><option value="20-29">20–29</option><option value="30-40">30–40</option><option value="41+">41+</option></select></label>
 <button class="btn purple" id="btnSaveParentSettings">Save parent settings</button>
 <button class="btn soft" id="btnExport">Export backup</button>
 <button class="btn soft" id="btnImport">Import backup</button>
@@ -306,7 +308,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn danger" id="btnReset">Reset all progress</button>
 <button class="btn soft" id="btnLockParent">🔒 Lock dashboard</button>
 </div></div>
-<div class="section-title"><h2>This week</h2></div>
+<div class="section-title"><h2>What the pet bars mean</h2></div><div class="card" style="text-align:left"><p><b>😊 Happiness</b><br><span class="small">Grows mainly through Meditation, Breathing, and Body Scan.</span></p><p><b>⚡ Energy</b><br><span class="small">Grows through healthy food and a small mindful-practice boost.</span></p><p style="margin-bottom:0"><b>💜 Friendship</b><br><span class="small">Permanent progress from consistent mindfulness. It never decreases.</span></p></div><div class="section-title"><h2>This week</h2></div>
 <div class="card weekly-grid" id="weeklySummary"></div>
 <div class="section-title"><h2>Mood tracker</h2></div>
 <div class="card" id="moodTracker"></div>
@@ -396,6 +398,13 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <button class="btn soft" data-close="chooseModal">Close</button>
 </div></div>
 
+<div id="stretchModal" class="modal"><div class="sheet" style="text-align:center">
+<h2>Quick Stretch 🤸</h2><p class="small">Move away from the screen if it is safe. No coins or points are earned here.</p>
+<div id="stretchIcon" style="font-size:72px;margin:14px">🙆</div><h3 id="stretchInstruction">Reach both arms upward</h3>
+<div id="stretchTimer" class="timer" style="font-size:38px;margin:18px 0">01:00</div>
+<button class="btn green" id="btnStartStretch" style="width:100%">Start 1-minute stretch</button>
+<button class="btn soft" id="btnSkipStretch" style="width:100%;margin-top:8px">Skip and choose a calm practice</button>
+</div></div>
 <div id="feedModal" class="modal"><div class="sheet">
 <h2>Food pantry</h2>
 <div id="pantrySort" class="tabs" style="margin-bottom:8px"></div>
@@ -750,10 +759,11 @@ const PRESENCE_SYMBOLS = ['⭐','🌿','☁️','🌙'];
 
 function ageGroupFromAge(value){const n=Math.max(5,Math.min(99,Math.floor(Number(value)||8)));return n<=7?'5-7':n<=10?'8-10':n<=12?'11-12':n<=15?'13-15':n<=19?'16-19':n<=29?'20-29':n<=40?'30-40':'41+'}
 function contentAgeGroup(){return AGE_GROUPS.includes(state.player.age)?state.player.age:'8-10'}
+function isAgeTenPlus(){return finiteInt(state.player.ageYears,5,99,8)>=10}
 function bedtimeEnabled(){const h=new Date().getHours();return h>=20||h<6}
 function isFavoriteFood(foodId){ return (PET_FAVORITES[state.activePetId]||[]).includes(foodId); }
 function petProfile(){ return {health:60,happiness:60,friendXP:0,level:1,accessory:null,room:'meadow',nickname:null,lastPlay:0,lastCareAt:Date.now(),lastDecayAt:Date.now(),fedToday:false,fedDate:null,milestones:[]}; }
-function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},pendingReward:null,appliedRewardIds:[],wishlist:null,monthlyGift:null,onboardingDone:false}; }
+function defaults(){ return {schemaVersion:5,player:{name:'Explorer',age:'8-10',ageYears:8,coins:80,stars:0,streak:0,bestStreak:0,lastPracticeDate:null,streakShields:0},activePetId:'cat',pets:{cat:petProfile()},inventory:{apple:1},ownedItems:[],progress:{sessions:0,breathing:0,meditation:0,bodyscan:0,totalSeconds:0,checkIns:[],badges:[]},settings:{sound:true,reducedMotion:false,buddy:true,petSignal:true,haptic:true,pinHash:null,breathPattern:'balloon'},daily:{date:'',earned:0,missionCount:0},pendingReward:null,appliedRewardIds:[],wishlist:null,monthlyGift:null,onboardingDone:false}; }
 
 function migrate(x){
   const d = defaults();
@@ -786,6 +796,7 @@ function migrate(x){
   merged.player.stars = finiteInt(merged.player.stars,0,999999,0);
   merged.player.streak = finiteInt(merged.player.streak,0,999999,0);
   merged.player.bestStreak = Math.max(merged.player.streak,finiteInt(merged.player.bestStreak,0,999999,0));
+  merged.player.ageYears=finiteInt(merged.player.ageYears,5,99,({'5-7':6,'8-10':9,'11-12':12,'13-15':14,'16-19':17,'20-29':25,'30-40':35,'41+':45}[merged.player.age]||8));merged.player.age=ageGroupFromAge(merged.player.ageYears);
   merged.settings.sound=!!merged.settings.sound;
   merged.settings.reducedMotion=!!merged.settings.reducedMotion;
   merged.settings.buddy=!!merged.settings.buddy;
@@ -1019,7 +1030,7 @@ function updatePetMessage(){
   if(p.health<50){msg=`${nick} is resting. Practice and choose a healthy snack! 🍎`;care=true;}
   else if(p.happiness<50){msg=`${nick} missed you. Gentle pats would feel lovely. 💛`;care=true;}
   else if(p.health<=65){msg='I used energy today. Shall we earn a healthy snack? 🥕';care=true;}
-  else if(p.happiness<=60){msg='Can we play after calm practice? 🌿';care=true;}
+  else if(p.happiness<=60){msg='A calm breath together could brighten our day. 🌿';care=true;}
   else if(h<12)msg=hasRealChildName()?`Good morning, ${displayFirstName()}! Shall we practice together?`:'Good morning! Shall we practice together?';
   $('petMessage').textContent=msg;
   $('petMessage').classList.toggle('needs-care',care);
@@ -1078,8 +1089,15 @@ function updatePrimaryMeditationCTA(){
   else if(h<18)b.textContent=practiced?'🧘 Practice again':'🌿 Take a calm moment';
   else b.textContent=practiced?'🧘 One more calm moment':'🌙 Wind down gently';
 }
+function renderDailyEncouragement(){
+  const el=$('dailyEncouragement');if(!el)return;const name=hasRealChildName()?`, ${displayFirstName()}`:'',last=state.player.lastPracticeDate,gap=last?Math.max(0,dayDiff(last,localDate())):0;
+  if(gap>=2)el.textContent=`Every day is a fresh start${name}. Let’s stretch, breathe, and begin again.`;
+  else if(gap===1)el.textContent=`Welcome back${name}! Let’s stretch and take five calm minutes together.`;
+  else if(isAgeTenPlus())el.textContent=`How was your day${name}? A quick stretch and five mindful minutes can help you reset.`;
+  else el.textContent=`How was your day${name}? Let’s stretch, breathe, and help our minds feel calm!`;
+}
 function render(){
-  checkDaily();applyGentleCareDecay();updateHomeActions();renderTodayCalm();updatePrimaryMeditationCTA();
+  checkDaily();applyGentleCareDecay();updateHomeActions();renderTodayCalm();renderDailyEncouragement();updatePrimaryMeditationCTA();
   if(parentUnlocked&&parentUnlockedUntil>0&&Date.now()>parentUnlockedUntil){parentUnlocked=false;parentUnlockedUntil=0;}
   const petDef=activePetDef(),ps=activePet();
   $('petAvatar').textContent=petDef.icon+(ps.accessory?' '+(ITEMS.find(x=>x.id===ps.accessory)?.icon||''):'');
@@ -1109,7 +1127,7 @@ function renderParentArea(){
   $('parentLockedCard').style.display=parentUnlocked?'none':'block';
   $('parentUnlockedCard').style.display=parentUnlocked?'block':'none';
   if(parentUnlocked){
-    $('childName').value=state.player.name;$('ageGroup').value=state.player.age;
+    $('childName').value=state.player.name;$('exactAge').value=state.player.ageYears||8;$('ageGroup').value=ageGroupFromAge($('exactAge').value);
     renderParentLog();renderWeeklySummary();renderMoodTracker();renderStreakCalendar();
   }
 }
@@ -1233,6 +1251,13 @@ function feed(id){
   toast(fav?`${i.icon} Favorite food! 💖`:`${i.icon} Yum!`);
 }
 
+/* ═══ QUICK STRETCH ═══ */
+let stretchTick=null,stretchRemaining=60,stretchStep=0;
+const STRETCH_STEPS=[['🙆','Reach both arms upward'],['🔄','Roll your shoulders slowly'],['↔️','Turn gently from side to side'],['✨','Shake out your arms and legs'],['🌬️','Take one comfortable breath']];
+function openQuickStretch(){clearInterval(stretchTick);stretchRemaining=60;stretchStep=0;renderStretch();$('btnStartStretch').disabled=false;$('btnStartStretch').textContent='Start 1-minute stretch';openModal('stretchModal')}
+function renderStretch(){$('stretchTimer').textContent=format(stretchRemaining);const index=Math.min(STRETCH_STEPS.length-1,Math.floor((60-stretchRemaining)/12));stretchStep=index;$('stretchIcon').textContent=STRETCH_STEPS[index][0];$('stretchInstruction').textContent=STRETCH_STEPS[index][1]}
+function startQuickStretch(){clearInterval(stretchTick);$('btnStartStretch').disabled=true;$('btnStartStretch').textContent='Stretching…';stretchTick=setInterval(()=>{stretchRemaining=Math.max(0,stretchRemaining-1);renderStretch();if(stretchRemaining<=0){clearInterval(stretchTick);stretchTick=null;$('btnStartStretch').disabled=false;$('btnStartStretch').textContent='Done';toast('Great stretch! Now choose five mindful minutes.');setTimeout(()=>{closeModal('stretchModal');openPractice('meditation')},500)}},1000)}
+function skipQuickStretch(){clearInterval(stretchTick);stretchTick=null;closeModal('stretchModal');openPractice('meditation')}
 /* ═══ PLAY ═══ */
 let playRewardReady=false,playMode='pat',patCount=0,ballThrows=0,ballCatches=0,dragging=false;function playTargets(){return state.player.age==='5-7'?{pats:4,catches:2,zone:95}:state.player.age==='11-12'?{pats:8,catches:4,zone:60}:{pats:6,catches:3,zone:75}}function resetPlayVisuals(){$('gamePet').style.left='50%';$('gamePet').classList.remove('catch','giggle');$('gameBall').style.transition='none';$('gameBall').style.left='25px';$('gameBall').style.bottom='25px';$('gameBall').style.transform='rotate(0)';$('gameBall').classList.remove('flying');dragging=false}
 function playPet(){
@@ -1254,7 +1279,7 @@ function ballMove(e){if(!dragging)return;e.preventDefault();const r=$('playArea'
 function ballUp(e){if(!dragging)return;e.preventDefault();dragging=false;const area=$('playArea').getBoundingClientRect(),pet=$('gamePet').getBoundingClientRect(),zone=playTargets().zone,target=playTargets().catches,dx=e.clientX-(pet.left+pet.width/2),dy=e.clientY-(pet.top+pet.height/2),caught=Math.hypot(dx,dy)<=zone;ballThrows++;$('gameBall').classList.add('flying');$('gameBall').style.left=(pet.left-area.left+pet.width*.25)+'px';$('gameBall').style.bottom=(area.bottom-pet.top-pet.height*.55)+'px';$('gameBall').style.transform=`rotate(${ballThrows*420}deg)`;playSound('tap');if(caught){ballCatches++;$('gamePet').classList.add('catch');haptic(25)}setTimeout(()=>{$('playScore').textContent=`Catches ${ballCatches}/${target}`;$('playInstruction').textContent=caught?'Caught it! 🎉':'Almost! Toss a little closer.';if(ballCatches>=target)completePlayReward();else setTimeout(resetPlayVisuals,650)},650)}
 function completePlayReward(){
   $('playInstruction').textContent='Great playing! 🎉';
-  const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.happiness=clamp(p.happiness+8);p.friendXP+=5;levelPet(p);save();render();playSound('coin');setTimeout(()=>toast('Happiness +8 • Friendship +5'),300);}else toast('Play reward recharging.');
+  const p=activePet();if(playRewardReady){playRewardReady=false;p.lastPlay=Date.now();p.happiness=clamp(p.happiness+1);save();render();playSound('tap');setTimeout(()=>toast('A little joy +1. Now try a stretch or calm practice!'),300);}else toast('Play reward recharging.');
 }
 $('gamePet').addEventListener('pointerdown',patPet);$('gameBall').addEventListener('pointerdown',ballDown);$('gameBall').addEventListener('pointermove',ballMove);$('gameBall').addEventListener('pointerup',ballUp);$('gameBall').addEventListener('pointercancel',ballUp);
 
@@ -1353,7 +1378,7 @@ function openPractice(type){
     $('breathPatternArea').style.display='none';$('breathSafety').style.display='none';
     $('ambientArea').style.display = (type==='meditation'||type==='bodyscan') ? 'block' : 'none';
   }
-  const exs=getAgeExercises(type);$('practiceOptions').replaceChildren();
+  const exs=getAgeExercises(type).filter(([,sec])=>!isAgeTenPlus()||sec>=300);$('practiceOptions').replaceChildren();
   exs.forEach(([name,sec])=>{const reward=sec>=900?'✨ Super Treasure':sec>=600?'🎁 Treasure':'🌱 Habit';const btn=document.createElement('button');btn.className='btn '+(type==='breathing'?'blue':type==='bodyscan'?'teal':'green');btn.innerHTML=`<span>${name} • ${Math.floor(sec/60)} min<br><small style="opacity:.9">${reward}</small></span>`;btn.addEventListener('click',()=>startPractice(type,name,sec));$('practiceOptions').appendChild(btn);});
   openModal('chooseModal');
 }
@@ -1649,10 +1674,10 @@ function finishJournal(notice){
   }
   const oldBest=state.player.bestStreak;
   updateStreak();
-  const p=activePet();p.lastCareAt=Date.now();p.lastDecayAt=Date.now();p.friendXP+=Math.round(actual/20);levelPet(p);
+  const p=activePet(),petGain={meditation:{happy:5,energy:2,friend:5},breathing:{happy:4,energy:2,friend:4},bodyscan:{happy:4,energy:1,friend:4}}[typeKey]||{happy:0,energy:0,friend:0};p.happiness=clamp(p.happiness+petGain.happy);p.health=clamp(p.health+petGain.energy);p.friendXP+=petGain.friend;p.lastCareAt=Date.now();p.lastDecayAt=Date.now();levelPet(p);
   const oldBadges=[...state.progress.badges];state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);const newBadges=state.progress.badges.filter(b=>!oldBadges.includes(b));
   state.appliedRewardIds.push(pending.id);state.appliedRewardIds=state.appliedRewardIds.slice(-200);state.pendingReward=null;saveNow();render();showView('home');playSound(specialMessage?'treasure':'coin');
-  toast(`+${reward} coins, +${actual>=600?3:1} star${actual>=600?'s':''}!`);
+  toast(`Mindful practice: Happiness +${petGain.happy} • Energy +${petGain.energy} • Friendship +${petGain.friend}`);
   animateCoinBurst(`🪙 +${reward}`);
   if(specialMessage)setTimeout(()=>toast(specialMessage),500);
   const crossedStreak=Object.keys(STREAK_MILESTONES).map(Number).find(day=>day>oldBest&&day<=state.player.bestStreak);
@@ -1716,7 +1741,7 @@ function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'
 function validateBackup(x){
   if(!x||typeof x!=='object'||Array.isArray(x)||!x.player||!x.pets||!x.inventory||!x.progress||!x.settings||!x.daily||!Array.isArray(x.progress.checkIns)||!Array.isArray(x.ownedItems))return false;
   if(!PETS.some(p=>p.id===x.activePetId)||!x.pets[x.activePetId])return false;
-  x.player.coins=finiteInt(x.player.coins,0,999999,0);x.player.stars=finiteInt(x.player.stars,0,999999,0);x.player.name=cleanUserText(x.player.name||'Explorer',18);x.player.age=AGE_GROUPS.includes(x.player.age)?x.player.age:'8-10';
+  x.player.coins=finiteInt(x.player.coins,0,999999,0);x.player.stars=finiteInt(x.player.stars,0,999999,0);x.player.name=cleanUserText(x.player.name||'Explorer',18);x.player.ageYears=finiteInt(x.player.ageYears,5,99,({'5-7':6,'8-10':9,'11-12':12,'13-15':14,'16-19':17,'20-29':25,'30-40':35,'41+':45}[x.player.age]||8));x.player.age=ageGroupFromAge(x.player.ageYears);
   for(const[id,n]of Object.entries(x.inventory)){if(!ITEMS.some(i=>i.id===id&&i.cat==='food')||!Number.isInteger(n)||n<0||n>999)return false}
   for(const[id,pet]of Object.entries(x.pets)){if(!PETS.some(q=>q.id===id)||!pet||typeof pet!=='object')return false;pet.health=finiteInt(pet.health,0,100,60);pet.happiness=finiteInt(pet.happiness,0,100,60);pet.friendXP=finiteInt(pet.friendXP,0,999999,0);pet.level=finiteInt(pet.level,1,999,1);pet.nickname=pet.nickname?cleanUserText(pet.nickname,12):null;if(!Array.isArray(pet.milestones))pet.milestones=[]}
   x.ownedItems=[...new Set(x.ownedItems.filter(id=>typeof id==='string'&&ITEMS.some(i=>i.id===id)))];
@@ -1748,14 +1773,14 @@ function executeProtectedAction(action){
   else if(action==='reset'){state=defaults();parentUnlocked=false;parentUnlockedUntil=0;saveNow();render();showView('home');toast('Reset complete.');}
   else if(action==='export')exportData();
   else if(action==='import')$('importFile').click();
-  else if(action==='saveParentSettings'){state.player.name=cleanUserText($('childName').value,18)||'Explorer';state.player.age=AGE_GROUPS.includes($('ageGroup').value)?$('ageGroup').value:'8-10';saveNow();render();toast('Saved.');}
+  else if(action==='saveParentSettings'){state.player.name=cleanUserText($('childName').value,18)||'Explorer';state.player.ageYears=finiteInt($('exactAge').value,5,99,8);state.player.age=ageGroupFromAge(state.player.ageYears);saveNow();render();toast('Saved.');}
   render();
 }
 
 let parentLockTimer=null;function armParentAutoLock(){clearTimeout(parentLockTimer);if(!parentUnlocked)return;parentLockTimer=setTimeout(()=>{parentUnlocked=false;parentUnlockedUntil=0;renderParentArea();toast('🔒 Parent dashboard locked automatically.')},Math.max(0,parentUnlockedUntil-Date.now()))}
 /* ═══ MODALS ═══ */
 let modalOpener=null;function openModal(id){modalOpener=document.activeElement;$(id).classList.add('show');}
-function closeModal(id){if(id==='playModal')resetPlayVisuals();$(id).classList.remove('show');if(modalOpener&&document.contains(modalOpener))setTimeout(()=>modalOpener.focus(),0);modalOpener=null;}
+function closeModal(id){if(id==='stretchModal'){clearInterval(stretchTick);stretchTick=null;}if(id==='playModal')resetPlayVisuals();$(id).classList.remove('show');if(modalOpener&&document.contains(modalOpener))setTimeout(()=>modalOpener.focus(),0);modalOpener=null;}
 document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>{
   m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
@@ -1764,8 +1789,12 @@ document.querySelectorAll('.modal').forEach(m=>{
 });
 
 /* ═══ ONBOARDING ═══ */
-function showOnboarding(){const needsProfile=!hasRealChildName();if(state.onboardingDone&&!needsProfile)return;$('onboarding').classList.remove('hidden');let step=state.onboardingDone?1:0;const steps=[{pet:'🪷',title:'Welcome to Mindful Moments',text:'A calm space to meditate, breathe, and grow.',btn:'Next →'},{pet:'👋',title:'Let’s personalize your calm space',text:'Your name is optional and stays on this device.',btn:'Save and continue →'},{pet:'🐱',title:'Meet Whiskers',text:'Your mindful companion will practice quietly with you.',btn:'Start with Meditation 🧘'}];function draw(){const st=steps[step];$('obPet').textContent=st.pet;$('obTitle').textContent=st.title;$('obText').textContent=st.text;$('obBtn').textContent=st.btn;$('obProfile').style.display=step===1?'grid':'none';if(step===1){$('obName').value=hasRealChildName()?state.player.name:'';$('obAge').value=({ '5-7':6,'8-10':9,'11-12':12,'13-15':14,'16-19':17,'20-29':25,'30-40':35,'41+':45}[state.player.age]||8)}for(let i=0;i<3;i++)$('obDot'+i).classList.toggle('active',i===step)}draw();$('obBtn').onclick=()=>{if(step===1){const n=cleanUserText($('obName').value,18);state.player.name=n&&n.toLowerCase()!=='explorer'?n:'Explorer';state.player.age=ageGroupFromAge($('obAge').value);saveNow()}step++;if(step>=steps.length){state.onboardingDone=true;saveNow();$('onboarding').classList.add('hidden');render();setTimeout(()=>openPractice('meditation'),200)}else draw()}}
+function showOnboarding(){const needsProfile=!hasRealChildName();if(state.onboardingDone&&!needsProfile)return;$('onboarding').classList.remove('hidden');let step=state.onboardingDone?1:0;const steps=[{pet:'🪷',title:'Welcome to Mindful Moments',text:'A calm space to meditate, breathe, and grow.',btn:'Next →'},{pet:'👋',title:'Let’s personalize your calm space',text:'Your name is optional and stays on this device.',btn:'Save and continue →'},{pet:'🐱',title:'Meet Whiskers',text:'Your mindful companion will practice quietly with you.',btn:'Start with Meditation 🧘'}];function draw(){const st=steps[step];$('obPet').textContent=st.pet;$('obTitle').textContent=st.title;$('obText').textContent=st.text;$('obBtn').textContent=st.btn;$('obProfile').style.display=step===1?'grid':'none';if(step===1){$('obName').value=hasRealChildName()?state.player.name:'';$('obAge').value=state.player.ageYears||({'5-7':6,'8-10':9,'11-12':12,'13-15':14,'16-19':17,'20-29':25,'30-40':35,'41+':45}[state.player.age]||8)}for(let i=0;i<3;i++)$('obDot'+i).classList.toggle('active',i===step)}draw();$('obBtn').onclick=()=>{if(step===1){const n=cleanUserText($('obName').value,18);state.player.name=n&&n.toLowerCase()!=='explorer'?n:'Explorer';state.player.ageYears=finiteInt($('obAge').value,5,99,8);state.player.age=ageGroupFromAge(state.player.ageYears);saveNow()}step++;if(step>=steps.length){state.onboardingDone=true;saveNow();$('onboarding').classList.add('hidden');render();setTimeout(()=>openPractice('meditation'),200)}else draw()}}
 /* ═══ EVENT WIRING ═══ */
+$('btnQuickStretch').addEventListener('click',openQuickStretch);
+$('btnStartStretch').addEventListener('click',startQuickStretch);
+$('btnSkipStretch').addEventListener('click',skipQuickStretch);
+$('exactAge').addEventListener('input',()=>{$('ageGroup').value=ageGroupFromAge($('exactAge').value)});
 $('btnStoryPrevious').addEventListener('click',()=>moveStoryLine(-1,false));
 $('btnStoryNext').addEventListener('click',()=>moveStoryLine(1,false));
 $('btnStoryListen').addEventListener('click',()=>speakCurrentStoryLine(false));
@@ -1826,7 +1855,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');check('wake lock targets active practices',()=>typeof shouldKeepScreenAwake==='function'&&typeof scheduleWakeLockRetry==='function');const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');check('wake lock targets active practices',()=>typeof shouldKeepScreenAwake==='function'&&typeof scheduleWakeLockRetry==='function');check('exact age minimum',()=>ageGroupFromAge(10)==='8-10'&&finiteInt(10,5,99,8)===10);check('mindfulness pet gains',()=>['meditation','breathing','bodyscan'].every(x=>({meditation:5,breathing:4,bodyscan:4})[x]>0));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 function runCapabilityCheck(){
   const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
   try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
