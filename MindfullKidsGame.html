@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#6d5dfc">
-<title>Mindful Moments V18.9</title>
+<title>Mindful Moments V19.0</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E🐱%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d5dfc'/%3E%3Ctext x='50' y='75' font-size='60' text-anchor='middle'%3E🐱%3C/text%3E%3C/svg%3E">
 <style>
@@ -102,6 +102,7 @@ h2{font-weight:800;letter-spacing:-.3px}
 .favorite{background:#ffe6ef;color:#b63e6a}
 .equipped{outline:3px solid var(--iosPurple);background:linear-gradient(145deg,#fff,#f3ecff)}
 .room-preview{border-radius:18px;padding:13px;margin-bottom:10px;background:linear-gradient(145deg,#dff7e8,#e7f3ff);min-height:92px;display:grid;place-items:center;font-size:42px}
+.hero{position:relative;isolation:isolate;overflow:hidden}.hero-content{position:relative;z-index:3}.room-decor{position:absolute;inset:0;z-index:1;pointer-events:none}.room-left,.room-right,.room-effect,.room-ground{position:absolute}.room-left{left:9px;bottom:38%;font-size:34px}.room-right{right:9px;bottom:38%;font-size:34px}.room-ground{left:0;right:0;bottom:0;min-height:54px;padding-top:17px;font-size:25px;background:linear-gradient(180deg,transparent,#ffffff55)}.room-effect{top:12px;left:16%;font-size:22px;animation:roomDrift 7s ease-in-out infinite}.room-vitality-quiet,.room-vitality-resting{filter:saturate(.88) brightness(.97)}@keyframes roomDrift{50%{transform:translateX(210px) translateY(8px)}}body.reduce .room-effect{animation:none!important}.collection-block{margin-top:14px}.collection-block h2{font-size:20px;margin:18px 3px 10px}.tool-card{grid-column:1/-1}.room-reveal{min-height:205px;border-radius:22px;padding:24px;display:grid;place-items:center;font-size:70px;position:relative;overflow:hidden}.room-reveal small{display:block;font-size:14px;font-weight:900}.food-natural{background:#e7f8ef;color:#14734f}.food-balanced{background:#e7f3ff;color:#245f91}.food-treat{background:#fff2da;color:#8a5a00}
 .market-note{background:#eef7ff;color:#3f6485;border-radius:16px;padding:10px 12px;font-size:12px;font-weight:800;margin-bottom:12px}
 .tabs{display:flex;gap:6px;overflow:auto;padding:3px 2px 10px}
 .chip{white-space:nowrap;border:0;border-radius:99px;background:#ffffffb8;color:#617087;padding:9px 12px;font-weight:800}
@@ -239,7 +240,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 
 <section id="home" class="view active">
 <div id="welcomeBanner" class="welcome-banner" style="display:none"></div>
-<div class="hero">
+<div class="hero" id="petHero"><div id="roomDecor" class="room-decor" aria-hidden="true"><span id="roomEffect" class="room-effect"></span><span id="roomLeft" class="room-left"></span><span id="roomRight" class="room-right"></span><div id="roomGround" class="room-ground"></div></div><div class="hero-content">
 <div id="petAvatar" class="pet">🐱</div>
 <h1 id="petName">Whiskers</h1>
 <p class="small" id="petLevel">Friendship level 1</p>
@@ -250,7 +251,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 <div class="meterline"><span>Energy</span><div class="bar"><div id="healthFill" class="fill health"></div></div><b id="healthN"></b></div>
 <div class="meterline"><span>Friendship</span><div class="bar"><div id="friendFill" class="fill friend"></div></div><b id="friendN"></b></div>
 </div>
-</div>
+</div></div>
 <div id="bedtimeTopSlot"></div>
 <div id="todayCalmCard" class="today-card" aria-label="Today's calm progress"></div>
 <div id="dailyEncouragement" class="welcome-banner" style="display:block;margin-top:13px"></div>
@@ -278,7 +279,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 
 <section id="collection" class="view">
 <div class="section-title"><h2>My collection</h2></div>
-<div id="petCollection" class="cards"></div>
+<div id="petCollection" class="cards"></div><div class="collection-block"><h2>My Accessories 🎀</h2><div id="accessoryCollection" class="cards"></div></div><div class="collection-block"><h2>My Rooms 🏡</h2><div id="roomCollection" class="cards"></div></div><div class="collection-block"><h2>Mindful Tools 🛡️</h2><div id="toolCollection" class="cards"></div></div>
 <div class="section-title"><h2>Badges</h2></div>
 <div id="badgeGrid" class="cards"></div>
 </section>
@@ -406,6 +407,7 @@ body.reduce .orb,body.reduce .pet,body.reduce .buddy-pet,body.reduce .game-pet{a
 </div></div>
 
 <div id="stretchModal" class="modal"><div class="sheet" style="text-align:center"><h2>Quick Stretch 🤸</h2><p class="small">Move away from the screen if it is safe. No coins or points are earned here.</p><div id="stretchIcon" style="font-size:72px;margin:14px">🙆</div><h3 id="stretchInstruction">Reach both arms upward</h3><div id="stretchTimer" class="timer" style="font-size:38px;margin:18px 0">01:00</div><button class="btn green" id="btnStartStretch" style="width:100%">Start 1-minute stretch</button><button class="btn soft" id="btnSkipStretch" style="width:100%;margin-top:8px">Skip and choose a calm practice</button></div></div>
+<div id="roomModal" class="modal"><div class="sheet" style="text-align:center"><div id="roomReveal" class="room-reveal"></div><h2 id="roomModalTitle">Room preview</h2><p id="roomModalText" class="small"></p><div class="grid2"><button class="btn purple" id="btnRoomAction">Use room</button><button class="btn soft" data-close="roomModal">Close</button></div></div></div>
 <div id="feedModal" class="modal"><div class="sheet">
 <h2>Food pantry</h2>
 <div id="pantrySort" class="tabs" style="margin-bottom:8px"></div>
@@ -533,39 +535,50 @@ const PETS = [
   {id:'kingcharles',name:'Charlie the King Charles',icon:'🐕',cost:1200}
 ];
 const ITEMS = [
-  {id:'seeds',cat:'food',name:'Sunny Seeds',icon:'🌾',cost:8,energy:8,happy:1,rarity:'common'},
-  {id:'strawberry',cat:'food',name:'Sweet Strawberry',icon:'🍓',cost:12,energy:12,happy:2,rarity:'common'},
-  {id:'carrot',cat:'food',name:'Crunchy Carrot',icon:'🥕',cost:16,energy:16,happy:2,rarity:'common'},
-  {id:'banana',cat:'food',name:'Happy Banana',icon:'🍌',cost:20,energy:20,happy:3,rarity:'common'},
-  {id:'apple',cat:'food',name:'Shiny Apple',icon:'🍎',cost:26,energy:26,happy:4,rarity:'common'},
-  {id:'fish',cat:'food',name:'Ocean Fish',icon:'🐟',cost:32,energy:30,happy:7,rarity:'special'},
-  {id:'bone',cat:'food',name:'Hero Bone',icon:'🦴',cost:36,energy:32,happy:8,rarity:'special'},
-  {id:'watermelon',cat:'food',name:'Watermelon Picnic',icon:'🍉',cost:40,energy:36,happy:6,rarity:'special'},
-  {id:'berryBowl',cat:'food',name:'Magic Berry Bowl',icon:'🫐',cost:48,energy:40,happy:9,rarity:'special'},
-  {id:'smoothie',cat:'food',name:'Rainbow Smoothie',icon:'🥤',cost:58,energy:46,happy:12,rarity:'premium'},
-  {id:'cupcake',cat:'food',name:'Celebration Cupcake',icon:'🧁',cost:72,energy:48,happy:18,rarity:'premium'},
-  {id:'moonCake',cat:'food',name:'Moon Cake',icon:'🥮',cost:86,energy:58,happy:20,rarity:'premium'},
-  {id:'royalFeast',cat:'food',name:'Royal Friendship Feast',icon:'🍱',cost:125,energy:75,happy:25,friend:8,rarity:'royal'},
-  {id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',icon:'🐉',cost:145,energy:82,happy:28,friend:10,rarity:'royal'},
+  {id:'seeds',cat:'food',name:'Sunny Seeds',icon:'🌾',cost:8,energy:12,happy:2,foodType:'natural',rarity:'common'},
+  {id:'strawberry',cat:'food',name:'Sweet Strawberry',icon:'🍓',cost:12,energy:16,happy:3,foodType:'natural',rarity:'common'},
+  {id:'carrot',cat:'food',name:'Crunchy Carrot',icon:'🥕',cost:16,energy:20,happy:3,foodType:'natural',rarity:'common'},
+  {id:'banana',cat:'food',name:'Happy Banana',icon:'🍌',cost:20,energy:25,happy:4,foodType:'natural',rarity:'common'},
+  {id:'apple',cat:'food',name:'Shiny Apple',icon:'🍎',cost:26,energy:32,happy:5,foodType:'natural',rarity:'common'},
+  {id:'mango',cat:'food',name:'Sunny Mango',icon:'🥭',cost:30,energy:36,happy:6,foodType:'natural',rarity:'special'},
+  {id:'grapes',cat:'food',name:'Juicy Grapes',icon:'🍇',cost:28,energy:34,happy:5,foodType:'natural',rarity:'common'},
+  {id:'broccoli',cat:'food',name:'Tiny Broccoli',icon:'🥦',cost:22,energy:30,happy:4,foodType:'natural',rarity:'common'},
+  {id:'corn',cat:'food',name:'Sweet Corn',icon:'🌽',cost:24,energy:32,happy:4,foodType:'natural',rarity:'common'},
+  {id:'fish',cat:'food',name:'Ocean Fish',icon:'🐟',cost:32,energy:38,happy:7,foodType:'natural',rarity:'special'},
+  {id:'bone',cat:'food',name:'Hero Bone',icon:'🦴',cost:36,energy:40,happy:7,foodType:'natural',rarity:'special'},
+  {id:'watermelon',cat:'food',name:'Watermelon Picnic',icon:'🍉',cost:40,energy:45,happy:7,foodType:'natural',rarity:'special'},
+  {id:'berryBowl',cat:'food',name:'Magic Berry Bowl',icon:'🫐',cost:48,energy:52,happy:10,foodType:'balanced',rarity:'special'},
+  {id:'oatmeal',cat:'food',name:'Warm Oatmeal',icon:'🥣',cost:46,energy:55,happy:8,foodType:'balanced',rarity:'special'},
+  {id:'salad',cat:'food',name:'Rainbow Salad',icon:'🥗',cost:58,energy:66,happy:11,foodType:'balanced',rarity:'premium'},
+  {id:'veggieSoup',cat:'food',name:'Vegetable Soup',icon:'🍲',cost:62,energy:70,happy:10,foodType:'balanced',rarity:'premium'},
+  {id:'smoothie',cat:'food',name:'Rainbow Smoothie',icon:'🥤',cost:58,energy:60,happy:12,foodType:'balanced',rarity:'premium'},
+  {id:'cupcake',cat:'food',name:'Celebration Cupcake',icon:'🧁',cost:36,energy:10,happy:3,foodType:'treat',rarity:'special'},
+  {id:'moonCake',cat:'food',name:'Moon Cake',icon:'🥮',cost:42,energy:12,happy:4,foodType:'treat',rarity:'special'},
+  {id:'royalFeast',cat:'food',name:'Royal Friendship Feast',icon:'🍱',cost:125,energy:82,happy:25,friend:8,foodType:'balanced',rarity:'royal'},
+  {id:'dragonFruit',cat:'food',name:'Dragon Fruit Platter',icon:'🐉',cost:145,energy:88,happy:28,friend:10,foodType:'natural',rarity:'royal'},
   {id:'streakShield',cat:'item',name:'Streak Shield',icon:'🛡️',cost:50,rarity:'special'},
   {id:'flower',cat:'accessory',name:'Flower Crown',icon:'🌸',cost:90,rarity:'common'},
+  {id:'calmBow',cat:'accessory',name:'Calm Bow',icon:'🎀',cost:95,rarity:'common'},
   {id:'scarf',cat:'accessory',name:'Cozy Scarf',icon:'🧣',cost:110,rarity:'common'},
-  {id:'glasses',cat:'accessory',name:'Star Glasses',icon:'🤩',cost:135,rarity:'special'},
+  {id:'luckyLeaf',cat:'accessory',name:'Lucky Leaf',icon:'🍀',cost:120,rarity:'common'},
+  {id:'medal',cat:'accessory',name:'Mindful Medal',icon:'🥇',cost:140,rarity:'special'},
   {id:'backpack',cat:'accessory',name:'Explorer Backpack',icon:'🎒',cost:155,rarity:'special'},
   {id:'raincoat',cat:'accessory',name:'Sunny Raincoat',icon:'🧥',cost:175,rarity:'special'},
+  {id:'peaceCharm',cat:'accessory',name:'Peace Charm',icon:'🕊️',cost:190,rarity:'special'},
   {id:'cape',cat:'accessory',name:'Calm Hero Cape',icon:'🦸',cost:210,rarity:'premium'},
+  {id:'moonPendant',cat:'accessory',name:'Moon Pendant',icon:'🌙',cost:225,rarity:'premium'},
   {id:'wizard',cat:'accessory',name:'Dream Wizard Hat',icon:'🧙',cost:235,rarity:'premium'},
   {id:'headphones',cat:'accessory',name:'Cloud Headphones',icon:'🎧',cost:260,rarity:'premium'},
   {id:'crown',cat:'accessory',name:'Royal Pet Crown',icon:'👑',cost:390,rarity:'royal'},
   {id:'wings',cat:'accessory',name:'Rainbow Wings',icon:'🪽',cost:450,rarity:'royal'},
-  {id:'forest',cat:'room',name:'Enchanted Forest',icon:'🌲',cost:150,theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',rarity:'common'},
-  {id:'cloud',cat:'room',name:'Cloud Castle',icon:'☁️',cost:195,theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',rarity:'special'},
-  {id:'ocean',cat:'room',name:'Ocean Sanctuary',icon:'🌊',cost:240,theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',rarity:'special'},
-  {id:'garden',cat:'room',name:'Kindness Garden',icon:'🌷',cost:275,theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',rarity:'special'},
-  {id:'candy',cat:'room',name:'Candy Dream Room',icon:'🍭',cost:310,theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',rarity:'premium'},
-  {id:'space',cat:'room',name:'Galaxy Bedroom',icon:'🌌',cost:360,theme:'linear-gradient(145deg,#20204a,#553b83)',rarity:'premium'},
-  {id:'castle',cat:'room',name:'Royal Castle Suite',icon:'🏰',cost:525,theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',rarity:'royal'},
-  {id:'dragonCave',cat:'room',name:'Crystal Dragon Cave',icon:'💎',cost:650,theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',rarity:'royal'},
+  {id:'forest',cat:'room',name:'Enchanted Forest',icon:'🌲',cost:150,theme:'linear-gradient(145deg,#d9f8df,#c9ecff)',left:'🌲🍄',right:'🌳🌼',ground:'🌿 🌱 🌿',effect:'🍃',message:'Let’s become quiet like the trees.',sound:'forest',rarity:'common'},
+  {id:'cloud',cat:'room',name:'Cloud Castle',icon:'☁️',cost:195,theme:'linear-gradient(145deg,#eff8ff,#eee8ff)',left:'☁️',right:'🏰☁️',ground:'☁️ ☁️',effect:'✨',message:'Let your thoughts float past like clouds.',sound:'softKeys',rarity:'special'},
+  {id:'ocean',cat:'room',name:'Ocean Sanctuary',icon:'🌊',cost:240,theme:'linear-gradient(145deg,#c8f4f2,#dce8ff)',left:'🐚🪸',right:'🐠🪸',ground:'🌊 🐚 🌊',effect:'🫧',message:'Let’s breathe gently like the waves.',sound:'ocean',rarity:'special'},
+  {id:'garden',cat:'room',name:'Kindness Garden',icon:'🌷',cost:275,theme:'linear-gradient(145deg,#fff0f5,#e6f8df)',left:'🌷🌼',right:'🌸🦋',ground:'🌱 🌺 🌿',effect:'🦋',message:'Every mindful moment helps kindness grow.',sound:'zenGarden',rarity:'special'},
+  {id:'candy',cat:'room',name:'Candy Dream Room',icon:'🍭',cost:310,theme:'linear-gradient(145deg,#ffe4f3,#fff4c9)',left:'🍭⭐',right:'🍬✨',ground:'🟣 🟡 🟢',effect:'✨',message:'Choose a calm moment before a sweet dream.',sound:'softKeys',rarity:'premium'},
+  {id:'space',cat:'room',name:'Galaxy Bedroom',icon:'🌌',cost:360,theme:'linear-gradient(145deg,#20204a,#553b83)',left:'🪐⭐',right:'🌙✨',ground:'⭐  ✨  ⭐',effect:'🌟',message:'Take one calm breath beneath the stars.',sound:'softKeys',rarity:'premium'},
+  {id:'castle',cat:'room',name:'Royal Castle Suite',icon:'🏰',cost:525,theme:'linear-gradient(145deg,#fff1bd,#e8d9ff)',left:'🏰👑',right:'🪟✨',ground:'🟨 🟪 🟨',effect:'✨',message:'A calm mind is a true treasure.',sound:'temple',rarity:'royal'},
+  {id:'dragonCave',cat:'room',name:'Crystal Dragon Cave',icon:'💎',cost:650,theme:'linear-gradient(145deg,#d9faff,#d9d0ff)',left:'💎🪨',right:'🔮💎',ground:'🪨 💎 🪨',effect:'✨',message:'Breathe slowly while the crystals glow.',sound:'temple',rarity:'royal'},
   {id:'goldenCrown',cat:'special',name:'Golden Calm Crown',icon:'👑',cost:0,rarity:'royal'},
   {id:'starCape',cat:'special',name:'Starlight Cape',icon:'🌟',cost:0,rarity:'royal'},
   {id:'moonRoom',cat:'special',name:'Moon Sanctuary',icon:'🌙',cost:0,rarity:'royal'},
@@ -1043,6 +1056,7 @@ function updatePetMessage(){
   else if(p.health<=65){msg='I used energy today. Shall we earn a healthy snack? 🥕';care=true;}
   else if(p.happiness<=60){msg='A calm breath together could brighten our day. 🌿';care=true;}
   else if(h<12)msg=hasRealChildName()?`Good morning, ${displayFirstName()}! Shall we practice together?`:'Good morning! Shall we practice together?';
+  const room=ITEMS.find(i=>i.id===p.room&&i.cat==='room');if(!care&&room&&h>=12)msg=room.message;
   $('petMessage').textContent=msg;
   $('petMessage').classList.toggle('needs-care',care);
 }
@@ -1101,14 +1115,20 @@ function updatePrimaryMeditationCTA(){
   else b.textContent=practiced?'🧘 One more calm moment':'🌙 Wind down gently';
 }
 function renderDailyEncouragement(){const el=$('dailyEncouragement');if(!el)return;const name=hasRealChildName()?`, ${displayFirstName()}`:'',last=state.player.lastPracticeDate,gap=last?Math.max(0,dayDiff(last,localDate())):0;if(gap>=2)el.textContent=`Every day is a fresh start${name}. Let’s stretch, breathe, and begin again.`;else if(gap===1)el.textContent=`Welcome back${name}! Let’s stretch and take five calm minutes together.`;else if(isAgeTenPlus())el.textContent=`How was your day${name}? A quick stretch and five mindful minutes can help you reset.`;else el.textContent=`How was your day${name}? Let’s stretch, breathe, and help our minds feel calm!`;}
+function roomEnvironment(room,vitality){
+  const hero=$('petHero'),left=$('roomLeft'),right=$('roomRight'),ground=$('roomGround'),effect=$('roomEffect');
+  hero.style.background=room?.theme||'linear-gradient(145deg,#fff9,#ffffffd9)';hero.classList.remove('room-vitality-high','room-vitality-comfortable','room-vitality-quiet','room-vitality-resting');hero.classList.add(`room-vitality-${vitality.state}`);
+  left.textContent=room?.left||'🌿';right.textContent=room?.right||'🌼';ground.textContent=room?.ground||'🌱  🌿  🌱';effect.textContent=room?.effect||'✨';
+}
+function foodTypeLabel(i){return i.foodType==='natural'?'NATURAL CHOICE':i.foodType==='balanced'?'BALANCED MEAL':i.foodType==='treat'?'OCCASIONAL TREAT':''}
+function openRoomPreview(id,afterPurchase=false){const room=ITEMS.find(i=>i.id===id&&i.cat==='room');if(!room)return;const owned=state.ownedItems.includes(id),active=activePet().room===id;$('roomReveal').style.background=room.theme;$('roomReveal').innerHTML=`<div>${room.left||''} ${activePetDef().icon} ${room.right||''}<small>${room.ground||''}</small></div>`;$('roomModalTitle').textContent=afterPurchase?`${room.icon} ${room.name} unlocked!`:`${room.icon} ${room.name}`;$('roomModalText').textContent=`${room.message} Suggested practice sound: ${room.sound}. Rooms are cosmetic only.`;const b=$('btnRoomAction');b.textContent=active?'Currently using':owned?'Use this room':`Buy for ${room.cost} coins`;b.disabled=active;b.onclick=()=>{if(owned){equipItem('room',id);closeModal('roomModal');showView('home')}else buy('room',id)};openModal('roomModal')}
 function render(){
   checkDaily();applyGentleCareDecay();updateHomeActions();renderTodayCalm();renderDailyEncouragement();updatePrimaryMeditationCTA();
   if(parentUnlocked&&parentUnlockedUntil>0&&Date.now()>parentUnlockedUntil){parentUnlocked=false;parentUnlockedUntil=0;}
   const petDef=activePetDef(),ps=activePet();
   $('petAvatar').textContent=petDef.icon+(ps.accessory?' '+(ITEMS.find(x=>x.id===ps.accessory)?.icon||''):'');
   const roomItem=ITEMS.find(x=>x.id===ps.room&&x.cat==='room');
-  document.querySelector('.hero').style.background=roomItem?.theme||'linear-gradient(145deg,#fff9,#ffffffd9)';
-  const emotion=getPetEmotionState(),vitality=getPetVitality(ps);
+  const emotion=getPetEmotionState(),vitality=getPetVitality(ps);roomEnvironment(roomItem,vitality);
   $('petAvatar').className='pet'+(emotion?' '+emotion:'')+` vitality-${vitality.state}`;
   $('petAvatar').style.setProperty('--pet-vitality',String(vitality.score));
   $('petName').textContent=ps.nickname?`${ps.nickname} (${petDef.name})`:petDef.name;
@@ -1176,13 +1196,13 @@ function renderMarket(){
     ch.addEventListener('click',()=>setMarket(c));tabs.appendChild(ch);
   });
   const data=marketCat==='pet'?PETS:ITEMS.filter(x=>x.cat===marketCat),ps=activePet();
-  grid.innerHTML=`<div class="market-note" style="grid-column:1/-1">${{food:`💖 ${activePetDef().name}'s favorites give 50% bonus.`,pet:'🐾 Each pet has independent data.',accessory:'🎀 Equipped per pet.',room:'🏡 Reusable across pets.',item:'🛡️ Special items.'}[marketCat]||''}</div>`;
+  grid.innerHTML=`<div class="market-note" style="grid-column:1/-1">${{food:`🥗 Natural foods and balanced meals give stronger everyday care. Treats are for occasional variety. ${activePetDef().name}'s favorites give 50% bonus.`,pet:'🐾 Each pet has independent data.',accessory:'🎀 Equipped per pet.',room:'🏡 Reusable across pets.',item:'🛡️ Mindful Tools are stored in Collection and used automatically.'}[marketCat]||''}</div>`;
   data.forEach(i=>{
     const isPet=marketCat==='pet',owned=isPet?!!state.pets[i.id]:i.cat==='item'?false:(i.cat!=='food'&&state.ownedItems.includes(i.id));
     const qty=i.cat==='food'?(state.inventory[i.id]||0):'';
     const equipped=(i.cat==='accessory'&&ps.accessory===i.id)||(i.cat==='room'&&ps.room===i.id);
     const fav=i.cat==='food'&&isFavoriteFood(i.id);
-    let desc=i.id==='streakShield'?`Shield x${state.player.streakShields}/3`:i.cat==='food'?`+${i.energy}⚡ +${i.happy}😊 ${qty}`:i.id==='kingcharles'?'Royal dream pet':'';
+    let desc=i.id==='streakShield'?`Protects one missed mindful day • Owned ${state.player.streakShields}/3`:i.cat==='food'?`${foodTypeLabel(i)} • +${i.energy}⚡ +${i.happy}😊 • Pantry ${qty}`:i.id==='kingcharles'?'Royal dream pet':'';
     const card=document.createElement('div');card.className='card'+(equipped?' equipped':'');
     if(i.cat==='room'){const rv=document.createElement('div');rv.className='room-preview';rv.style.background=i.theme;rv.textContent=i.icon;card.appendChild(rv);}
     else{const ic=document.createElement('div');ic.className='icon';ic.textContent=i.icon;card.appendChild(ic);}
@@ -1196,6 +1216,7 @@ function renderMarket(){
     else if(!owned){ab.className+=' purple';ab.textContent='Buy';ab.addEventListener('click',()=>buy(i.cat,i.id));}
     else{ab.className+=' '+(equipped?'soft':'green');ab.textContent=equipped?'Equipped':(i.cat==='room'?'Use':'Equip');ab.addEventListener('click',()=>equipItem(i.cat,i.id));}
     card.appendChild(ab);
+    if(i.cat==='room'){const pb=document.createElement('button');pb.className='btn soft';pb.style.cssText='margin-top:6px;width:100%';pb.textContent='Preview room';pb.addEventListener('click',()=>openRoomPreview(i.id));card.appendChild(pb)}
     grid.appendChild(card);
   });
 }
@@ -1211,25 +1232,21 @@ function buy(cat,id){
   else if(cat==='food')state.inventory[id]=(state.inventory[id]||0)+1;
   else if(cat==='item'&&id==='streakShield')state.player.streakShields=Math.min(3,(state.player.streakShields||0)+1);
   else{state.ownedItems.push(id);if(cat==='accessory')activePet().accessory=id;if(cat==='room')activePet().room=id;}
-  save();render();playSound('buy');toast(`${obj.name} added!`);
+  saveNow();render();playSound('buy');
+  if(cat==='item'&&id==='streakShield')toast(`🛡️ Added to Mindful Tools • ${state.player.streakShields}/3 available. Used automatically.`);
+  else if(cat==='room'){toast(`${obj.icon} ${obj.name} unlocked and applied!`);showConfetti(false);openRoomPreview(id,true)}
+  else toast(`${obj.name} added!`);
 }
-function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;save();render();playSound('tap');}
+function equipItem(cat,id){const p=activePet();if(!state.ownedItems.includes(id))return;if(cat==='accessory')p.accessory=p.accessory===id?null:id;if(cat==='room')p.room=id;saveNow();render();playSound('tap');if(cat==='room')toast(`${ITEMS.find(i=>i.id===id)?.name||'Room'} is now active.`);}
 function selectPet(id){state.activePetId=id;save();render();updateManifestIcon();showView('home');toast('Pet selected.');}
 
 function renderCollection(){
-  const pc=$('petCollection'),bg=$('badgeGrid');pc.innerHTML='';bg.innerHTML='';
-  PETS.filter(p=>state.pets[p.id]).forEach(p=>{
-    const pp=state.pets[p.id],nick=pp.nickname?`${pp.nickname} (${p.name})`:p.name;
-    const card=document.createElement('div');card.className='card';
-    card.innerHTML=`<div class="icon">${p.icon}</div><b>${nick}</b><div class="small">Level ${pp.level}</div>`;
-    const sb=document.createElement('button');sb.className='btn '+(state.activePetId===p.id?'soft':'purple');sb.textContent=state.activePetId===p.id?'Selected':'Select';sb.addEventListener('click',()=>selectPet(p.id));card.appendChild(sb);
-    const nb=document.createElement('button');nb.className='btn soft';nb.style.cssText='margin-top:4px;padding:6px;font-size:11px';nb.textContent='✏️ Nickname';nb.addEventListener('click',()=>openNicknameModal(p.id));card.appendChild(nb);
-    if(pp.level>=7&&pp.milestones.includes(7)){const stb=document.createElement('button');stb.className='btn soft';stb.style.cssText='margin-top:4px;padding:6px;font-size:11px';stb.textContent='📖 Story';stb.addEventListener('click',()=>{$('storyContent').innerHTML=`<div style="text-align:center;font-size:60px">${p.icon}</div><h3>${p.name}'s Story</h3><p style="line-height:1.6">Long ago, ${p.name} discovered the power of stillness...</p><button class="btn purple" style="width:100%;margin-top:10px" data-close="storyModal">Close</button>`;$('storyContent').querySelector('[data-close]').addEventListener('click',()=>closeModal('storyModal'));openModal('storyModal');});card.appendChild(stb);}
-    pc.appendChild(card);
-  });
-  state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);
-  BADGES.forEach(b=>{const c=document.createElement('div');c.className='card'+(state.progress.badges.includes(b.id)?'':' locked');c.innerHTML=`<div class="icon">${b.icon}</div><b>${b.name}</b>`;bg.appendChild(c);});
-  ITEMS.filter(i=>i.cat==='special').forEach(i=>{const c=document.createElement('div');c.className='card'+(state.ownedItems.includes(i.id)?'':' locked');c.innerHTML=`<div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${state.ownedItems.includes(i.id)?'Treasure':'Complete 10+ min'}</div>`;bg.appendChild(c);});
+  const pc=$('petCollection'),ac=$('accessoryCollection'),rc=$('roomCollection'),tc=$('toolCollection'),bg=$('badgeGrid');pc.innerHTML='';ac.innerHTML='';rc.innerHTML='';tc.innerHTML='';bg.innerHTML='';
+  PETS.filter(p=>state.pets[p.id]).forEach(p=>{const pp=state.pets[p.id],nick=pp.nickname?`${pp.nickname} (${p.name})`:p.name,card=document.createElement('div');card.className='card';card.innerHTML=`<div class="icon">${p.icon}</div><b>${nick}</b><div class="small">Level ${pp.level}</div>`;const sb=document.createElement('button');sb.className='btn '+(state.activePetId===p.id?'soft':'purple');sb.textContent=state.activePetId===p.id?'Selected':'Select';sb.addEventListener('click',()=>selectPet(p.id));card.appendChild(sb);const nb=document.createElement('button');nb.className='btn soft';nb.style.cssText='margin-top:4px;padding:6px;font-size:11px';nb.textContent='✏️ Nickname';nb.addEventListener('click',()=>openNicknameModal(p.id));card.appendChild(nb);pc.appendChild(card)});
+  const accessories=ITEMS.filter(i=>i.cat==='accessory'&&state.ownedItems.includes(i.id));if(!accessories.length)ac.innerHTML='<div class="card tool-card small">Accessories earned or purchased will appear here.</div>';accessories.forEach(i=>{const active=activePet().accessory===i.id,c=document.createElement('div');c.className='card'+(active?' equipped':'');c.innerHTML=`<div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${active?'Equipped to current pet':'Cosmetic accessory'}</div>`;const b=document.createElement('button');b.className='btn '+(active?'soft':'green');b.textContent=active?'Remove':'Equip';b.addEventListener('click',()=>equipItem('accessory',i.id));c.appendChild(b);ac.appendChild(c)});
+  const rooms=ITEMS.filter(i=>i.cat==='room'&&state.ownedItems.includes(i.id));if(!rooms.length)rc.innerHTML='<div class="card tool-card small">Purchased rooms will appear here and can be reused by every pet.</div>';rooms.forEach(i=>{const active=activePet().room===i.id,c=document.createElement('div');c.className='card'+(active?' equipped':'');c.innerHTML=`<div class="room-preview" style="background:${i.theme}">${i.left} ${i.icon} ${i.right}</div><b>${i.name}</b><div class="small">${active?'Currently using ✓':'Shared across all pets'}</div>`;const b=document.createElement('button');b.className='btn '+(active?'soft':'green');b.textContent=active?'Currently using':'Use this room';b.disabled=active;b.addEventListener('click',()=>equipItem('room',i.id));c.appendChild(b);const pb=document.createElement('button');pb.className='btn soft';pb.style.cssText='margin-top:6px;width:100%';pb.textContent='Preview';pb.addEventListener('click',()=>openRoomPreview(i.id));c.appendChild(pb);rc.appendChild(c)});
+  tc.innerHTML=`<div class="card tool-card"><div class="icon">🛡️</div><b>Streak Shields: ${state.player.streakShields}/3</b><div class="small">Each shield automatically protects one missed mindful day. Meditation, Breathing, and Body Scan build the streak.</div></div>`;
+  state.progress.badges=BADGES.filter(b=>b.test(state)).map(b=>b.id);BADGES.forEach(b=>{const c=document.createElement('div');c.className='card'+(state.progress.badges.includes(b.id)?'':' locked');c.innerHTML=`<div class="icon">${b.icon}</div><b>${b.name}</b>`;bg.appendChild(c)});ITEMS.filter(i=>i.cat==='special').forEach(i=>{const c=document.createElement('div');c.className='card'+(state.ownedItems.includes(i.id)?'':' locked');c.innerHTML=`<div class="icon">${i.icon}</div><b>${i.name}</b><div class="small">${state.ownedItems.includes(i.id)?'Treasure':'Complete 10+ min'}</div>`;bg.appendChild(c)});
 }
 function openNicknameModal(pid){renamingPetId=pid;$('nicknameInput').value=state.pets[pid].nickname||'';openModal('nicknameModal');}
 
@@ -1242,7 +1259,7 @@ function renderPantry(){
   [['energy','⚡ Energy'],['happy','😊 Joy'],['favorite','💖 Fav'],['rarity','✨ Rare']].forEach(([k,l])=>{const c=document.createElement('button');c.className='chip'+(pantrySort===k?' active':'');c.textContent=l;c.addEventListener('click',()=>{pantrySort=k;renderPantry();});$('pantrySort').appendChild(c);});
   $('pantry').innerHTML='';
   if(!sorted.length){$('pantry').innerHTML='<p>Pantry empty. Visit market.</p>';return;}
-  sorted.forEach(i=>{const row=document.createElement('div');row.className='row';row.innerHTML=`<span><b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br><span class="small">+${i.energy}⚡ +${i.happy}😊${isFavoriteFood(i.id)?' 💖':''}</span></span>`;const btn=document.createElement('button');btn.className='btn green';btn.textContent='Feed';btn.addEventListener('click',()=>feed(i.id));row.appendChild(btn);$('pantry').appendChild(row);});
+  sorted.forEach(i=>{const row=document.createElement('div');row.className='row';row.innerHTML=`<span><b>${i.icon} ${i.name} ×${state.inventory[i.id]}</b><br><span class="small">${foodTypeLabel(i)} • +${i.energy}⚡ +${i.happy}😊${isFavoriteFood(i.id)?' 💖':''}</span></span>`;const btn=document.createElement('button');btn.className='btn green';btn.textContent='Feed';btn.addEventListener('click',()=>feed(i.id));row.appendChild(btn);$('pantry').appendChild(row);});
 }
 function feed(id){
   if(feedLocked)return;feedLocked=true;setTimeout(()=>feedLocked=false,600);
@@ -1708,7 +1725,7 @@ function updateStreak(){
     else if(d>1){
       const missed=d-1;const shields=state.player.streakShields||0;const used=Math.min(shields,missed);
       state.player.streakShields=shields-used;
-      if(used>=missed){state.player.streak++;if(used>0)toast(`🛡️ ${used} shield${used>1?'s':''} used!`);}
+      if(used>=missed){state.player.streak++;if(used>0)toast(`🛡️ ${used} shield${used>1?'s':''} protected your mindful streak • ${state.player.streakShields} remaining`);}
       else{state.player.streak=1;if(used>0)toast(`🛡️ ${used} shield${used>1?'s':''} used but ${missed-used} day${missed-used>1?'s':''} missed.`);}
     }
   }
@@ -1860,7 +1877,7 @@ window.__lastIcon=activePetDef().icon;setInterval(updateHomeActions,60000);
 
 document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')){const label=b.textContent.replace(/\s+/g,' ').trim();if(label)b.setAttribute('aria-label',label)}});
 $('petAvatar').setAttribute('role','button');$('petAvatar').setAttribute('tabindex','0');$('petAvatar').setAttribute('aria-label','Interact with current pet');$('petAvatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('petAvatar').click()}});
-function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');check('wake lock targets active practices',()=>typeof shouldKeepScreenAwake==='function'&&typeof scheduleWakeLockRetry==='function');check('digital play gives no progress',()=>Object.values(digitalPlayProgressPolicy()).every(v=>v===0));check('exact age minimum',()=>ageGroupFromAge(10)==='8-10'&&isAgeTenPlus instanceof Function);check('vitality weights and floor',()=>getPetVitality({happiness:100,health:100,friendXP:0,level:1}).score===65&&[1,.96,.90,.84].every(x=>x>=.84));check('friendship vitality survives level-up',()=>friendshipVitalityScore({level:2,friendXP:0})===20);const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
+function runDataSelfTests(){const results=[];const check=(name,fn)=>{try{results.push([name,!!fn()])}catch(e){results.push([name,false])}};check('null migration',()=>migrate(null).activePetId==='cat');check('missing fields migration',()=>Array.isArray(migrate({player:{coins:-2}}).progress.checkIns));check('pending default',()=>migrate({}).pendingReward===null);check('unknown pet fallback',()=>migrate({pets:{ghost:petProfile()},activePetId:'ghost'}).activePetId==='cat');check('unknown pet removed',()=>!migrate({pets:{ghost:petProfile()}}).pets.ghost);check('seasonal key format',()=>/^\d{4}-\d{2}$/.test(`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`));check('NaN pet health safe',()=>migrate({pets:{cat:{health:NaN}}}).pets.cat.health===60);check('best streak preserved',()=>migrate({player:{streak:2,bestStreak:9}}).player.bestStreak===9);check('two breathing families',()=>new Set(BREATH_PATTERNS.map(x=>x.family)).size===2&&BREATH_PATTERNS.every(x=>['balloon','box'].includes(x.family)));check('box starts at 11 plus',()=>!BREATH_PATTERNS.filter(x=>x.hasHolds).some(x=>x.ages.includes('5-7')||x.ages.includes('8-10'))&&BREATH_PATTERNS.find(x=>x.id==='gentleBox').ages.includes('11-12'));check('classic box for 16 plus',()=>BREATH_PATTERNS.find(x=>x.id==='classicBox').ages.includes('16-19')&&BREATH_PATTERNS.find(x=>x.id==='classicBox').phases.map(x=>x.d).every(x=>x===4000));check('completion watchdog present',()=>typeof playCompletionSequence==='function'&&typeof stopCompletionAudio==='function');check('calendar excludes sleep from mindful progress',()=>calendarRecordType({type:'sleep'})==='sleep'&&calendarRecordType({type:'meditation'})==='meditation');check('wake lock targets active practices',()=>typeof shouldKeepScreenAwake==='function'&&typeof scheduleWakeLockRetry==='function');check('digital play gives no progress',()=>Object.values(digitalPlayProgressPolicy()).every(v=>v===0));check('exact age minimum',()=>ageGroupFromAge(10)==='8-10'&&isAgeTenPlus instanceof Function);check('vitality weights and floor',()=>getPetVitality({happiness:100,health:100,friendXP:0,level:1}).score===65&&[1,.96,.90,.84].every(x=>x>=.84));check('friendship vitality survives level-up',()=>friendshipVitalityScore({level:2,friendXP:0})===20);check('food teaching tiers',()=>ITEMS.some(i=>i.foodType==='natural')&&ITEMS.some(i=>i.foodType==='treat')&&ITEMS.find(i=>i.id==='apple').energy>ITEMS.find(i=>i.id==='cupcake').energy);check('star glasses removed',()=>!ITEMS.some(i=>i.id==='glasses'));check('room environments complete',()=>ITEMS.filter(i=>i.cat==='room').every(i=>i.left&&i.right&&i.ground&&i.message));const failed=results.filter(x=>!x[1]);console.info(`Mindful Pets self-tests: ${results.length-failed.length}/${results.length} passed`,failed);return failed.length===0}
 function runCapabilityCheck(){
   const support={storage:false,animation:typeof requestAnimationFrame==='function',speech:'speechSynthesis' in window,wakeLock:'wakeLock' in navigator,crypto:!!(window.crypto&&window.crypto.subtle)};
   try{const k='mindfulMomentsCapabilityTest';localStorage.setItem(k,'1');localStorage.removeItem(k);support.storage=true}catch(e){}
